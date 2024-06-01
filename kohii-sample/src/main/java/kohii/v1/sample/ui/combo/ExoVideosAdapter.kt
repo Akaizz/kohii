@@ -31,12 +31,11 @@ class ExoVideosAdapter(
   val kohii: Kohii,
   private val items: List<Item>,
   private val onClick: ((ExoVideoHolder, Int) -> Unit)? = null,
-  private val onLoad: ((ExoVideoHolder, Int) -> Unit)? = null
+  private val onLoad: ((ExoVideoHolder, Int) -> Unit)? = null,
 ) : Adapter<ExoVideoHolder>() {
-
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): ExoVideoHolder {
     val holder = ExoVideoHolder(parent)
     holder.container.setOnClickListener {
@@ -51,7 +50,7 @@ class ExoVideosAdapter(
 
   override fun onBindViewHolder(
     holder: ExoVideoHolder,
-    position: Int
+    position: Int,
   ) {
     val item = items[position % items.size]
     holder.videoTitle.text = item.name
@@ -61,20 +60,22 @@ class ExoVideosAdapter(
       MediaItem(Uri.parse(item.uri), item.extension, drmItem)
     val itemTag = "${javaClass.canonicalName}::${item.uri}::${holder.absoluteAdapterPosition}"
 
-    holder.rebinder = kohii.setUp(mediaItem) {
-      tag = itemTag
-      // preLoad = false
-      repeatMode = Player.REPEAT_MODE_ONE
-      callbacks += object : Callback {
-        override fun onRemoved(playback: Playback) {
-          playback.removeStateListener(holder)
+    holder.rebinder =
+      kohii.setUp(mediaItem) {
+        tag = itemTag
+        // preLoad = false
+        repeatMode = Player.REPEAT_MODE_ONE
+        callbacks +=
+          object : Callback {
+            override fun onRemoved(playback: Playback) {
+              playback.removeStateListener(holder)
+            }
+          }
+        artworkHintListener = holder
+      }
+        .bind(holder.container) {
+          onLoad?.invoke(holder, position)
+          it.addStateListener(holder)
         }
-      }
-      artworkHintListener = holder
-    }
-      .bind(holder.container) {
-        onLoad?.invoke(holder, position)
-        it.addStateListener(holder)
-      }
   }
 }

@@ -49,7 +49,6 @@ import okio.source
  */
 @Keep
 class VerticalListRecyclerViewFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = VerticalListRecyclerViewFragment()
   }
@@ -80,28 +79,30 @@ class VerticalListRecyclerViewFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     parent: ViewGroup?,
-    state: Bundle?
+    state: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_recycler_view, parent, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentRecyclerViewBinding = FragmentRecyclerViewBinding.bind(view)
-    val kohii = Kohii[this].also {
-      it.register(this)
-        .addBucket(binding.recyclerView)
-    }
+    val kohii =
+      Kohii[this].also {
+        it.register(this)
+          .addBucket(binding.recyclerView)
+      }
 
     val data = ArrayList(items).apply { this.addAll(items) } // To double the list.
-    val container = (view.findViewById(R.id.recyclerView) as RecyclerView).also {
-      it.setHasFixedSize(true)
-      it.layoutManager = LinearLayoutManager(requireContext())
-      it.adapter = ItemsAdapter(kohii, this, data) { dp -> dp.toPixel(resources) }
-    }
+    val container =
+      (view.findViewById(R.id.recyclerView) as RecyclerView).also {
+        it.setHasFixedSize(true)
+        it.layoutManager = LinearLayoutManager(requireContext())
+        it.adapter = ItemsAdapter(kohii, this, data) { dp -> dp.toPixel(resources) }
+      }
 
     prepareTransitions(container)
     postponeEnterTransition()
@@ -126,27 +127,30 @@ class VerticalListRecyclerViewFragment : BaseFragment(), DemoContainer {
 
   private fun prepareTransitions(container: RecyclerView) {
     // Hmm Google https://stackoverflow.com/questions/49461738/transitionset-arraylist-size-on-a-null-object-reference
-    val transition = TransitionInflater.from(requireContext())
-      .inflateTransition(R.transition.player_exit_transition)
+    val transition =
+      TransitionInflater.from(requireContext())
+        .inflateTransition(R.transition.player_exit_transition)
     transition.duration = 375
     exitTransition = transition
 
     val playerInfo = this.fetchPlayerInfo() ?: return
-    setEnterSharedElementCallback(object : SharedElementCallback() {
-      override fun onMapSharedElements(
-        names: List<String>?,
-        elements: MutableMap<String, View>?
-      ) {
-        // Locate the ViewHolder for the clicked position.
-        val holder = container.findViewHolderForAdapterPosition(playerInfo.adapterPos)
-        if (holder is VideoViewHolder) {
-          // Map the first shared element name to the child ImageView.
-          elements?.put(names?.get(0)!!, holder.transView)
-        } else {
-          return
+    setEnterSharedElementCallback(
+      object : SharedElementCallback() {
+        override fun onMapSharedElements(
+          names: List<String>?,
+          elements: MutableMap<String, View>?,
+        ) {
+          // Locate the ViewHolder for the clicked position.
+          val holder = container.findViewHolderForAdapterPosition(playerInfo.adapterPos)
+          if (holder is VideoViewHolder) {
+            // Map the first shared element name to the child ImageView.
+            elements?.put(names?.get(0)!!, holder.transView)
+          } else {
+            return
+          }
         }
-      }
-    })
+      },
+    )
   }
 
   // Called by Adapter

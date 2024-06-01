@@ -67,7 +67,7 @@ internal fun View.findCoordinatorLayoutDirectChildContainer(target: View?): View
 
 internal inline fun <T, R> Iterable<T>.partitionToMutableSets(
   predicate: (T) -> Boolean,
-  transform: (T) -> R
+  transform: (T) -> R,
 ): Pair<MutableSet<R>, MutableSet<R>> {
   val first = mutableSetOf<R>()
   val second = mutableSetOf<R>()

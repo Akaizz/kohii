@@ -22,12 +22,11 @@ import kohii.v1.media.VolumeInfo
 import kohii.v1.sample.common.getOrPut
 
 class VolumeStateViewModel : ViewModel(), VolumeStore {
-
   private val volumeInfoStore = SparseArray<VolumeInfo>()
 
   override fun set(
     key: Int,
-    volumeInfo: VolumeInfo
+    volumeInfo: VolumeInfo,
   ) {
     volumeInfoStore.put(key, volumeInfo)
   }

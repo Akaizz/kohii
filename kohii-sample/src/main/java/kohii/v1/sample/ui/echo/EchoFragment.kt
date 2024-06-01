@@ -32,7 +32,6 @@ import kohii.v1.sample.ui.main.DemoItem
 
 // Change VolumeInfo of each Playback individually, and store that info across config change.
 class EchoFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = EchoFragment()
   }
@@ -45,14 +44,14 @@ class EchoFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_recycler_view, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentRecyclerViewBinding = FragmentRecyclerViewBinding.bind(view)
@@ -60,20 +59,22 @@ class EchoFragment : BaseFragment(), DemoContainer {
     kohii.register(this)
       .addBucket(binding.recyclerView)
 
-    val adapter = VideoItemsAdapter(getApp().videos, kohii, viewModel) {
-      val playback = it.playback
-      return@VideoItemsAdapter if (playback != null) {
-        val currentVolumeInfo = viewModel.get(it.absoluteAdapterPosition)
-        val nextVolumeInfo = VolumeInfo(
-          !currentVolumeInfo.mute,
-          currentVolumeInfo.volume
-        )
-        viewModel.set(it.absoluteAdapterPosition, nextVolumeInfo)
-        nextVolumeInfo
-      } else {
-        null
+    val adapter =
+      VideoItemsAdapter(getApp().videos, kohii, viewModel) {
+        val playback = it.playback
+        return@VideoItemsAdapter if (playback != null) {
+          val currentVolumeInfo = viewModel.get(it.absoluteAdapterPosition)
+          val nextVolumeInfo =
+            VolumeInfo(
+              !currentVolumeInfo.mute,
+              currentVolumeInfo.volume,
+            )
+          viewModel.set(it.absoluteAdapterPosition, nextVolumeInfo)
+          nextVolumeInfo
+        } else {
+          null
+        }
       }
-    }
 
     binding.recyclerView.adapter = adapter
   }

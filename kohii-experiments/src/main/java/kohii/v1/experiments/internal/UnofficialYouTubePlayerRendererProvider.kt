@@ -23,18 +23,18 @@ import kohii.v1.core.Playback
 import kohii.v1.core.RecycledRendererProvider
 
 internal class UnofficialYouTubePlayerRendererProvider(
-  poolSize: Int
+  poolSize: Int,
 ) : RecycledRendererProvider(poolSize) {
-
   constructor() : this(2)
 
   override fun createRenderer(
     playback: Playback,
-    rendererType: Int
+    rendererType: Int,
   ): Any {
-    val iFramePlayerOptions = IFramePlayerOptions.Builder()
-      .controls(0)
-      .build()
+    val iFramePlayerOptions =
+      IFramePlayerOptions.Builder()
+        .controls(0)
+        .build()
 
     val container = playback.container
     return YouTubePlayerView(container.context).also {

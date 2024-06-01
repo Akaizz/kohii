@@ -30,11 +30,11 @@ import kohii.v1.sample.DemoApp
 internal class ManualVideosAdapter(
   val kohii: Kohii,
   val manager: Manager,
-  val enterFullscreenListener: (ManualVideosAdapter, ManualVideoViewHolder, View, Any) -> Unit = { _, _, _, _ -> }
+  val enterFullscreenListener: (ManualVideosAdapter, ManualVideoViewHolder, View, Any) -> Unit = { _, _, _, _ -> },
 ) : Adapter<ManualVideoViewHolder>() {
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): ManualVideoViewHolder {
     val holder = ManualVideoViewHolder(parent)
     holder.binding.controller.exoFullscreenEnter.setOnClickListener {
@@ -42,7 +42,7 @@ internal class ManualVideosAdapter(
         this,
         holder,
         holder.binding.playerView,
-        "player::${holder.absoluteAdapterPosition}"
+        "player::${holder.absoluteAdapterPosition}",
       )
     }
     return holder
@@ -50,33 +50,43 @@ internal class ManualVideosAdapter(
 
   override fun getItemCount() = Int.MAX_VALUE / 2
 
-  override fun onBindViewHolder(holder: ManualVideoViewHolder, position: Int) {
+  override fun onBindViewHolder(
+    holder: ManualVideoViewHolder,
+    position: Int,
+  ) {
     bindVideo(holder)
   }
 
   fun bindVideo(holder: ManualVideoViewHolder) {
-    kohii.setUp(DemoApp.assetVideoUri) {
+    kohii.setUp(DemoApp.VIDEO_URI_ASSET) {
       tag = "player::${holder.absoluteAdapterPosition}"
       repeatMode = Player.REPEAT_MODE_ONE
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = false
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = false
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          holder.binding.controller.exoPlay.setOnClickListener {
-            val playable = playback.playable ?: return@setOnClickListener
-            playback.manager.play(playable)
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            holder.binding.controller.exoPlay.setOnClickListener {
+              val playable = playback.playable ?: return@setOnClickListener
+              playback.manager.play(playable)
+            }
+            holder.binding.controller.exoPause.setOnClickListener {
+              val playable = playback.playable ?: return@setOnClickListener
+              playback.manager.pause(playable)
+            }
           }
-          holder.binding.controller.exoPause.setOnClickListener {
-            val playable = playback.playable ?: return@setOnClickListener
-            playback.manager.pause(playable)
+
+          override fun teardownRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            holder.binding.controller.exoPlay.setOnClickListener(null)
+            holder.binding.controller.exoPause.setOnClickListener(null)
           }
         }
-
-        override fun teardownRenderer(playback: Playback, renderer: Any?) {
-          holder.binding.controller.exoPlay.setOnClickListener(null)
-          holder.binding.controller.exoPause.setOnClickListener(null)
-        }
-      }
     }
       .bind(holder.binding.playerView) {
         it.addStateListener(holder)

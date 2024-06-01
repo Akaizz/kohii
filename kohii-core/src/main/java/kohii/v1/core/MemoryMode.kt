@@ -58,5 +58,5 @@ enum class MemoryMode {
    * In INFINITE mode, no unselected Playables/Playbacks will ever be released due to priority
    * change (though Kohii will release the resource once they are inactive).
    */
-  INFINITE
+  INFINITE,
 }

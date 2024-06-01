@@ -65,13 +65,12 @@ class Manager internal constructor(
   val host: Any,
   internal val lifecycleOwner: LifecycleOwner,
   internal val memoryMode: MemoryMode = LOW,
-  internal val activeLifecycleState: State = State.STARTED
+  internal val activeLifecycleState: State = State.STARTED,
 ) : PlayableManager, DefaultLifecycleObserver, LifecycleEventObserver, Comparable<Manager> {
-
   companion object {
     private fun compareAndCheck(
       left: Prioritized,
-      right: Prioritized
+      right: Prioritized,
     ): Int {
       val ltr = left.compareTo(right)
       val rtl = right.compareTo(left)
@@ -99,7 +98,7 @@ class Manager internal constructor(
   // - When adding new Bucket, we add it to tail of the Queue.
   // - When promoting a Bucket as sticky, we push the same Bucket to head of the Queue.
   // - When demoting a Bucket from sticky, we just poll the head.
-  internal val buckets = ArrayDeque<Bucket>(4 /* less than default minimum of ArrayDeque */)
+  internal val buckets = ArrayDeque<Bucket>(4) // Less than ArrayDeque default minimum
 
   // Up to one Bucket can be sticky at a time.
   private var stickyBucket: Bucket? = null
@@ -109,7 +108,7 @@ class Manager internal constructor(
       val to = field
       if (from === to) return
       // Promote 'to' from buckets.
-      if (to != null /* set new sticky Bucket */) {
+      if (to != null) { // -> set new sticky Bucket
         buckets.push(to) // Push it to head.
       } else { // 'to' is null then 'from' must be nonnull. Consider to remove it from head.
         // Demote 'from'
@@ -117,7 +116,7 @@ class Manager internal constructor(
       }
     }
 
-  internal val playbacks = mutableMapOf<Any /* container */, Playback>()
+  internal val playbacks = mutableMapOf<Any, Playback>() // Container -> Playback
 
   internal var sticky: Boolean = false
 
@@ -149,7 +148,7 @@ class Manager internal constructor(
 
   override fun onStateChanged(
     source: LifecycleOwner,
-    event: Event
+    event: Event,
   ) {
     playbacks.forEach { it.value.lifecycleState = source.lifecycle.currentState }
     refresh()
@@ -159,7 +158,9 @@ class Manager internal constructor(
     playbacks.values
       .toMutableList()
       .also { group.selection -= it }
-      .onEach { removePlayback(it) /* also modify 'playbacks' content */ }
+      .onEach {
+        removePlayback(it) // also modify 'playbacks' content
+      }
       .clear()
     stickyBucket = null // will pop current sticky Bucket from the Stack
 
@@ -189,17 +190,18 @@ class Manager internal constructor(
   }
 
   internal fun findRendererProvider(playable: Playable): RendererProvider {
-    val cache = rendererProviders[playable.config.rendererType]
-      ?: rendererProviders.entries.firstOrNull {
-        // If there is a RendererProvider of subclass, we can use it.
-        playable.config.rendererType.isAssignableFrom(it.key)
-      }?.value
+    val cache =
+      rendererProviders[playable.config.rendererType]
+        ?: rendererProviders.entries.firstOrNull {
+          // If there is a RendererProvider of subclass, we can use it.
+          playable.config.rendererType.isAssignableFrom(it.key)
+        }?.value
     return requireNotNull(cache)
   }
 
   fun registerRendererProvider(
     type: Class<*>,
-    provider: RendererProvider
+    provider: RendererProvider,
   ) {
     val prev = rendererProviders.put(type, provider)
     if (prev != null && prev !== provider) {
@@ -250,7 +252,7 @@ class Manager internal constructor(
   private fun onAddBucket(
     view: View,
     strategy: Strategy,
-    selector: Selector
+    selector: Selector,
   ) {
     val existing = buckets.find { it.root === view }
     if (existing != null) return
@@ -267,11 +269,14 @@ class Manager internal constructor(
 
   internal fun refresh(): Unit = group.onRefresh()
 
-  private fun refreshPlaybackStates(): Pair<MutableSet<Playback> /* Active */, MutableSet<Playback> /* InActive */> {
-    val toActive = playbacks.filterValues { !it.isActive && it.token.shouldPrepare() }
-      .values
-    val toInActive = playbacks.filterValues { it.isActive && !it.token.shouldPrepare() }
-      .values
+  // Returns the pair of Active playbacks and Inactive playbacks.
+  private fun refreshPlaybackStates(): Pair<MutableSet<Playback>, MutableSet<Playback>> {
+    val toActive =
+      playbacks.filterValues { !it.isActive && it.token.shouldPrepare() }
+        .values
+    val toInActive =
+      playbacks.filterValues { it.isActive && !it.token.shouldPrepare() }
+        .values
 
     toActive.forEach { onPlaybackActive(it) }
     toInActive.forEach { onPlaybackInActive(it) }
@@ -279,7 +284,7 @@ class Manager internal constructor(
     return playbacks.entries.filter { it.value.isAttached }
       .partitionToMutableSets(
         predicate = { it.value.isActive },
-        transform = { it.value }
+        transform = { it.value },
       )
   }
 
@@ -288,23 +293,25 @@ class Manager internal constructor(
    * - Refreshes the state of all managed [Playback].
    * - Splits the [Playback]s into 2 buckets: those can be played and those can not.
    */
-  internal fun splitPlaybacks(): Pair<Set<Playback> /* toPlay */, Set<Playback> /* toPause */> {
+  internal fun splitPlaybacks(): Pair<Set<Playback>, Set<Playback>> {
     val (activePlaybacks, inactivePlaybacks) = refreshPlaybackStates()
     val toPlay = arraySetOf<Playback>()
 
     val bucketToPlaybacks = playbacks.values.groupBy { it.bucket } // -> Map<Bucket, List<Playback>
     buckets.asSequence()
       .filter { !bucketToPlaybacks[it].isNullOrEmpty() }
-      .map { /* Bucket --> Set<Playback> */
-        val candidates = bucketToPlaybacks
-          .getValue(it)
-          .filter { playback ->
-            // TODO(eneim): rethink this to support off-screen manual playback/kohiiCanPause().
-            /* val cannotPause = master.manuallyStartedPlayable.get() === playback.playable &&
-                master.plannedManualPlayables.contains(playback.tag) &&
-                !requireNotNull(playback.config.controller).kohiiCanPause() */
-            return@filter /* cannotPause || */ it.allowToPlay(playback)
-          }
+      .map { // Bucket --> Set<Playback>
+        val candidates =
+          bucketToPlaybacks
+            .getValue(it)
+            .filter { playback ->
+              // TODO(eneim): rethink this to support off-screen manual playback/kohiiCanPause().
+
+              /* val cannotPause = master.manuallyStartedPlayable.get() === playback.playable &&
+                  master.plannedManualPlayables.contains(playback.tag) &&
+                  !requireNotNull(playback.config.controller).kohiiCanPause() */
+              return@filter it.allowToPlay(playback)
+            }
         return@map it.strategy(it.selectToPlay(candidates)).toSet()
       }
       .find { it.isNotEmpty() }
@@ -345,7 +352,11 @@ class Manager internal constructor(
     playbacks[container]?.let(::removePlayback)
   }
 
-  internal fun notifyPlaybackChanged(playable: Playable, from: Playback?, to: Playback?) {
+  internal fun notifyPlaybackChanged(
+    playable: Playable,
+    from: Playback?,
+    to: Playback?,
+  ) {
     "Manager#notifyPlaybackChanged ${playable.tag}, $from, $to, $this".logInfo()
     playableObservers[playable.tag]?.invoke(playable.tag, from, to)
   }
@@ -367,7 +378,10 @@ class Manager internal constructor(
    * @param observer the [PlayableObserver] to be notified about the change.
    * @return `true` if the [observer] is registered, `false` otherwise.
    */
-  fun observe(mediaTag: Any, observer: PlayableObserver): Boolean {
+  fun observe(
+    mediaTag: Any,
+    observer: PlayableObserver,
+  ): Boolean {
     require(mediaTag !== Master.NO_TAG)
     return playableObservers.put(mediaTag, observer) !== observer
   }
@@ -382,7 +396,7 @@ class Manager internal constructor(
   fun addBucket(
     view: View,
     strategy: Strategy = SINGLE_PLAYER,
-    selector: Selector = SINGLE_PLAYER
+    selector: Selector = SINGLE_PLAYER,
   ): Manager {
     this.onAddBucket(view, strategy, selector)
     return this
@@ -406,7 +420,7 @@ class Manager internal constructor(
 
   internal fun onBucketVolumeInfoUpdated(
     bucket: Bucket,
-    effectiveVolumeInfo: VolumeInfo
+    effectiveVolumeInfo: VolumeInfo,
   ) = playbacks.forEach {
     if (it.value.bucket === bucket) it.value.playbackVolumeInfo = effectiveVolumeInfo
   }
@@ -426,7 +440,7 @@ class Manager internal constructor(
   fun applyVolumeInfo(
     volumeInfo: VolumeInfo,
     target: Any,
-    scope: Scope
+    scope: Scope,
   ) {
     when (scope) {
       PLAYBACK -> {
@@ -467,7 +481,6 @@ class Manager internal constructor(
   fun pause(playable: Playable): Unit = master.pause(playable)
 
   interface OnSelectionListener {
-
     // Called when some Playbacks under this Manager are selected.
     fun onSelection(selection: Collection<Playback>)
   }

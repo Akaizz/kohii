@@ -33,7 +33,6 @@ import kotlin.LazyThreadSafetyMode.NONE
  * @author eneim (2018/08/08).
  */
 class PlayerActivity : BaseActivity() {
-
   companion object {
     private const val EXTRA_INIT_DATA = "kohii::player::init_data"
     private const val EXTRA_REBINDER = "kohii::player::rebinder"
@@ -41,12 +40,13 @@ class PlayerActivity : BaseActivity() {
     fun createIntent(
       context: Context,
       initData: InitData,
-      rebinder: Rebinder
+      rebinder: Rebinder,
     ): Intent {
-      val extras = Bundle().also {
-        it.putParcelable(EXTRA_INIT_DATA, initData)
-        it.putParcelable(EXTRA_REBINDER, rebinder)
-      }
+      val extras =
+        Bundle().also {
+          it.putParcelable(EXTRA_INIT_DATA, initData)
+          it.putParcelable(EXTRA_REBINDER, rebinder)
+        }
       return Intent(context, PlayerActivity::class.java).also {
         it.putExtras(extras)
       }
@@ -66,9 +66,10 @@ class PlayerActivity : BaseActivity() {
     val rebinder = extras?.getParcelable<Rebinder>(EXTRA_REBINDER)
 
     if (rebinder != null && initData != null) {
-      val displaySize = Point().apply {
-        this@PlayerActivity.windowManager.defaultDisplay.getSize(this)
-      }
+      val displaySize =
+        Point().apply {
+          this@PlayerActivity.windowManager.defaultDisplay.getSize(this)
+        }
 
       if (displaySize.y * initData.aspectRatio >= displaySize.x) {
         binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH

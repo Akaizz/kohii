@@ -27,13 +27,12 @@ import androidx.lifecycle.ViewModelProvider
 import kohii.v1.sample.tiktok.R
 
 class NotificationsFragment : Fragment() {
-
   private lateinit var notificationsViewModel: NotificationsViewModel
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     notificationsViewModel = ViewModelProvider(this).get(NotificationsViewModel::class.java)
     val root = inflater.inflate(R.layout.fragment_notifications, container, false)
@@ -42,7 +41,7 @@ class NotificationsFragment : Fragment() {
       viewLifecycleOwner,
       Observer {
         textView.text = it
-      }
+      },
     )
     return root
   }

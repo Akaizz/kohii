@@ -46,12 +46,11 @@ import kohii.v1.media.VolumeInfo
  */
 abstract class Playable(
   val media: Media,
-  internal val config: Config
+  internal val config: Config,
 ) {
-
   data class Config(
     internal val tag: Any = Master.NO_TAG,
-    internal val rendererType: Class<*>
+    internal val rendererType: Class<*>,
   )
 
   abstract val tag: Any
@@ -164,17 +163,17 @@ abstract class Playable(
   internal abstract fun onPlaybackPriorityChanged(
     playback: Playback,
     oldPriority: Int,
-    newPriority: Int
+    newPriority: Int,
   )
 
   internal abstract fun onVolumeInfoChanged(
     playback: Playback,
     from: VolumeInfo,
-    to: VolumeInfo
+    to: VolumeInfo,
   )
 
   internal abstract fun onNetworkTypeChanged(
     from: NetworkType,
-    to: NetworkType
+    to: NetworkType,
   )
 }

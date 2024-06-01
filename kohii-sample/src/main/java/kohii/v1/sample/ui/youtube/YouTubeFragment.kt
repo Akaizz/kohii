@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class YouTubeFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = YouTubeFragment()
   }
@@ -46,7 +45,7 @@ class YouTubeFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     val binding: FragmentRecyclerViewBinding =
       FragmentRecyclerViewBinding.inflate(inflater, container, false)
@@ -56,7 +55,7 @@ class YouTubeFragment : BaseFragment(), DemoContainer {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val engine = UnofficialYouTubePlayerEngine[requireContext()]

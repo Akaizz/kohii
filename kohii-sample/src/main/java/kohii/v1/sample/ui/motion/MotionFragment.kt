@@ -37,7 +37,6 @@ import kohii.v1.sample.ui.main.DemoItem
  */
 @Keep
 class MotionFragment : BaseFragment(), Presenter, DemoContainer {
-
   companion object {
     fun newInstance() = MotionFragment()
   }
@@ -49,20 +48,21 @@ class MotionFragment : BaseFragment(), Presenter, DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
-    binding = DataBindingUtil.inflate(
-      inflater,
-      R.layout.fragment_motion,
-      container,
-      false
-    ) as FragmentMotionBinding
+    binding =
+      DataBindingUtil.inflate(
+        inflater,
+        R.layout.fragment_motion,
+        container,
+        false,
+      ) as FragmentMotionBinding
     return binding.root
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     Kohii[this].register(this)
@@ -83,7 +83,7 @@ class MotionFragment : BaseFragment(), Presenter, DemoContainer {
 
   override fun onVideoClick(
     container: View,
-    video: Video
+    video: Video,
   ) {
     val playerView = (container as ViewGroup)[0]
     val rebinder = playerView.getTag(R.id.motion_view_tag) as Rebinder?
@@ -93,10 +93,10 @@ class MotionFragment : BaseFragment(), Presenter, DemoContainer {
           requireContext(),
           InitData(
             tag = rebinder.tag.toString(),
-            aspectRatio = video.width / video.height
+            aspectRatio = video.width / video.height,
           ),
-          rebinder
-        )
+          rebinder,
+        ),
       )
     }
   }

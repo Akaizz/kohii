@@ -20,6 +20,5 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class VideosViewModel : ViewModel() {
-
   val selectedRebinder = MutableLiveData<SelectionKey>(null)
 }

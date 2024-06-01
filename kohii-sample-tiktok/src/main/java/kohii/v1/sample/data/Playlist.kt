@@ -33,5 +33,5 @@ data class Playlist(
   val sources: List<Sources>,
   val tracks: List<Tracks>,
   val link: String,
-  val duration: Int
+  val duration: Int,
 ) : Parcelable

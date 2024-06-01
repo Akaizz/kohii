@@ -28,96 +28,97 @@ import kotlin.math.max
 /**
  * Definition of a pool to provide [PLAYER] instance for the consumer.
  */
-abstract class PlayerPool<PLAYER : Any> @JvmOverloads constructor(
-  @IntRange(from = 1) poolSize: Int = DEFAULT_POOL_SIZE
-) {
+abstract class PlayerPool<PLAYER : Any>
+  @JvmOverloads
+  constructor(
+    @IntRange(from = 1) poolSize: Int = DEFAULT_POOL_SIZE,
+  ) {
+    companion object {
+      // Max number of Player instance are cached in the Pool
+      // Magic number: Build.VERSION.SDK_INT / 6 --> API 16 ~ 18 will set pool size to 2, etc.
+      val DEFAULT_POOL_SIZE =
+        max(Util.SDK_INT / 6, max(Runtime.getRuntime().availableProcessors(), 1))
+    }
 
-  companion object {
-    // Max number of Player instance are cached in the Pool
-    // Magic number: Build.VERSION.SDK_INT / 6 --> API 16 ~ 18 will set pool size to 2, etc.
-    val DEFAULT_POOL_SIZE =
-      max(Util.SDK_INT / 6, max(Runtime.getRuntime().availableProcessors(), 1))
-  }
+    init {
+      require(poolSize > 0) { "Pool size must be positive." }
+    }
 
-  init {
-    require(poolSize > 0) { "Pool size must be positive." }
-  }
+    private val playerCache = Pools.SimplePool<PLAYER>(poolSize)
 
-  private val playerCache = Pools.SimplePool<PLAYER>(poolSize)
+    /**
+     * Return `true` if a [PLAYER] instance can be reused to play the [media], `false` otherwise. If
+     * this method returns `false`, this pool will always create new [PLAYER] instance and never put
+     * that instance back to pool.
+     *
+     * @param media The [Media] object.
+     */
+    protected open fun recyclePlayerForMedia(media: Media): Boolean = true
 
-  /**
-   * Return `true` if a [PLAYER] instance can be reused to play the [media], `false` otherwise. If
-   * this method returns `false`, this pool will always create new [PLAYER] instance and never put
-   * that instance back to pool.
-   *
-   * @param media The [Media] object.
-   */
-  protected open fun recyclePlayerForMedia(media: Media): Boolean = true
+    /**
+     * Reset the internal state of the [player] instance before putting it back to the pool.
+     *
+     * @param player The [PLAYER] instance to reset.
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    open fun resetPlayer(player: PLAYER) = Unit
 
-  /**
-   * Reset the internal state of the [player] instance before putting it back to the pool.
-   *
-   * @param player The [PLAYER] instance to reset.
-   */
-  @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-  open fun resetPlayer(player: PLAYER) = Unit
+    /**
+     * Create a new [PLAYER] instance that can be used to play the [media] object.
+     *
+     * @param media The [Media] object.
+     * @return a [PLAYER] instance that can be used to play the [media].
+     */
+    abstract fun createPlayer(media: Media): PLAYER
 
-  /**
-   * Create a new [PLAYER] instance that can be used to play the [media] object.
-   *
-   * @param media The [Media] object.
-   * @return a [PLAYER] instance that can be used to play the [media].
-   */
-  abstract fun createPlayer(media: Media): PLAYER
+    /**
+     * Destroy the [PLAYER] instance. After this, the [player] must not be reused.
+     *
+     * @param player The [PLAYER] instance.
+     */
+    abstract fun destroyPlayer(player: PLAYER)
 
-  /**
-   * Destroy the [PLAYER] instance. After this, the [player] must not be reused.
-   *
-   * @param player The [PLAYER] instance.
-   */
-  abstract fun destroyPlayer(player: PLAYER)
+    /**
+     * Acquire a [PLAYER] that can be used to play the [media] from the pool. If there is no available
+     * instance in the pool, this method will create a new one.
+     *
+     * @param media The [Media] object.
+     * @return a [PLAYER] instance that can be used to play the [media].
+     */
+    fun getPlayer(media: Media): PLAYER {
+      if (!recyclePlayerForMedia(media)) return createPlayer(media)
+      return playerCache.acquire() ?: createPlayer(media)
+    }
 
-  /**
-   * Acquire a [PLAYER] that can be used to play the [media] from the pool. If there is no available
-   * instance in the pool, this method will create a new one.
-   *
-   * @param media The [Media] object.
-   * @return a [PLAYER] instance that can be used to play the [media].
-   */
-  fun getPlayer(media: Media): PLAYER {
-    if (!recyclePlayerForMedia(media)) return createPlayer(media)
-    return playerCache.acquire() ?: createPlayer(media)
-  }
+    /**
+     * Release an unused [PLAYER] to the pool. If the pool is already full, this method must destroy
+     * the [PLAYER] instance. Return `true` if the instance is successfully put back to the pool, or
+     * `false` otherwise.
+     *
+     * @param media The [Media] object.
+     * @param player The [PLAYER] to be put back to the pool.
+     * @return `true` if the instance is successfully put back to the pool, or `false` otherwise.
+     */
+    fun putPlayer(
+      media: Media,
+      player: PLAYER,
+    ): Boolean {
+      return if (!recyclePlayerForMedia(media) || !playerCache.release(player)) {
+        destroyPlayer(player)
+        false
+      } else {
+        resetPlayer(player)
+        true
+      }
+    }
 
-  /**
-   * Release an unused [PLAYER] to the pool. If the pool is already full, this method must destroy
-   * the [PLAYER] instance. Return `true` if the instance is successfully put back to the pool, or
-   * `false` otherwise.
-   *
-   * @param media The [Media] object.
-   * @param player The [PLAYER] to be put back to the pool.
-   * @return `true` if the instance is successfully put back to the pool, or `false` otherwise.
-   */
-  fun putPlayer(
-    media: Media,
-    player: PLAYER
-  ): Boolean {
-    return if (!recyclePlayerForMedia(media) || !playerCache.release(player)) {
-      destroyPlayer(player)
-      false
-    } else {
-      resetPlayer(player)
-      true
+    /**
+     * Destroy all available [PLAYER] instances in the pool.
+     */
+    @CallSuper
+    open fun clear() {
+      playerCache.onEachAcquired {
+        destroyPlayer(it)
+      }
     }
   }
-
-  /**
-   * Destroy all available [PLAYER] instances in the pool.
-   */
-  @CallSuper
-  open fun clear() {
-    playerCache.onEachAcquired {
-      destroyPlayer(it)
-    }
-  }
-}

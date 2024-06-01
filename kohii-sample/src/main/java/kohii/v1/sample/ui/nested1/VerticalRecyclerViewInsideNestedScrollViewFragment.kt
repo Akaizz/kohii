@@ -29,20 +29,19 @@ import kohii.v1.sample.databinding.FragmentDebugRvInNestsvVerticalBinding
 import kohii.v1.sample.ui.main.DemoItem
 
 class VerticalRecyclerViewInsideNestedScrollViewFragment : BaseFragment(), DemoContainer {
-
   override val demoItem: DemoItem? get() = arguments?.getParcelable(KEY_DEMO_ITEM)
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_debug_rv_in_nestsv_vertical, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentDebugRvInNestsvVerticalBinding =

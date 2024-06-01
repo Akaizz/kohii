@@ -39,7 +39,6 @@ import kohii.v1.sample.ui.pagers.ViewPager1WithFragmentsFragment
  */
 @Keep
 class MasterDetailFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = MasterDetailFragment()
   }
@@ -51,14 +50,14 @@ class MasterDetailFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     return inflater.inflate(R.layout.fragment_master_detail, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentMasterDetailBinding = FragmentMasterDetailBinding.bind(view)
@@ -79,7 +78,7 @@ class MasterDetailFragment : BaseFragment(), DemoContainer {
           fm: FragmentManager,
           f: Fragment,
           v: View,
-          savedInstanceState: Bundle?
+          savedInstanceState: Bundle?,
         ) {
           if (f.id == R.id.topContainer) {
             kohii.stick(f.viewLifecycleOwner)
@@ -88,14 +87,14 @@ class MasterDetailFragment : BaseFragment(), DemoContainer {
 
         override fun onFragmentViewDestroyed(
           fm: FragmentManager,
-          f: Fragment
+          f: Fragment,
         ) {
           if (f.id == R.id.topContainer) {
             kohii.unstick(f.viewLifecycleOwner)
           }
         }
       },
-      false
+      false,
     )
   }
 }

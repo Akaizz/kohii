@@ -30,7 +30,7 @@ data class AdSample(
   @Json(name = "uri")
   val contentUri: Uri,
   @Json(name = "ad_tag_uri")
-  val adTagUri: Uri
+  val adTagUri: Uri,
 ) : Parcelable
 
 @JsonClass(generateAdapter = true)
@@ -38,5 +38,5 @@ data class AdSamples(
   @Json(name = "name")
   val name: String,
   @Json(name = "samples")
-  val samples: List<AdSample>
+  val samples: List<AdSample>,
 )

@@ -37,9 +37,8 @@ import kotlin.properties.Delegates
 @Suppress("MemberVisibilityCanBePrivate")
 class VideoItemHolder(
   parent: ViewGroup,
-  private val kohii: Kohii
+  private val kohii: Kohii,
 ) : BaseViewHolder(parent, R.layout.holder_video_text_overlay), ArtworkHintListener {
-
   val videoTitle = itemView.findViewById(R.id.videoTitle) as TextView
   val videoInfo = itemView.findViewById(R.id.videoInfo) as TextView
   val videoImage = itemView.findViewById(R.id.videoImage) as ImageView
@@ -56,12 +55,13 @@ class VideoItemHolder(
   private var videoData by Delegates.observable<Video?>(null) { _, _, newVal ->
     if (newVal != null) {
       val playlist = newVal.playlist.first()
-      this.videoItem = VideoItem(
-        newVal.title,
-        newVal.description,
-        playlist.image,
-        playlist.sources.first().file
-      )
+      this.videoItem =
+        VideoItem(
+          newVal.title,
+          newVal.description,
+          playlist.image,
+          playlist.sources.first().file,
+        )
     } else {
       this.videoItem = null
     }
@@ -118,7 +118,7 @@ class VideoItemHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     videoImage.isVisible = shouldShow
   }

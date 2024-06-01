@@ -60,9 +60,7 @@ import kohii.v1.utils.Capsule
 import java.util.concurrent.atomic.AtomicReference
 
 class Master private constructor(context: Context) : PlayableManager {
-
   companion object {
-
     internal const val MSG_CLEANUP = 1
     internal const val MSG_BIND_PLAYABLE = 2
     internal const val MSG_RELEASE_PLAYABLE = 3
@@ -80,25 +78,25 @@ class Master private constructor(context: Context) : PlayableManager {
 
   internal val engines = mutableMapOf<Class<*>, Engine<*>>()
   internal val groups = mutableSetOf<Group>()
-  internal val requests = mutableMapOf<ViewGroup /* Container */, BindRequest>()
-  internal val playables = mutableMapOf<Playable, Any /* Playable tag */>()
+  internal val requests = mutableMapOf<ViewGroup, BindRequest>() // Container -> Request
+  internal val playables = mutableMapOf<Playable, Any>() // Playable -> Tag
 
   // Memorize the tags which belongs to Playbacks that enable manual playbacks. On config change,
   // we may not get the binding of these tags yet, but we may need to play them.
   // TODO when to remove entries of this map?
-  internal val plannedManualPlayables = arraySetOf<Any /* Playable tag */>()
+  internal val plannedManualPlayables = arraySetOf<Any>() // Tags
 
   // Reference of the Playable started manually by the User. This Playable can be paused if
   // the controller allows the library to pause it.
   internal val manuallyStartedPlayable = AtomicReference<Playable>()
 
   // TODO when to remove entries of this map?
-  internal val playablesPendingActions = arrayMapOf<Any /* Playable tag */, Boolean>()
+  internal val playablesPendingActions = arrayMapOf<Any, Boolean>() // Tag -> pending "Play".
 
   // TODO design a dedicated mechanism for this store, considering paging to save in-memory space.
   // TODO when to remove entries of this map?
   // TODO LruStore (temporary, short term), SqLiteStore (eternal, manual clean up), etc?
-  private val playbackInfoStore = mutableMapOf<Any /* Playable tag */, PlaybackInfo>()
+  private val playbackInfoStore = mutableMapOf<Any, PlaybackInfo>() // Tag -> PlaybackInfo
 
   private var systemLock: Boolean = false
     set(value) {
@@ -115,13 +113,16 @@ class Master private constructor(context: Context) : PlayableManager {
 
   internal var groupsMaxLifecycleState: State = DESTROYED
 
-  private val componentCallbacks = object : ComponentCallbacks2 {
-    override fun onLowMemory() = Unit
-    override fun onConfigurationChanged(newConfig: Configuration) = Unit
-    override fun onTrimMemory(level: Int) {
-      trimMemoryLevel = level
+  private val componentCallbacks =
+    object : ComponentCallbacks2 {
+      override fun onLowMemory() = Unit
+
+      override fun onConfigurationChanged(newConfig: Configuration) = Unit
+
+      override fun onTrimMemory(level: Int) {
+        trimMemoryLevel = level
+      }
     }
-  }
 
   @C.NetworkType
   internal var networkType: NetworkType = C.NETWORK_TYPE_UNKNOWN
@@ -135,14 +136,16 @@ class Master private constructor(context: Context) : PlayableManager {
         .forEach { (playable: Playable, _) -> playable.onNetworkTypeChanged(from, to) }
     }
 
-  private val networkTypeChangedListener = NetworkTypeObserver.Listener { networkType ->
-    this@Master.networkType = networkType
-  }
+  private val networkTypeChangedListener =
+    NetworkTypeObserver.Listener { networkType ->
+      this@Master.networkType = networkType
+    }
 
-  internal var trimMemoryLevel: Int = RunningAppProcessInfo().let {
-    ActivityManager.getMyMemoryState(it)
-    it.lastTrimLevel
-  }
+  internal var trimMemoryLevel: Int =
+    RunningAppProcessInfo().let {
+      ActivityManager.getMyMemoryState(it)
+      it.lastTrimLevel
+    }
     set(value) {
       val from = field
       field = value
@@ -152,15 +155,17 @@ class Master private constructor(context: Context) : PlayableManager {
 
   init {
     NetworkTypeObserver.getInstance(app).register(networkTypeChangedListener)
-    ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
-      override fun onStart(owner: LifecycleOwner) {
-        systemLock = false
-      }
+    ProcessLifecycleOwner.get().lifecycle.addObserver(
+      object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) {
+          systemLock = false
+        }
 
-      override fun onStop(owner: LifecycleOwner) {
-        systemLock = true
-      }
-    })
+        override fun onStop(owner: LifecycleOwner) {
+          systemLock = true
+        }
+      },
+    )
   }
 
   internal fun preferredMemoryMode(actual: MemoryMode): MemoryMode =
@@ -175,15 +180,16 @@ class Master private constructor(context: Context) : PlayableManager {
     host: Any,
     managerLifecycleOwner: LifecycleOwner,
     memoryMode: MemoryMode = AUTO,
-    activeLifecycleState: State
+    activeLifecycleState: State,
   ): Manager {
     check(!activity.isDestroyed) {
       "Cannot register a destroyed Activity: $activity"
     }
-    val group = groups.find { it.activity === activity } ?: Group(this, activity).also {
-      onGroupCreated(it)
-      activity.lifecycle.addObserver(it)
-    }
+    val group =
+      groups.find { it.activity === activity } ?: Group(this, activity).also {
+        onGroupCreated(it)
+        activity.lifecycle.addObserver(it)
+      }
 
     return group.managers.find { it.lifecycleOwner === managerLifecycleOwner }
       ?: Manager(this, group, host, managerLifecycleOwner, memoryMode, activeLifecycleState)
@@ -203,7 +209,7 @@ class Master private constructor(context: Context) : PlayableManager {
     tag: Any,
     container: ViewGroup,
     options: Options,
-    callback: ((Playback) -> Unit)? = null
+    callback: ((Playback) -> Unit)? = null,
   ) {
     "Master#bind tag=$tag, playable=$playable, container=$container, options=$options".logInfo()
     // Remove any queued binding requests for the same container.
@@ -217,10 +223,11 @@ class Master private constructor(context: Context) : PlayableManager {
     // trigger the binding, because we wait for the Container to be attached to the Window first.
     // So if a Playable is registered to be bound, but then another Playable is registered to the
     // same Container, we need to kick the previous Playable.
-    val requestForSameTag = requests.asSequence()
-      .filter { it.value.tag !== NO_TAG }
-      .firstOrNull { it.value.tag == tag }
-      ?.key
+    val requestForSameTag =
+      requests.asSequence()
+        .filter { it.value.tag !== NO_TAG }
+        .firstOrNull { it.value.tag == tag }
+        ?.key
     if (requestForSameTag != null) requests.remove(requestForSameTag)?.onRemoved()
     requests[container] = BindRequest(this, playable, container, tag, options, callback)
     // if (playable.manager == null) playable.manager = this
@@ -230,7 +237,7 @@ class Master private constructor(context: Context) : PlayableManager {
 
   internal fun tearDown(
     playable: Playable,
-    clearState: Boolean
+    clearState: Boolean,
   ) {
     dispatcher.removeMessages(MSG_DESTROY_PLAYABLE, playable)
     dispatcher.obtainMessage(MSG_DESTROY_PLAYABLE, clearState.compareTo(true), -1, playable)
@@ -239,7 +246,7 @@ class Master private constructor(context: Context) : PlayableManager {
 
   internal fun onTearDown(
     playable: Playable,
-    clearState: Boolean
+    clearState: Boolean,
   ) {
     "Master#onTearDown: $playable, clear: $clearState".logDebug()
     check(playable.manager == null || playable.manager === this) {
@@ -260,15 +267,16 @@ class Master private constructor(context: Context) : PlayableManager {
 
   internal fun trySavePlaybackInfo(playable: Playable) {
     "Master#trySavePlaybackInfo: $playable".logDebug()
-    val key = if (playable.tag !== NO_TAG) {
-      playable.tag
-    } else {
-      // if there is no available tag, we use the playback as info key, to allow state caching in
-      // the same session.
-      val playback = playable.playback
-      if (playback == null || !playback.isAttached) return
-      playback
-    }
+    val key =
+      if (playable.tag !== NO_TAG) {
+        playable.tag
+      } else {
+        // if there is no available tag, we use the playback as info key, to allow state caching in
+        // the same session.
+        val playback = playable.playback
+        if (playback == null || !playback.isAttached) return
+        playback
+      }
 
     if (!playbackInfoStore.containsKey(key)) {
       val info = playable.playbackInfo
@@ -280,12 +288,13 @@ class Master private constructor(context: Context) : PlayableManager {
   // If this method is called, it must be before any call to playable.bridge.prepare(flag)
   internal fun tryRestorePlaybackInfo(playable: Playable) {
     "Master#tryRestorePlaybackInfo: $playable".logDebug()
-    val cache = if (playable.tag !== NO_TAG) {
-      playbackInfoStore.remove(playable.tag)
-    } else {
-      val key = playable.playback ?: return
-      playbackInfoStore.remove(key)
-    }
+    val cache =
+      if (playable.tag !== NO_TAG) {
+        playbackInfoStore.remove(playable.tag)
+      } else {
+        val key = playable.playback ?: return
+        playbackInfoStore.remove(key)
+      }
 
     "Master#tryRestorePlaybackInfo: $cache, $playable".logInfo()
     // Only restoring playback state if there is cached state, and the player is not ready yet.
@@ -307,7 +316,11 @@ class Master private constructor(context: Context) : PlayableManager {
     playbackInfoStore.remove(playback)
   }
 
-  internal fun notifyPlaybackChanged(playable: Playable, from: Playback?, to: Playback?) {
+  internal fun notifyPlaybackChanged(
+    playable: Playable,
+    from: Playback?,
+    to: Playback?,
+  ) {
     if (playable.tag !== NO_TAG) {
       for (group in groups) {
         group.notifyPlaybackChanged(playable, from, to)
@@ -406,7 +419,7 @@ class Master private constructor(context: Context) : PlayableManager {
 
   internal fun preparePlayable(
     playable: Playable,
-    loadSource: Boolean = false
+    loadSource: Boolean = false,
   ) {
     "Master#preparePlayable playable=$playable, loadSource=$loadSource".logInfo()
     dispatcher.removeMessages(MSG_RELEASE_PLAYABLE, playable)
@@ -443,6 +456,7 @@ class Master private constructor(context: Context) : PlayableManager {
     if (plannedManualPlayables.contains(tag)) {
       requireNotNull(playable.playback).also {
         // TODO(eneim): rethink this to support off-screen manual playback/kohiiCanPause().
+
         /* if (!requireNotNull(it.config.controller).kohiiCanPause()) {
           manuallyStartedPlayable.set(playable)
         } */
@@ -481,7 +495,7 @@ class Master private constructor(context: Context) : PlayableManager {
    */
   internal fun lock(
     target: Any? = null,
-    scope: Scope = GLOBAL
+    scope: Scope = GLOBAL,
   ) {
     when (scope) {
       GLOBAL -> this.lock = true
@@ -495,7 +509,7 @@ class Master private constructor(context: Context) : PlayableManager {
           }
 
           else -> throw IllegalArgumentException(
-            "Receiver for scope $scope must be a Manager or a Group"
+            "Receiver for scope $scope must be a Manager or a Group",
           )
         }
       }
@@ -514,10 +528,11 @@ class Master private constructor(context: Context) : PlayableManager {
           is Bucket -> target.lock = true
           is Playback -> lock(target.bucket, BUCKET)
           else -> {
-            val bucket = groups.asSequence()
-              .flatMap { it.managers.asSequence() }
-              .flatMap { it.buckets.asSequence() }
-              .firstOrNull { it.root === target }
+            val bucket =
+              groups.asSequence()
+                .flatMap { it.managers.asSequence() }
+                .flatMap { it.buckets.asSequence() }
+                .firstOrNull { it.root === target }
             if (bucket != null) lock(bucket, BUCKET)
           }
         }
@@ -542,7 +557,7 @@ class Master private constructor(context: Context) : PlayableManager {
    */
   internal fun unlock(
     target: Any? = null,
-    scope: Scope = GLOBAL
+    scope: Scope = GLOBAL,
   ) {
     when (scope) {
       GLOBAL -> this.lock = false
@@ -556,7 +571,7 @@ class Master private constructor(context: Context) : PlayableManager {
           }
 
           else -> throw IllegalArgumentException(
-            "Receiver for scope $scope must be a Manager or a Group"
+            "Receiver for scope $scope must be a Manager or a Group",
           )
         }
       }
@@ -576,10 +591,11 @@ class Master private constructor(context: Context) : PlayableManager {
           is Playback -> unlock(target.bucket, BUCKET)
           else -> {
             // Find the Bucket whose root is this receiver
-            val bucket = groups.asSequence()
-              .flatMap { it.managers.asSequence() }
-              .flatMap { it.buckets.asSequence() }
-              .firstOrNull { it.root === target }
+            val bucket =
+              groups.asSequence()
+                .flatMap { it.managers.asSequence() }
+                .flatMap { it.buckets.asSequence() }
+                .firstOrNull { it.root === target }
 
             if (bucket != null) unlock(bucket, BUCKET)
           }
@@ -608,7 +624,7 @@ class Master private constructor(context: Context) : PlayableManager {
     manager: Manager,
     container: ViewGroup,
     noinline callback: ((Playback) -> Unit)? = null,
-    crossinline createNewPlayback: () -> Playback
+    crossinline createNewPlayback: () -> Playback,
   ) {
     // Cancel any pending release/destroy request. This Playable needs to live a bit longer.
     dispatcher.removeMessages(MSG_RELEASE_PLAYABLE, playable)
@@ -678,9 +694,8 @@ class Master private constructor(context: Context) : PlayableManager {
     val container: ViewGroup,
     val tag: Any,
     val options: Options,
-    val callback: ((Playback) -> Unit)?
+    val callback: ((Playback) -> Unit)?,
   ) {
-
     // used by RecyclerViewBucket to 'assume' that it will hold this container
     // It is recommended to use Engine#cancel to easily remove a queued request from cache.
     internal var bucket: Bucket? = null
@@ -691,19 +706,20 @@ class Master private constructor(context: Context) : PlayableManager {
       requireNotNull(bucket) { "No Manager and Bucket available for $container" }
 
       master.onBind(playable, tag, bucket.manager, container, callback) createNewPlayback@{
-        val config = Config(
-          tag = options.tag,
-          delay = options.delay,
-          threshold = options.threshold,
-          preload = options.preload,
-          repeatMode = options.repeatMode,
-          controller = options.controller,
-          initialPlaybackInfo = options.initialPlaybackInfo,
-          artworkHintListener = options.artworkHintListener,
-          tokenUpdateListener = options.tokenUpdateListener,
-          networkTypeChangeListener = options.networkTypeChangeListener,
-          callbacks = options.callbacks
-        )
+        val config =
+          Config(
+            tag = options.tag,
+            delay = options.delay,
+            threshold = options.threshold,
+            preload = options.preload,
+            repeatMode = options.repeatMode,
+            controller = options.controller,
+            initialPlaybackInfo = options.initialPlaybackInfo,
+            artworkHintListener = options.artworkHintListener,
+            tokenUpdateListener = options.tokenUpdateListener,
+            networkTypeChangeListener = options.networkTypeChangeListener,
+            callbacks = options.callbacks,
+          )
 
         return@createNewPlayback when {
           // Scenario: Playable accepts renderer of type PlayerView, and
@@ -722,7 +738,7 @@ class Master private constructor(context: Context) : PlayableManager {
 
           else -> {
             throw IllegalArgumentException(
-              "Unsupported Renderer type: ${playable.config.rendererType}"
+              "Unsupported Renderer type: ${playable.config.rendererType}",
             )
           }
         }

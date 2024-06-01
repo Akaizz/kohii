@@ -26,9 +26,8 @@ internal class UnofficialYouTubePlayerPlayable(
   master: Master,
   media: Media,
   config: Config,
-  bridge: Bridge<YouTubePlayerView>
+  bridge: Bridge<YouTubePlayerView>,
 ) : AbstractPlayable<YouTubePlayerView>(master, media, config, bridge) {
-
   override var renderer: Any?
     get() = bridge.renderer
     set(value) {

@@ -35,29 +35,31 @@ fun Int.toPixel(resources: Resources): Int {
   return TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP,
     this.toFloat(),
-    resources.displayMetrics
+    resources.displayMetrics,
   )
     .toInt()
 }
 
 // Improved (or Degraded?) version of ktx.doOnNextLayout
 inline fun <reified T : View> View.doOnNextLayoutAs(crossinline action: (view: T) -> Unit) {
-  addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
-    override fun onLayoutChange(
-      view: View,
-      left: Int,
-      top: Int,
-      right: Int,
-      bottom: Int,
-      oldLeft: Int,
-      oldTop: Int,
-      oldRight: Int,
-      oldBottom: Int
-    ) {
-      view.removeOnLayoutChangeListener(this)
-      action(view as T)
-    }
-  })
+  addOnLayoutChangeListener(
+    object : View.OnLayoutChangeListener {
+      override fun onLayoutChange(
+        view: View,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+        oldLeft: Int,
+        oldTop: Int,
+        oldRight: Int,
+        oldBottom: Int,
+      ) {
+        view.removeOnLayoutChangeListener(this)
+        action(view as T)
+      }
+    },
+  )
 }
 
 fun Activity.getDisplayPoint(): Point {
@@ -70,13 +72,14 @@ fun Activity.isLandscape(): Boolean {
   return resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 }
 
-fun DialogFragment.requireWindow(): Window = checkNotNull(requireDialog().window) {
-  "Window of Dialog is null"
-}
+fun DialogFragment.requireWindow(): Window =
+  checkNotNull(requireDialog().window) {
+    "Window of Dialog is null"
+  }
 
 inline fun <T> SparseArray<T>.getOrPut(
   key: Int,
-  defaultValue: () -> T
+  defaultValue: () -> T,
 ) = get(key) ?: defaultValue().also { put(key, it) }
 
 fun ViewGroup.inflateView(layoutId: Int): View {

@@ -28,24 +28,25 @@ import kohii.v1.media.Media
 /**
  * Default implementation of [PlayableCreator] that supports [VideoView]
  */
-class VideoViewPlayableCreator @JvmOverloads constructor(
-  private val master: Master,
-  private val playerPool: PlayerPool<MediaPlayer> = MediaPlayerPool(master.app)
-) : PlayableCreator<VideoView>(VideoView::class.java) {
+class VideoViewPlayableCreator
+  @JvmOverloads
+  constructor(
+    private val master: Master,
+    private val playerPool: PlayerPool<MediaPlayer> = MediaPlayerPool(master.app),
+  ) : PlayableCreator<VideoView>(VideoView::class.java) {
+    override fun createPlayable(
+      config: Config,
+      media: Media,
+    ): Playable {
+      return VideoViewPlayable(
+        master,
+        media,
+        config,
+        VideoViewBridge(media, playerPool),
+      )
+    }
 
-  override fun createPlayable(
-    config: Config,
-    media: Media
-  ): Playable {
-    return VideoViewPlayable(
-      master,
-      media,
-      config,
-      VideoViewBridge(media, playerPool)
-    )
+    override fun cleanUp() {
+      playerPool.clear()
+    }
   }
-
-  override fun cleanUp() {
-    playerPool.clear()
-  }
-}

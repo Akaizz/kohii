@@ -35,11 +35,10 @@ import kohii.v1.sample.ui.list.data.Item
 class VideoViewHolder(
   parent: ViewGroup,
   private val kohii: Kohii,
-  private val listener: OnClickListener
+  private val listener: OnClickListener,
 ) : BaseViewHolder(parent, R.layout.holder_player_view),
   View.OnClickListener,
   Playback.Callback {
-
   init {
     itemView.setOnClickListener(this)
   }
@@ -57,16 +56,17 @@ class VideoViewHolder(
       val itemTag = "${javaClass.canonicalName}::${item.content}::$absoluteAdapterPosition"
       payload = InitData(tag = itemTag, aspectRatio = item.width / item.height.toFloat())
       playerContainer.setAspectRatio(payload!!.aspectRatio)
-      rebinder = kohii.setUp(item.content) {
-        tag = itemTag
-        preload = true
-        repeatMode = Player.REPEAT_MODE_ONE
-        callbacks += this@VideoViewHolder
-      }
-        .bind(playerView) {
-          playback = it
-          listener.onItemLoaded(itemView, absoluteAdapterPosition)
+      rebinder =
+        kohii.setUp(item.content) {
+          tag = itemTag
+          preload = true
+          repeatMode = Player.REPEAT_MODE_ONE
+          callbacks += this@VideoViewHolder
         }
+          .bind(playerView) {
+            playback = it
+            listener.onItemLoaded(itemView, absoluteAdapterPosition)
+          }
 
       ViewCompat.setTransitionName(transView, itemTag)
     }
@@ -78,7 +78,7 @@ class VideoViewHolder(
         v,
         transView,
         absoluteAdapterPosition,
-        Pair(rebinder!!, payload!!)
+        Pair(rebinder!!, payload!!),
       )
     }
   }

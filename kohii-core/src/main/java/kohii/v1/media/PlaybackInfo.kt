@@ -24,13 +24,14 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class PlaybackInfo(
-  var resumeWindow: Int, // TODO rename to windowIndex
-  var resumePosition: Long // TODO rename to position
+  // TODO rename to windowIndex
+  var resumeWindow: Int,
+  // TODO rename to position
+  var resumePosition: Long,
 ) : Parcelable {
-
   constructor() : this(
     INDEX_UNSET,
-    TIME_UNSET
+    TIME_UNSET,
   )
 
   companion object {

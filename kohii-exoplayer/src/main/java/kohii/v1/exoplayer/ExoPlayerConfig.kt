@@ -64,9 +64,8 @@ data class ExoPlayerConfig(
   internal val backBufferDurationMs: Int = DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
   internal val retainBackBufferFromKeyframe: Boolean = DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME,
   // Other configurations
-  internal val cache: Cache? = null
+  internal val cache: Cache? = null,
 ) : LoadControlFactory, BandwidthMeterFactory, TrackSelectorFactory {
-
   companion object {
     /**
      * Every fields are default, following the setup by ExoPlayer.
@@ -78,29 +77,31 @@ data class ExoPlayerConfig(
      * Reduce some setting for fast start playback.
      */
     @JvmStatic
-    val FAST_START = ExoPlayerConfig(
-      minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS / 10,
-      maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS / 10,
-      bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS / 10,
-      bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS / 10
-    )
+    val FAST_START =
+      ExoPlayerConfig(
+        minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS / 10,
+        maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS / 10,
+        bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS / 10,
+        bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS / 10,
+      )
   }
 
-  override fun createLoadControl(): LoadControl = DefaultLoadControl.Builder()
-    .setAllocator(allocator)
-    .setBackBuffer(
-      backBufferDurationMs,
-      retainBackBufferFromKeyframe
-    )
-    .setBufferDurationsMs(
-      minBufferMs,
-      maxBufferMs,
-      bufferForPlaybackMs,
-      bufferForPlaybackAfterRebufferMs
-    )
-    .setPrioritizeTimeOverSizeThresholds(prioritizeTimeOverSizeThresholds)
-    .setTargetBufferBytes(targetBufferBytes)
-    .build()
+  override fun createLoadControl(): LoadControl =
+    DefaultLoadControl.Builder()
+      .setAllocator(allocator)
+      .setBackBuffer(
+        backBufferDurationMs,
+        retainBackBufferFromKeyframe,
+      )
+      .setBufferDurationsMs(
+        minBufferMs,
+        maxBufferMs,
+        bufferForPlaybackMs,
+        bufferForPlaybackAfterRebufferMs,
+      )
+      .setPrioritizeTimeOverSizeThresholds(prioritizeTimeOverSizeThresholds)
+      .setTargetBufferBytes(targetBufferBytes)
+      .build()
 
   override fun createBandwidthMeter(context: Context): BandwidthMeter =
     DefaultBandwidthMeter.Builder(context.applicationContext)
@@ -131,7 +132,7 @@ data class ExoPlayerConfig(
 // For internal use only
 fun ExoPlayerConfig.createDefaultPlayerPool(
   context: Context,
-  userAgent: String
+  userAgent: String,
 ) = ExoPlayerPool(
   context = context.applicationContext,
   userAgent = userAgent,
@@ -139,10 +140,11 @@ fun ExoPlayerConfig.createDefaultPlayerPool(
   bandwidthMeterFactory = this,
   trackSelectorFactory = this,
   loadControlFactory = this,
-  renderersFactory = DefaultRenderersFactory(context.applicationContext)
-    .setEnableDecoderFallback(enableDecoderFallback)
-    .setAllowedVideoJoiningTimeMs(allowedVideoJoiningTimeMs)
-    .setExtensionRendererMode(extensionRendererMode)
-    .setMediaCodecSelector(mediaCodecSelector),
+  renderersFactory =
+    DefaultRenderersFactory(context.applicationContext)
+      .setEnableDecoderFallback(enableDecoderFallback)
+      .setAllowedVideoJoiningTimeMs(allowedVideoJoiningTimeMs)
+      .setExtensionRendererMode(extensionRendererMode)
+      .setMediaCodecSelector(mediaCodecSelector),
   cache = cache,
 )

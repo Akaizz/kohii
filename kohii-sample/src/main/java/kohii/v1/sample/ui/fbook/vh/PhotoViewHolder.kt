@@ -24,7 +24,6 @@ import com.bumptech.glide.Glide
 import kohii.v1.sample.R
 
 internal class PhotoViewHolder(parent: ViewGroup) : FbookItemHolder(parent) {
-
   init {
     photoContainer.isVisible = true
   }

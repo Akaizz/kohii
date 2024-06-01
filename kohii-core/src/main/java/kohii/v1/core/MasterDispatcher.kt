@@ -25,7 +25,6 @@ import kohii.v1.debugOnly
 import kohii.v1.logInfo
 
 internal class MasterDispatcher(val master: Master) : Handler(Looper.getMainLooper()) {
-
   override fun handleMessage(msg: Message) {
     when (msg.what) {
       Master.MSG_CLEANUP -> master.cleanupPendingPlayables()

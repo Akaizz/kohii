@@ -28,9 +28,8 @@ internal class StaticViewRendererPlayback(
   manager: Manager,
   bucket: Bucket,
   container: ViewGroup,
-  config: Config
+  config: Config,
 ) : Playback(manager, bucket, container, config) {
-
   override fun onActive() {
     super.onActive()
     playable?.setupRenderer(this)

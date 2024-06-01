@@ -23,9 +23,8 @@ import android.view.ViewGroup
 import androidx.viewbinding.ViewBinding
 
 abstract class ViewBindingFragment<V : ViewBinding>(
-  val bindingCreator: (LayoutInflater, ViewGroup?, Boolean) -> V
+  val bindingCreator: (LayoutInflater, ViewGroup?, Boolean) -> V,
 ) : BaseFragment() {
-
   private var _binding: V? = null
 
   val binding: V? get() = _binding
@@ -35,7 +34,7 @@ abstract class ViewBindingFragment<V : ViewBinding>(
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     _binding = bindingCreator(inflater, container, false)
     return requireBinding().root

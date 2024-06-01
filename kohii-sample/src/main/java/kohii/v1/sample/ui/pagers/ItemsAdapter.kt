@@ -20,14 +20,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.google.android.exoplayer2.Player
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class ItemsAdapter(
   private val kohii: Kohii,
-  private val pagePos: Int
+  private val pagePos: Int,
 ) : Adapter<BaseViewHolder>() {
-
   companion object {
     private const val TYPE_VIDEO = 1
     private const val TYPE_TEXT = 2
@@ -39,7 +38,7 @@ internal class ItemsAdapter(
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return if (viewType == TYPE_VIDEO) {
       VideoViewHolder(parent, pagePos)
@@ -62,12 +61,12 @@ internal class ItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     if (holder is VideoViewHolder) {
-      holder.videoUrl = assetVideoUri
+      holder.videoUrl = VIDEO_URI_ASSET
       val videoTag = holder.videoTag
-      kohii.setUp(assetVideoUri) {
+      kohii.setUp(VIDEO_URI_ASSET) {
         tag = requireNotNull(videoTag)
         repeatMode = Player.REPEAT_MODE_ONE
         artworkHintListener = holder

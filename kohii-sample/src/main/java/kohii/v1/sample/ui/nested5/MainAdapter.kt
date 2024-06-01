@@ -35,15 +35,11 @@ import kohii.v1.sample.data.Item
 class MainAdapter(
   val kohii: Kohii,
   val manager: Manager,
-  private val items: List<Item>
+  private val items: List<Item>,
 ) : Adapter<BaseViewHolder>() {
-
-  private val TYPE_NORMAL = R.layout.holder_nested_normal
-  private val TYPE_LIST = R.layout.holder_nested_recyclerview
-
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     val view = parent.inflateView(viewType)
     return if (viewType == TYPE_LIST) NestedRecyclerViewViewHolder(view) else MainViewHolder(view)
@@ -67,7 +63,7 @@ class MainAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(position)
     if (holder is NestedRecyclerViewViewHolder) {
@@ -111,5 +107,7 @@ class MainAdapter(
 
   companion object {
     const val STATE_KEY = "${BuildConfig.APPLICATION_ID}::nested::state"
+    private val TYPE_NORMAL = R.layout.holder_nested_normal
+    private val TYPE_LIST = R.layout.holder_nested_recyclerview
   }
 }

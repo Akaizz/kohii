@@ -31,7 +31,6 @@ import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class Rebinder(val tag: @RawValue Any) : Parcelable {
-
   init {
     require(tag != NO_TAG) { "Rebinder requires unique tag." }
   }
@@ -60,7 +59,7 @@ data class Rebinder(val tag: @RawValue Any) : Parcelable {
   fun bind(
     engine: Engine<*>,
     container: ViewGroup,
-    callback: ((Playback) -> Unit)? = null
+    callback: ((Playback) -> Unit)? = null,
   ) {
     this.bind(engine.master, container, callback)
   }
@@ -68,11 +67,14 @@ data class Rebinder(val tag: @RawValue Any) : Parcelable {
   private fun bind(
     master: Master,
     container: ViewGroup,
-    callback: ((Playback) -> Unit)? = null
+    callback: ((Playback) -> Unit)? = null,
   ) {
-    val playable = master.playables.asSequence()
-      .firstOrNull { it.value == tag /* equals */ }
-      ?.key
+    val playable =
+      master.playables.asSequence()
+        .firstOrNull {
+          it.value == tag // equals
+        }
+        ?.key
     master.bind(
       requireNotNull(playable) { "Playable is null for tag $tag" },
       tag,
@@ -88,7 +90,7 @@ data class Rebinder(val tag: @RawValue Any) : Parcelable {
         it.networkTypeChangeListener = options.networkTypeChangeListener
         it.callbacks += options.callbacks
       },
-      callback
+      callback,
     )
     options = Options() // reset.
   }

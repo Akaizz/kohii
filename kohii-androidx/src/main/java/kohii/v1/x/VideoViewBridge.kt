@@ -30,16 +30,17 @@ import kohii.v1.media.VolumeInfo
 
 /**
  * [kohii.v1.core.Bridge] for [VideoView]
+ *
+ * Note: this is an experimental implementation of AbstractBridge using androidx.media2 APIs. It is
+ * not production-ready.
  */
-// Really experimental implementation of AbstractBridge using androidx.media2 APIs.
-// Not production-ready.
 class VideoViewBridge(
   private val media: Media,
-  private val playerPool: PlayerPool<MediaPlayer>
+  private val playerPool: PlayerPool<MediaPlayer>,
 ) : AbstractBridge<VideoView>() {
-
-  private val mediaItem: MediaItem = UriMediaItem.Builder(media.uri)
-    .build()
+  private val mediaItem: MediaItem =
+    UriMediaItem.Builder(media.uri)
+      .build()
 
   private var player: MediaPlayer? = null
 
@@ -54,8 +55,7 @@ class VideoViewBridge(
   override val playerState: Int
     get() = this.player?.playerState ?: SessionPlayer.PLAYER_STATE_IDLE
 
-  override fun isPlaying(): Boolean =
-    this.player?.playerState == SessionPlayer.PLAYER_STATE_PLAYING
+  override fun isPlaying(): Boolean = this.player?.playerState == SessionPlayer.PLAYER_STATE_PLAYING
 
   override fun seekTo(positionMs: Long) {
     this.player?.seekTo(positionMs)
@@ -80,13 +80,14 @@ class VideoViewBridge(
 
   override fun ready() {
     if (player == null) {
-      player = playerPool.getPlayer(media)
-        .also {
-          it.setMediaItem(mediaItem)
-          it.repeatMode = repeatMode
-          renderer?.setPlayer(it)
-          it.prepare()
-        }
+      player =
+        playerPool.getPlayer(media)
+          .also {
+            it.setMediaItem(mediaItem)
+            it.repeatMode = repeatMode
+            renderer?.setPlayer(it)
+            it.prepare()
+          }
     }
   }
 

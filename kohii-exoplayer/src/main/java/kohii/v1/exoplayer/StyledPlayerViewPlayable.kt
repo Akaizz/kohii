@@ -27,9 +27,8 @@ class StyledPlayerViewPlayable(
   master: Master,
   media: Media,
   config: Config,
-  bridge: Bridge<StyledPlayerView>
+  bridge: Bridge<StyledPlayerView>,
 ) : AbstractPlayable<StyledPlayerView>(master, media, config, bridge) {
-
   override var renderer: Any?
     get() = bridge.renderer
     set(value) {
@@ -37,9 +36,13 @@ class StyledPlayerViewPlayable(
       bridge.renderer = value
     }
 
-  override fun onRendererAttached(playback: Playback, renderer: Any?) {
+  override fun onRendererAttached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     val controller = playback.config.controller
     // TODO: replace with custom ForwardingPlayer.
+
     /* if (renderer is PlayerView) {
       if (controller is ControlDispatcher) {
         renderer.setControlDispatcher(controller)
@@ -52,13 +55,17 @@ class StyledPlayerViewPlayable(
     super.onRendererAttached(playback, renderer)
     if (renderer is StyledPlayerView && renderer.useController && controller == null) {
       throw IllegalStateException(
-        "To enable `useController`, Playback $playback must have a non-null Playback.Controller."
+        "To enable `useController`, Playback $playback must have a non-null Playback.Controller.",
       )
     }
   }
 
-  override fun onRendererDetached(playback: Playback, renderer: Any?) {
+  override fun onRendererDetached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     // TODO: replace with custom ForwardingPlayer.
+
     /* if (renderer is PlayerView) {
       renderer.setControlDispatcher(defaultControlDispatcher)
       renderer.useController = false

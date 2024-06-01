@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import kohii.v1.sample.R
 
 abstract class InfinityDialogFragment : AppCompatDialogFragment() {
-
   override fun getTheme(): Int {
     return R.style.Kohii_Board
   }

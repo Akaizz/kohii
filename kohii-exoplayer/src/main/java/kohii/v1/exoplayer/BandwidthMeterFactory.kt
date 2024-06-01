@@ -20,6 +20,5 @@ import android.content.Context
 import com.google.android.exoplayer2.upstream.BandwidthMeter
 
 interface BandwidthMeterFactory {
-
   fun createBandwidthMeter(context: Context): BandwidthMeter
 }

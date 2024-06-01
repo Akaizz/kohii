@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import kohii.v1.core.Bucket
 
 internal object RecyclerViewUtils {
-
   /**
    * Return `true` if the [Bucket] of the [recyclerView] accepts [params].
    *
@@ -31,7 +30,7 @@ internal object RecyclerViewUtils {
    */
   fun accepts(
     recyclerView: RecyclerView,
-    params: RecyclerView.LayoutParams?
+    params: RecyclerView.LayoutParams?,
   ): Boolean {
     if (params == null) return false
     return params.mViewHolder == null || params.mViewHolder.mOwnerRecyclerView === recyclerView

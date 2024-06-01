@@ -24,7 +24,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import kohii.v1.core.Manager
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.R
 import kohii.v1.sample.R.id
 import kohii.v1.sample.R.string
@@ -33,42 +33,45 @@ import kohii.v1.sample.common.BaseViewHolder
 internal class NestedScrollViewHolder(
   val kohii: Kohii,
   val manager: Manager,
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_debug_nestsv) {
-
   private val container =
     itemView.findViewById(
-      id.scrollViewContainer
+      id.scrollViewContainer,
     ) as AspectRatioFrameLayout
-  private val scrollView = itemView.findViewById(
-    id.scrollView
-  ) as NestedScrollView
-  private val playerView = itemView.findViewById(
-    id.playerView
-  ) as PlayerView
-  private val libIntro = itemView.findViewById(
-    id.libIntro
-  ) as TextView
+  private val scrollView =
+    itemView.findViewById(
+      id.scrollView,
+    ) as NestedScrollView
+  private val playerView =
+    itemView.findViewById(
+      id.playerView,
+    ) as PlayerView
+  private val libIntro =
+    itemView.findViewById(
+      id.libIntro,
+    ) as TextView
 
   init {
     container.setAspectRatio(4 / 5F)
     (
       playerView.findViewById(
-        com.google.android.exoplayer2.ui.R.id.exo_content_frame
+        com.google.android.exoplayer2.ui.R.id.exo_content_frame,
       ) as AspectRatioFrameLayout
-      ).setAspectRatio(16 / 9F)
+    ).setAspectRatio(16 / 9F)
   }
 
   override fun bind(item: Any?) {
     super.bind(item)
-    libIntro.text = itemView.context.getString(string.lib_intro)
-      .parseAsHtml()
+    libIntro.text =
+      itemView.context.getString(string.lib_intro)
+        .parseAsHtml()
   }
 
   override fun onAttached() {
     super.onAttached()
     manager.addBucket(scrollView)
-    kohii.setUp(assetVideoUri) {
+    kohii.setUp(VIDEO_URI_ASSET) {
       tag = "NESTED::NSV::$absoluteAdapterPosition"
     }
       .bind(playerView)

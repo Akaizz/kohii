@@ -37,24 +37,24 @@ class ItemsAdapter(
   private val kohii: Kohii,
   private val fragment: VerticalListRecyclerViewFragment,
   private val items: List<Item>,
-  private val dp2Px: (Int) -> Int
+  private val dp2Px: (Int) -> Int,
 ) : Adapter<BaseViewHolder>() {
-
   init {
     setHasStableIds(true)
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return when (viewType) {
       R.layout.holder_text_view -> TextViewHolder(parent, this.dp2Px)
-      R.layout.holder_player_view -> VideoViewHolder(
-        parent,
-        kohii,
-        VideoClickImpl(fragment)
-      )
+      R.layout.holder_player_view ->
+        VideoViewHolder(
+          parent,
+          kohii,
+          VideoClickImpl(fragment),
+        )
 
       else -> throw RuntimeException("Unknown type: $viewType")
     }
@@ -79,7 +79,7 @@ class ItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(items[position % items.size])
   }
@@ -101,7 +101,7 @@ class ItemsAdapter(
       itemView: View,
       transView: View?,
       adapterPos: Int,
-      payload: Any
+      payload: Any,
     ) {
       if (transView == null) return
       val transName = ViewCompat.getTransitionName(transView) ?: return
@@ -120,7 +120,7 @@ class ItemsAdapter(
         .replace(
           R.id.fragmentContainer,
           PlayerFragment.newInstance(data.first, initData),
-          initData.tag
+          initData.tag,
         )
         .addToBackStack(null)
         .commit()
@@ -128,7 +128,7 @@ class ItemsAdapter(
 
     override fun onItemLoaded(
       itemView: View,
-      adapterPos: Int
+      adapterPos: Int,
     ) {
       val playerInfo = fragment.fetchPlayerInfo()
       if (playerInfo != null && adapterPos != playerInfo.adapterPos) return
@@ -139,7 +139,7 @@ class ItemsAdapter(
 
     override fun onItemLoadFailed(
       adapterPos: Int,
-      error: Exception
+      error: Exception,
     ) {
       if (enterTransitionStarted.getAndSet(true)) return
       fragment.recordPlayerInfo(null)

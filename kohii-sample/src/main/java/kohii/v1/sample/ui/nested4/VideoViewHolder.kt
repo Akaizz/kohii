@@ -25,11 +25,12 @@ import kohii.v1.sample.R.layout
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class VideoViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, layout.holder_player_view) {
-  internal val container = itemView.findViewById(
-    id.playerContainer
-  ) as AspectRatioFrameLayout
+  internal val container =
+    itemView.findViewById(
+      id.playerContainer,
+    ) as AspectRatioFrameLayout
 
   init {
     container.setAspectRatio(16 / 9F)
@@ -43,8 +44,10 @@ internal class VideoViewHolder(
     get() = videoTag?.let { Rebinder(it) }
 
   internal val itemDetails: ItemDetails<Rebinder>
-    get() = object : ItemDetails<Rebinder>() {
-      override fun getSelectionKey() = rebinder
-      override fun getPosition() = absoluteAdapterPosition
-    }
+    get() =
+      object : ItemDetails<Rebinder>() {
+        override fun getSelectionKey() = rebinder
+
+        override fun getPosition() = absoluteAdapterPosition
+      }
 }

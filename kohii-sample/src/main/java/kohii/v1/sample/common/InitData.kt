@@ -22,5 +22,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class InitData(
   val tag: String,
-  val aspectRatio: Float
+  val aspectRatio: Float,
 ) : Parcelable

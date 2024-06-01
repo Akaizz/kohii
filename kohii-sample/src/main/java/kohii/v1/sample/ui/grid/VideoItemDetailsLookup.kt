@@ -21,7 +21,7 @@ import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.widget.RecyclerView
 
 internal class VideoItemDetailsLookup(
-  val recyclerView: RecyclerView
+  val recyclerView: RecyclerView,
 ) : ItemDetailsLookup<SelectionKey>() {
   override fun getItemDetails(event: MotionEvent): ItemDetails<SelectionKey>? {
     val view = recyclerView.findChildViewUnder(event.x, event.y) ?: return null

@@ -27,9 +27,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 abstract class BaseViewHolder(
   inflater: LayoutInflater,
   layoutRes: Int,
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : ViewHolder(inflater.inflate(layoutRes, parent, false)) {
-
   open fun bind(item: Any?) {}
 
   open fun onRecycled() {}
@@ -37,13 +36,16 @@ abstract class BaseViewHolder(
   open fun clearTransientStates() {}
 
   interface OnClickListener {
-
     fun onItemClick(
-      itemView: View, // The main View receives the click
-      transView: View?, // The view to use in SharedElement Transition.
-      adapterPos: Int, // The adapter position.
+      // The main View receives the click
+      itemView: View,
+      // The view to use in SharedElement Transition.
+      transView: View?,
+      // The adapter position.
+      adapterPos: Int,
       itemId: Long,
-      payload: Any? // Payload, for Video it is the tag (String), used as Transition name.
+      // Payload, for Video it is the tag (String), used as Transition name.
+      payload: Any?,
     )
   }
 
@@ -52,5 +54,6 @@ abstract class BaseViewHolder(
   }
 
   open fun onAttached() {}
+
   open fun onDetached() {}
 }

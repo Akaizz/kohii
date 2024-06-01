@@ -28,9 +28,8 @@ internal class VideoViewPlayable(
   master: Master,
   media: Media,
   config: Config,
-  bridge: Bridge<VideoView>
+  bridge: Bridge<VideoView>,
 ) : AbstractPlayable<VideoView>(master, media, config, bridge) {
-
   override var renderer: Any?
     get() = bridge.renderer
     set(value) {
@@ -38,7 +37,10 @@ internal class VideoViewPlayable(
       bridge.renderer = value
     }
 
-  override fun onRendererAttached(playback: Playback, renderer: Any?) {
+  override fun onRendererAttached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     if (renderer is VideoView) {
       renderer.mediaControlView?.isVisible = playback.config.controller != null
     }

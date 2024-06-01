@@ -21,5 +21,5 @@ import kohii.v1.media.Media
 
 class HybridMediaItem(
   val media: Media,
-  val mediaSource: MediaSource
+  val mediaSource: MediaSource,
 ) : Media by media, MediaSource by mediaSource

@@ -54,20 +54,21 @@ abstract class Playback(
   val manager: Manager,
   val bucket: Bucket,
   val container: ViewGroup,
-  val config: Config = Config()
+  val config: Config = Config(),
 ) : PlayableContainer, Player.Listener, ErrorListener {
-
   companion object {
     @Suppress("unused")
     const val DELAY_INFINITE = -1L
 
-    internal val CENTER_X: Comparator<Token> = Comparator { o1, o2 ->
-      compareValues(o1.containerRect.centerX(), o2.containerRect.centerX())
-    }
+    internal val CENTER_X: Comparator<Token> =
+      Comparator { o1, o2 ->
+        compareValues(o1.containerRect.centerX(), o2.containerRect.centerX())
+      }
 
-    internal val CENTER_Y: Comparator<Token> = Comparator { o1, o2 ->
-      compareValues(o1.containerRect.centerY(), o2.containerRect.centerY())
-    }
+    internal val CENTER_Y: Comparator<Token> =
+      Comparator { o1, o2 ->
+        compareValues(o1.containerRect.centerY(), o2.containerRect.centerY())
+      }
 
     internal val VERTICAL_COMPARATOR =
       Comparator<Playback> { o1, o2 -> o1.compareWith(o2, VERTICAL) }
@@ -89,13 +90,14 @@ abstract class Playback(
 
   class Token(
     private val threshold: Float = 0.65F,
+    // -1 ~ < 0 : inactive or detached, 0 ~ 1: active
     @FloatRange(from = -1.0, to = 1.0)
-    val areaOffset: Float, // -1 ~ < 0 : inactive or detached, 0 ~ 1: active
-    val containerRect: Rect, // Relative Rect to its Bucket's root View.
+    val areaOffset: Float,
+    // Relative Rect to its Bucket's root View.
+    val containerRect: Rect,
     val containerWidth: Int,
-    val containerHeight: Int
+    val containerHeight: Int,
   ) {
-
     internal fun shouldPrepare(): Boolean {
       return areaOffset >= 0
     }
@@ -121,7 +123,7 @@ abstract class Playback(
     val initialPlaybackInfo: PlaybackInfo? = null,
     val artworkHintListener: ArtworkHintListener? = null,
     val tokenUpdateListener: TokenUpdateListener? = null,
-    val networkTypeChangeListener: NetworkTypeChangeListener? = null
+    val networkTypeChangeListener: NetworkTypeChangeListener? = null,
   )
 
   private val tmpRect = Rect()
@@ -240,11 +242,12 @@ abstract class Playback(
       return Token(config.threshold, -1F, tmpRect, container.width, container.height)
     }
 
-    val drawArea = with(Rect()) {
-      container.getDrawingRect(this)
-      container.clipBounds?.let(::intersect)
-      width() * height()
-    }
+    val drawArea =
+      with(Rect()) {
+        container.getDrawingRect(this)
+        container.clipBounds?.let(::intersect)
+        width() * height()
+      }
 
     val offset: Float =
       if (drawArea > 0) {
@@ -365,7 +368,7 @@ abstract class Playback(
       this,
       playable?.isPlaying() == false,
       playbackInfo.resumePosition,
-      playerState
+      playerState,
     )
   }
 
@@ -386,7 +389,7 @@ abstract class Playback(
       this,
       playerState == Player.STATE_ENDED,
       playbackInfo.resumePosition,
-      playerState
+      playerState,
     )
   }
 
@@ -406,27 +409,30 @@ abstract class Playback(
 
   internal fun compareWith(
     other: Playback,
-    orientation: Int
+    orientation: Int,
   ): Int {
     "Playback#compareWith $this $other, $this".logDebug()
     val thisToken = this.token
     val thatToken = other.token
 
-    var result = when (orientation) {
-      VERTICAL -> CENTER_Y.compare(thisToken, thatToken)
-      HORIZONTAL -> CENTER_X.compare(thisToken, thatToken)
-      BOTH_AXIS -> max(
-        CENTER_Y.compare(thisToken, thatToken),
-        CENTER_X.compare(thisToken, thatToken)
-      )
+    var result =
+      when (orientation) {
+        VERTICAL -> CENTER_Y.compare(thisToken, thatToken)
+        HORIZONTAL -> CENTER_X.compare(thisToken, thatToken)
+        BOTH_AXIS ->
+          max(
+            CENTER_Y.compare(thisToken, thatToken),
+            CENTER_X.compare(thisToken, thatToken),
+          )
 
-      NONE_AXIS -> max(
-        CENTER_Y.compare(thisToken, thatToken),
-        CENTER_X.compare(thisToken, thatToken)
-      )
+        NONE_AXIS ->
+          max(
+            CENTER_Y.compare(thisToken, thatToken),
+            CENTER_X.compare(thisToken, thatToken),
+          )
 
-      else -> 0
-    }
+        else -> 0
+      }
 
     if (result == 0) result = compareValues(thisToken.areaOffset, thatToken.areaOffset)
     return result
@@ -480,7 +486,7 @@ abstract class Playback(
   @Deprecated("Deprecated in Java")
   override fun onPlayerStateChanged(
     playWhenReady: Boolean,
-    playbackState: Int
+    playbackState: Int,
   ) {
     "Playback#onPlayerStateChanged $playWhenReady - $playbackState, $this".logDebug()
     when (playbackState) {
@@ -504,7 +510,7 @@ abstract class Playback(
       playback = this,
       shouldShow = if (playable != null) !playable.isPlaying() else true,
       position = playbackInfo.resumePosition,
-      state = playerState
+      state = playerState,
     )
   }
 
@@ -516,7 +522,7 @@ abstract class Playback(
         width = videoSize.width,
         height = videoSize.height,
         unAppliedRotationDegrees = videoSize.unappliedRotationDegrees,
-        pixelWidthHeightRatio = videoSize.pixelWidthHeightRatio
+        pixelWidthHeightRatio = videoSize.pixelWidthHeightRatio,
       )
     }
   }
@@ -538,7 +544,6 @@ abstract class Playback(
    * Callbacks for events triggered by the underlying [Playable].
    */
   interface StateListener {
-
     /** Called when a Video is rendered on the Surface for the first time */
     fun onRendered(playback: Playback) = Unit
 
@@ -549,7 +554,7 @@ abstract class Playback(
      */
     fun onBuffering(
       playback: Playback,
-      playWhenReady: Boolean
+      playWhenReady: Boolean,
     ) = Unit // ExoPlayer state: 2
 
     /** Called when the Video starts playing */
@@ -566,12 +571,12 @@ abstract class Playback(
       width: Int,
       height: Int,
       unAppliedRotationDegrees: Int,
-      pixelWidthHeightRatio: Float
+      pixelWidthHeightRatio: Float,
     ) = Unit
 
     fun onError(
       playback: Playback,
-      exception: Exception
+      exception: Exception,
     ) = Unit
   }
 
@@ -579,7 +584,6 @@ abstract class Playback(
    * Callbacks for lifecycle events of a [Playback].
    */
   interface Callback {
-
     fun onActive(playback: Playback) = Unit
 
     fun onInActive(playback: Playback) = Unit
@@ -637,7 +641,10 @@ abstract class Playback(
      *
      * @see [Playback.onRendererAttached]
      */
-    fun setupRenderer(playback: Playback, renderer: Any?) = Unit
+    fun setupRenderer(
+      playback: Playback,
+      renderer: Any?,
+    ) = Unit
 
     /**
      * This method is called once the renderer of the [Playback] becomes unavailable to it. Client
@@ -646,11 +653,13 @@ abstract class Playback(
      *
      * @see [Playback.onRendererDetached]
      */
-    fun teardownRenderer(playback: Playback, renderer: Any?) = Unit
+    fun teardownRenderer(
+      playback: Playback,
+      renderer: Any?,
+    ) = Unit
   }
 
   interface ArtworkHintListener {
-
     /**
      * @param position current position of the playback in milliseconds.
      */
@@ -658,22 +667,23 @@ abstract class Playback(
       playback: Playback,
       shouldShow: Boolean,
       position: Long,
-      state: Int
+      state: Int,
     )
   }
 
   interface TokenUpdateListener {
-
-    fun onTokenUpdate(playback: Playback, token: Token)
+    fun onTokenUpdate(
+      playback: Playback,
+      token: Token,
+    )
   }
 
   interface NetworkTypeChangeListener {
-
     fun onNetworkTypeChanged(networkType: NetworkType): PlayerParameters
   }
 }
 
-/** Extension functions for a Playback */
+//region Extension functions for a Playback
 
 /**
  * Quickly setup the [Controller] that only needs to setup the renderer.
@@ -685,9 +695,16 @@ abstract class Playback(
 inline fun controller(
   kohiiCanStart: Boolean = true,
   kohiiCanPause: Boolean = true,
-  crossinline setupRenderer: (playback: Playback, renderer: Any?) -> Unit
-): Controller = object : Controller {
-  override fun kohiiCanStart(): Boolean = kohiiCanStart
-  override fun kohiiCanPause(): Boolean = kohiiCanPause
-  override fun setupRenderer(playback: Playback, renderer: Any?) = setupRenderer(playback, renderer)
-}
+  crossinline setupRenderer: (playback: Playback, renderer: Any?) -> Unit,
+): Controller =
+  object : Controller {
+    override fun kohiiCanStart(): Boolean = kohiiCanStart
+
+    override fun kohiiCanPause(): Boolean = kohiiCanPause
+
+    override fun setupRenderer(
+      playback: Playback,
+      renderer: Any?,
+    ) = setupRenderer(playback, renderer)
+  }
+//endregion

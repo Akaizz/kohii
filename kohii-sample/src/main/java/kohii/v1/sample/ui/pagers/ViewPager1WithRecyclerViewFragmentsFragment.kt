@@ -34,14 +34,12 @@ import kotlin.math.abs
 
 // ViewPager (1) whose pages are Fragments
 class ViewPager1WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = ViewPager1WithRecyclerViewFragmentsFragment()
   }
 
   internal class VideoPagerAdapter(fm: FragmentManager) :
     FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-
     override fun getItem(position: Int): Fragment {
       return GridContentFragment.newInstance(position)
     }
@@ -55,7 +53,7 @@ class ViewPager1WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContaine
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     val binding: FragmentPagerBinding = FragmentPagerBinding.inflate(inflater, container, false)
     this.binding = binding
@@ -64,7 +62,7 @@ class ViewPager1WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContaine
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     Kohii[this].register(this)

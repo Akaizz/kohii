@@ -36,7 +36,6 @@ import kohii.v1.sample.ui.main.DemoItem
  * Clicking to an item will open fullscreen landscape Player.
  */
 class ExoPlayerVideosFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = ExoPlayerVideosFragment()
   }
@@ -46,14 +45,14 @@ class ExoPlayerVideosFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     parent: ViewGroup?,
-    state: Bundle?
+    state: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_recycler_view, parent, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentRecyclerViewBinding = FragmentRecyclerViewBinding.bind(view)
@@ -64,23 +63,25 @@ class ExoPlayerVideosFragment : BaseFragment(), DemoContainer {
     kohii.register(this)
       .addBucket(binding.recyclerView)
 
-    binding.recyclerView.adapter = ExoVideosAdapter(
-      kohii,
-      getApp().exoItems,
-      onClick = { holder, _ ->
-        holder.rebinder?.let {
-          val player = LandscapeFullscreenFragment.newInstance(
-            it,
-            InitData(it.tag.toString(), holder.aspectRatio)
-          )
+    binding.recyclerView.adapter =
+      ExoVideosAdapter(
+        kohii,
+        getApp().exoItems,
+        onClick = { holder, _ ->
+          holder.rebinder?.let {
+            val player =
+              LandscapeFullscreenFragment.newInstance(
+                it,
+                InitData(it.tag.toString(), holder.aspectRatio),
+              )
 
-          parentFragmentManager.commit {
-            setReorderingAllowed(true) // required for Activity-like lifecycle changing.
-            replace(R.id.fragmentContainer, player, it.tag.toString())
-            addToBackStack(null)
+            parentFragmentManager.commit {
+              setReorderingAllowed(true) // required for Activity-like lifecycle changing.
+              replace(R.id.fragmentContainer, player, it.tag.toString())
+              addToBackStack(null)
+            }
           }
-        }
-      }
-    )
+        },
+      )
   }
 }

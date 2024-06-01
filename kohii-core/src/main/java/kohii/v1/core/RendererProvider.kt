@@ -24,14 +24,13 @@ import kohii.v1.media.Media
  * A pool to cache the renderer for the Playback.
  */
 interface RendererProvider : DefaultLifecycleObserver {
-
   /**
    * Returns a renderer for the [playback] that can be used to render the content of [media], or
    * `null` if no renderer is available.
    */
   fun acquireRenderer(
     playback: Playback,
-    media: Media
+    media: Media,
   ): Any? = null
 
   /**
@@ -41,7 +40,7 @@ interface RendererProvider : DefaultLifecycleObserver {
   fun releaseRenderer(
     playback: Playback,
     media: Media,
-    renderer: Any?
+    renderer: Any?,
   ): Boolean = renderer == null
 
   /**

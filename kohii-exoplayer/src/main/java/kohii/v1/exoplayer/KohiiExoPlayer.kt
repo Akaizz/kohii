@@ -43,10 +43,9 @@ import kotlin.LazyThreadSafetyMode.NONE
  * @author eneim (2018/06/25).
  */
 open class KohiiExoPlayer(
-  private val player: ExoPlayer
+  private val player: ExoPlayer,
 ) : ExoPlayer by player,
   VolumeInfoController {
-
   constructor(builder: ExoPlayer.Builder) : this(builder.build())
 
   constructor(
@@ -62,7 +61,7 @@ open class KohiiExoPlayer(
       DefaultBandwidthMeter.Builder(context.applicationContext).build(),
     mediaSourceFactory: MediaSource.Factory,
     analyticsCollector: AnalyticsCollector = DefaultAnalyticsCollector(clock),
-    looper: Looper = Util.getCurrentOrMainLooper()
+    looper: Looper = Util.getCurrentOrMainLooper(),
   ) : this(
     ExoPlayer.Builder(
       context.applicationContext,
@@ -71,11 +70,11 @@ open class KohiiExoPlayer(
       trackSelector,
       loadControl,
       bandwidthMeter,
-      analyticsCollector
+      analyticsCollector,
     )
       .setUseLazyPreparation(true)
       .setClock(clock)
-      .setLooper(looper)
+      .setLooper(looper),
   )
 
   private val volumeChangedListeners by lazy(NONE) { VolumeChangedListeners() }

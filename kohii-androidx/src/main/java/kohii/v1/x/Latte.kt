@@ -34,13 +34,11 @@ import kohii.v1.utils.Capsule
 class Latte private constructor(
   master: Master,
   playableCreator: PlayableCreator<VideoView> = VideoViewPlayableCreator(master),
-  private val rendererProviderFactory: RendererProviderFactory = { VideoViewProvider() }
+  private val rendererProviderFactory: RendererProviderFactory = { VideoViewProvider() },
 ) : Engine<VideoView>(master, playableCreator) {
-
   private constructor(context: Context) : this(Master[context])
 
   companion object {
-
     private val capsule = Capsule(::Latte)
 
     @JvmStatic
@@ -55,27 +53,29 @@ class Latte private constructor(
   }
 
   class Builder(context: Context) {
-
     private val master = Master[context.applicationContext]
 
     private var playableCreator: PlayableCreator<VideoView> = VideoViewPlayableCreator(master)
 
     private var rendererProviderFactory: RendererProviderFactory = { VideoViewProvider() }
 
-    fun setPlayableCreator(playableCreator: PlayableCreator<VideoView>): Builder = apply {
-      this.playableCreator = playableCreator
-    }
+    fun setPlayableCreator(playableCreator: PlayableCreator<VideoView>): Builder =
+      apply {
+        this.playableCreator = playableCreator
+      }
 
-    fun setRendererProviderFactory(factory: RendererProviderFactory): Builder = apply {
-      this.rendererProviderFactory = factory
-    }
+    fun setRendererProviderFactory(factory: RendererProviderFactory): Builder =
+      apply {
+        this.rendererProviderFactory = factory
+      }
 
-    fun build(): Latte = Latte(
-      master,
-      playableCreator,
-      rendererProviderFactory
-    ).also {
-      master.registerEngine(it)
-    }
+    fun build(): Latte =
+      Latte(
+        master,
+        playableCreator,
+        rendererProviderFactory,
+      ).also {
+        master.registerEngine(it)
+      }
   }
 }

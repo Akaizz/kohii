@@ -24,9 +24,8 @@ import kohii.v1.sample.common.BaseViewHolder
 
 internal class ItemsAdapter(
   private val kohii: Kohii,
-  private val preferItemCount: Int = Int.MAX_VALUE / 2
+  private val preferItemCount: Int = Int.MAX_VALUE / 2,
 ) : Adapter<BaseViewHolder>() {
-
   companion object {
     private const val TYPE_VIDEO = 1
     private const val TYPE_TEXT = 2
@@ -38,7 +37,7 @@ internal class ItemsAdapter(
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return if (viewType == TYPE_VIDEO) VideoViewHolder(parent) else TextViewHolder(parent)
   }
@@ -57,12 +56,12 @@ internal class ItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     if (holder is VideoViewHolder) {
-      holder.videoUrl = DemoApp.assetVideoUri
+      holder.videoUrl = DemoApp.VIDEO_URI_ASSET
       val videoTag = holder.videoTag
-      kohii.setUp(DemoApp.assetVideoUri) {
+      kohii.setUp(DemoApp.VIDEO_URI_ASSET) {
         tag = requireNotNull(videoTag)
       }
         .bind(holder.container)

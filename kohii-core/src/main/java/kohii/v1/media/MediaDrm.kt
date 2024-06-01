@@ -26,7 +26,6 @@ import java.util.Arrays
  * @author eneim (2018/06/25).
  */
 interface MediaDrm : Comparable<MediaDrm>, Parcelable {
-
   // DRM Scheme
   val type: String
 
@@ -47,11 +46,12 @@ interface MediaDrm : Comparable<MediaDrm>, Parcelable {
     }
 
     if (result == 0) {
-      result = if (Arrays.deepEquals(keyRequestPropertiesArray, other.keyRequestPropertiesArray)) {
-        0
-      } else {
-        -1
-      }
+      result =
+        if (Arrays.deepEquals(keyRequestPropertiesArray, other.keyRequestPropertiesArray)) {
+          0
+        } else {
+          -1
+        }
     }
 
     return result

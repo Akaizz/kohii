@@ -24,9 +24,8 @@ import kohii.v1.sample.common.BaseViewHolder
 import kohii.v1.sample.common.splitCases
 
 class DemoItemViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_main_demo_item) {
-
   private val demoTitle: TextView = itemView.findViewById(R.id.demoTitle)
   private val demoSubtitle: TextView = itemView.findViewById(R.id.demoSubtitle)
 

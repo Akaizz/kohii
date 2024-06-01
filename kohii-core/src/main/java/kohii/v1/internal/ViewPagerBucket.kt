@@ -30,9 +30,8 @@ internal class ViewPagerBucket(
   manager: Manager,
   override val root: ViewPager,
   strategy: Strategy,
-  selector: Selector
+  selector: Selector,
 ) : Bucket(manager, root, strategy, selector), OnPageChangeListener {
-
   override fun onAdded() {
     super.onAdded()
     root.addOnPageChangeListener(this)
@@ -50,7 +49,7 @@ internal class ViewPagerBucket(
   override fun onPageScrolled(
     position: Int,
     positionOffset: Float,
-    positionOffsetPixels: Int
+    positionOffsetPixels: Int,
   ) {
     // Do nothing
   }

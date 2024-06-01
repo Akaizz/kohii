@@ -15,21 +15,10 @@
  */
 
 pluginManagement {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-fun includeModules(modulesDirName: String = "kohii-samples") {
-    val basePath = "$rootDir/$modulesDirName"
-    file(basePath).list()?.forEach { dir ->
-        if (file("$basePath/$dir/build.gradle").exists() ||
-            file("$basePath/$dir/build.gradle.kts").exists()
-        ) {
-            include(":$modulesDirName:$dir")
-        }
-    }
+  repositories {
+    mavenCentral()
+    gradlePluginPortal()
+  }
 }
 
 include(":kohii-core")
@@ -39,5 +28,3 @@ include(":kohii-ads")
 include(":kohii-experiments")
 include(":kohii-sample")
 include(":kohii-sample-tiktok")
-
-includeModules()

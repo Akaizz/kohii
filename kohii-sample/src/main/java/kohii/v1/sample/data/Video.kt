@@ -28,5 +28,5 @@ data class Video(
   val title: String,
   val kind: String,
   val playlist: List<Playlist>,
-  val description: String
+  val description: String,
 ) : Parcelable

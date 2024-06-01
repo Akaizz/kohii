@@ -32,9 +32,8 @@ import timber.log.Timber
 
 class YouTubeViewHolder(
   parent: ViewGroup,
-  layoutId: Int
+  layoutId: Int,
 ) : BaseViewHolder(parent, layoutId), Playback.ArtworkHintListener {
-
   val container = itemView.findViewById(R.id.container) as FrameLayout
   val thumbnail = itemView.findViewById(R.id.thumbnail) as ImageView
   val videoTitle = itemView.findViewById(R.id.videoTitle) as TextView
@@ -50,8 +49,9 @@ class YouTubeViewHolder(
     super.bind(item)
     (item as? Video)?.apply {
       val lowResThumb = this.snippet.thumbnails.medium.url
-      val thumbRequest = Glide.with(itemView)
-        .load(lowResThumb)
+      val thumbRequest =
+        Glide.with(itemView)
+          .load(lowResThumb)
       val highResThumb = this.snippet.thumbnails.maxres.url
       GlideApp.with(itemView)
         .load(highResThumb)
@@ -67,7 +67,7 @@ class YouTubeViewHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     thumbnail.isVisible = shouldShow
     Timber.d("${playback.tag} art: $shouldShow, $position, $state")

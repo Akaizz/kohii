@@ -28,7 +28,7 @@ import kohii.v1.core.Playback
 import kohii.v1.core.Playback.Controller
 import kohii.v1.core.Rebinder
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.R
 import kohii.v1.sample.data.Sources
 import kohii.v1.sample.data.Video
@@ -36,11 +36,10 @@ import kohii.v1.sample.data.Video
 internal class VideoViewHolder(
   parent: ViewGroup,
   val kohii: Kohii,
-  val shouldBind: (Rebinder?) -> Boolean
+  val shouldBind: (Rebinder?) -> Boolean,
 ) : FbookItemHolder(parent),
   Playback.StateListener,
   Playback.ArtworkHintListener {
-
   init {
     videoContainer.isVisible = true
   }
@@ -63,9 +62,10 @@ internal class VideoViewHolder(
     get() = {
       tag = requireNotNull(videoTag)
       artworkHintListener = this@VideoViewHolder
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
-      }
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
+        }
     }
 
   // Trick here: we do not rely on the actual binding to have the Rebinder. This instance will
@@ -77,17 +77,18 @@ internal class VideoViewHolder(
     super.bind(item)
     (item as? Video)?.also {
       this.video = it
-      this.videoSources = it.playlist.first()
-        .also { pl ->
-          videoImage = pl.image
-          Glide.with(itemView)
-            .load(pl.image)
-            .into(thumbnail)
-        }
-        .sources.first()
+      this.videoSources =
+        it.playlist.first()
+          .also { pl ->
+            videoImage = pl.image
+            Glide.with(itemView)
+              .load(pl.image)
+              .into(thumbnail)
+          }
+          .sources.first()
 
       if (shouldBind(this.rebinder)) {
-        kohii.setUp(assetVideoUri, params)
+        kohii.setUp(VIDEO_URI_ASSET, params)
           .bind(playerView) { pk ->
             volume.isSelected = !pk.volumeInfo.mute
             pk.addStateListener(this@VideoViewHolder)
@@ -101,7 +102,7 @@ internal class VideoViewHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     thumbnail.isVisible = shouldShow
     playAgain.isVisible = shouldShow && state == Player.STATE_ENDED

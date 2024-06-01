@@ -22,9 +22,8 @@ import kohii.v1.sample.data.Video
 import kohii.v1.sample.tiktok.databinding.HolderVerticalVideoBinding
 
 class VideoViewHolder(
-  val binding: HolderVerticalVideoBinding
+  val binding: HolderVerticalVideoBinding,
 ) : ViewHolder(binding.root), Playback.StateListener {
-
   var videoItem: Video? = null
     set(value) {
       field = value
@@ -44,7 +43,10 @@ class VideoViewHolder(
   internal var videoFile: String? = null
   internal var videoThumbnail: String? = null
 
-  override fun onBuffering(playback: Playback, playWhenReady: Boolean) {
+  override fun onBuffering(
+    playback: Playback,
+    playWhenReady: Boolean,
+  ) {
     binding.status.text = "Buffering"
   }
 
@@ -56,7 +58,10 @@ class VideoViewHolder(
     binding.status.text = "Paused"
   }
 
-  override fun onError(playback: Playback, exception: Exception) {
+  override fun onError(
+    playback: Playback,
+    exception: Exception,
+  ) {
     binding.status.text = "Error: ${exception.message}"
   }
 

@@ -19,7 +19,7 @@ package kohii.v1.sample.ui.nested2
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.R.layout
 import kohii.v1.sample.common.inflateView
 
@@ -27,7 +27,7 @@ internal class HorizontalItemsAdapter(private val kohii: Kohii) :
   Adapter<HorizontalItemViewHolder>() {
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): HorizontalItemViewHolder {
     val itemView = parent.inflateView(layout.holder_player_view)
     return HorizontalItemViewHolder(itemView)
@@ -39,10 +39,10 @@ internal class HorizontalItemsAdapter(private val kohii: Kohii) :
 
   override fun onBindViewHolder(
     holder: HorizontalItemViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.container.setAspectRatio(16 / 9F)
-    kohii.setUp(assetVideoUri) {
+    kohii.setUp(VIDEO_URI_ASSET) {
       tag = "NESTED::RV::HOZ::${holder.absoluteAdapterPosition}"
     }
       .bind(holder.container)

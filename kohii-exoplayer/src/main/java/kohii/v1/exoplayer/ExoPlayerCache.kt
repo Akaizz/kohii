@@ -34,7 +34,6 @@ import java.io.File
  * which is useful to store downloaded content.
  */
 object ExoPlayerCache {
-
   private const val CACHE_CONTENT_DIRECTORY = "kohii_content"
   private const val DOWNLOAD_CONTENT_DIRECTORY = "kohii_content_download"
   private const val CACHE_SIZE = 24 * 1024 * 1024L // 24 Megabytes
@@ -43,10 +42,10 @@ object ExoPlayerCache {
     SimpleCache(
       File(
         context.getExternalFilesDir(null) ?: context.filesDir,
-        CACHE_CONTENT_DIRECTORY
+        CACHE_CONTENT_DIRECTORY,
       ),
       LeastRecentlyUsedCacheEvictor(CACHE_SIZE),
-      StandaloneDatabaseProvider(context)
+      StandaloneDatabaseProvider(context),
     )
   }
 
@@ -54,10 +53,10 @@ object ExoPlayerCache {
     SimpleCache(
       File(
         context.getExternalFilesDir(null) ?: context.filesDir,
-        DOWNLOAD_CONTENT_DIRECTORY
+        DOWNLOAD_CONTENT_DIRECTORY,
       ),
       NoOpCacheEvictor(),
-      StandaloneDatabaseProvider(context)
+      StandaloneDatabaseProvider(context),
     )
   }
 

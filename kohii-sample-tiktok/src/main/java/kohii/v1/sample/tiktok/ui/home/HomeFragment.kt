@@ -28,20 +28,22 @@ import kohii.v1.sample.tiktok.databinding.FragmentHomeBinding
 import kohii.v1.sample.tiktok.getApp
 
 class HomeFragment : Fragment() {
-
   private var _binding: FragmentHomeBinding? = null
   private val binding: FragmentHomeBinding get() = requireNotNull(_binding)
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     _binding = FragmentHomeBinding.inflate(inflater, container, false)
     return binding.root
   }
 
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?,
+  ) {
     super.onViewCreated(view, savedInstanceState)
     val kohii = KohiiProvider[requireContext()]
     kohii.register(this, memoryMode = HIGH, activeLifecycleState = State.RESUMED)

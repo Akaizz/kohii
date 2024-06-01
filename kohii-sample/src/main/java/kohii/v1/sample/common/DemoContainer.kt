@@ -19,6 +19,5 @@ package kohii.v1.sample.common
 import kohii.v1.sample.ui.main.DemoItem
 
 interface DemoContainer {
-
   val demoItem: DemoItem?
 }

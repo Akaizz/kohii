@@ -37,12 +37,11 @@ import kohii.v1.sample.data.Item
  */
 class VideoViewHolder(
   parent: ViewGroup,
-  val kohii: Kohii
+  val kohii: Kohii,
 ) : BaseViewHolder(
-  parent,
-  R.layout.holder_mix_view
-) {
-
+    parent,
+    R.layout.holder_mix_view,
+  ) {
   private val mediaName = itemView.findViewById(R.id.videoTitle) as TextView
   private val playerContainer = itemView.findViewById(R.id.playerContainer) as FrameLayout
 
@@ -53,11 +52,12 @@ class VideoViewHolder(
     if (item is Item) {
       val drmItem = item.drmScheme?.let { DrmItem(item) }
       // Dynamically create the PlayerView instance.
-      val playerView = (
-        drmItem?.let {
-          // Encrypted video must be played on SurfaceView.
-          playerContainer.inflateView(R.layout.playerview_surface)
-        } ?: playerContainer.inflateView(R.layout.playerview_texture)
+      val playerView =
+        (
+          drmItem?.let {
+            // Encrypted video must be played on SurfaceView.
+            playerContainer.inflateView(R.layout.playerview_surface)
+          } ?: playerContainer.inflateView(R.layout.playerview_texture)
         ) as PlayerView
       playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
       playerContainer.addView(playerView, 0)

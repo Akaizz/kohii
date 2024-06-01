@@ -24,5 +24,5 @@ import com.squareup.moshi.JsonClass
 data class ItemIcon(
   val url: String = "",
   val width: Int = -1,
-  val height: Int = -1
+  val height: Int = -1,
 )

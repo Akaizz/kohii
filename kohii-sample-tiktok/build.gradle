@@ -19,6 +19,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
 android {
+  namespace 'kohii.v1.sample.tiktok'
   compileSdkVersion libs.versions.android.target.sdk.get().toInteger()
 
   defaultConfig {
@@ -38,10 +39,11 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
-
   packagingOptions {
-    exclude 'META-INF/services/javax.annotation.processing.Processor'
-    exclude 'META-INF/DEPENDENCIES'
+    resources {
+      excludes +=
+          ['META-INF/services/javax.annotation.processing.Processor', 'META-INF/DEPENDENCIES']
+    }
   }
 
   buildFeatures {
@@ -65,7 +67,7 @@ dependencies {
   implementation project(':kohii-core')
   implementation project(':kohii-exoplayer')
 
-  implementation(libs.android.exoplayer)
+  implementation(libs.android.exoplayer.all)
   implementation(libs.androidx.media2.widget)
 
   implementation(libs.androidx.core)
@@ -87,18 +89,18 @@ dependencies {
   implementation(libs.androidx.lifecycle.java8)
   implementation(libs.androidx.lifecycle.process)
 
-  implementation("com.squareup.moshi:moshi:1.14.0")
-  kapt("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
-  implementation("com.squareup.okio:okio:2.10.0")
+  implementation(libs.square.moshi)
+  kapt(libs.square.moshi.codegen)
+  implementation(libs.okio)
 
-  implementation("io.coil-kt:coil:2.2.2")
+  implementation(libs.coil.common)
 
-  implementation("androidx.vectordrawable:vectordrawable:1.1.0")
+  implementation(libs.androidx.vectordrawable)
 
-  testImplementation("androidx.test:core-ktx:1.5.0")
-  testImplementation("androidx.test:rules:1.5.0")
-  testImplementation("androidx.test:runner:1.5.2")
+  testImplementation(libs.androidx.core.ktx)
+  testImplementation(libs.androidx.rules)
+  testImplementation(libs.androidx.runner)
 
-  androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  androidTestImplementation(libs.androidx.junit.ktx)
+  androidTestImplementation(libs.androidx.espresso.core)
 }

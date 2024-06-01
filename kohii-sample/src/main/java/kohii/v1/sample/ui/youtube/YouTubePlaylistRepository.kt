@@ -25,19 +25,19 @@ import kotlinx.coroutines.flow.Flow
 
 class YouTubePlaylistRepository(
   private val apiKey: String,
-  private val youtube: YouTube
+  private val youtube: YouTube,
 ) {
-
-  fun playlist(id: String): Flow<PagingData<Video>> = Pager(
-    config = PagingConfig(pageSize = 20),
-    initialKey = null,
-    pagingSourceFactory = {
-      YouTubePlaylistPagingSource(
-        youtube = youtube,
-        apiKey = apiKey,
-        playlistId = id
-      )
-    }
-  )
-    .flow
+  fun playlist(id: String): Flow<PagingData<Video>> =
+    Pager(
+      config = PagingConfig(pageSize = 20),
+      initialKey = null,
+      pagingSourceFactory = {
+        YouTubePlaylistPagingSource(
+          youtube = youtube,
+          apiKey = apiKey,
+          playlistId = id,
+        )
+      },
+    )
+      .flow
 }

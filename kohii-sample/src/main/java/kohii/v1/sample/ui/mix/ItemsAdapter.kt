@@ -28,16 +28,15 @@ import kohii.v1.sample.data.Item
  */
 class ItemsAdapter(
   private val items: List<Item>,
-  private val kohii: Kohii
+  private val kohii: Kohii,
 ) : Adapter<BaseViewHolder>() {
-
   init {
     setHasStableIds(true)
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return when (viewType) {
       R.layout.holder_mix_view -> VideoViewHolder(parent, kohii)
@@ -59,7 +58,7 @@ class ItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(items[position % items.size])
   }

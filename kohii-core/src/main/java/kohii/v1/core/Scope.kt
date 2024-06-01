@@ -21,5 +21,5 @@ enum class Scope {
   GROUP,
   MANAGER,
   BUCKET,
-  PLAYBACK
+  PLAYBACK,
 }

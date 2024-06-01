@@ -27,30 +27,32 @@ import kohii.v1.sample.ui.list.data.Item
  */
 abstract class BaseViewHolder(
   parent: ViewGroup,
-  layoutRes: Int
+  layoutRes: Int,
 ) : ViewHolder(parent.inflateView(layoutRes)) {
-
   abstract fun bind(item: Item?)
 
   open fun onRecycled(success: Boolean) {}
 
   interface OnClickListener {
-
     fun onItemClick(
-      itemView: View, // The main View receives the click
-      transView: View?, // The view to use in SharedElement Transition.
-      adapterPos: Int, // The adapter position.
-      payload: Any // Payload, for Video it is the tag (String), used as Transition name.
+      // The main View receives the click
+      itemView: View,
+      // The view to use in SharedElement Transition.
+      transView: View?,
+      // The adapter position.
+      adapterPos: Int,
+      // Payload, for Video it is the tag (String), used as Transition name.
+      payload: Any,
     )
 
     fun onItemLoaded(
       itemView: View,
-      adapterPos: Int
+      adapterPos: Int,
     )
 
     fun onItemLoadFailed(
       adapterPos: Int,
-      error: Exception
+      error: Exception,
     )
   }
 

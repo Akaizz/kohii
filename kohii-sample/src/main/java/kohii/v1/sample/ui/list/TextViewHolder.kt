@@ -35,9 +35,8 @@ import kohii.v1.sample.ui.list.data.Item
 @Suppress("MemberVisibilityCanBePrivate", "DEPRECATION")
 class TextViewHolder(
   parent: ViewGroup,
-  private val dp2Px: (Int) -> Int
+  private val dp2Px: (Int) -> Int,
 ) : BaseViewHolder(parent, R.layout.holder_text_view) {
-
   val textView = itemView.findViewById(R.id.contentView) as TextView
   val iconView = itemView.findViewById(R.id.iconView) as ImageView
 

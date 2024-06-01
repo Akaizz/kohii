@@ -37,11 +37,10 @@ import java.util.ArrayDeque
 
 class Group(
   internal val master: Master,
-  internal val activity: FragmentActivity
+  internal val activity: FragmentActivity,
 ) : DefaultLifecycleObserver, LifecycleEventObserver, Handler.Callback {
-
   companion object {
-    const val DELAY = 2 * 1000L / 60 /* about 2 frames */
+    const val DELAY = 2 * 1000L / 60 // about 2 frames
     const val MSG_REFRESH = 1
 
     private val managerComparator = Comparator<Manager> { o1, o2 -> o2.compareTo(o1) }
@@ -107,7 +106,10 @@ class Group(
     return true
   }
 
-  override fun onStateChanged(source: LifecycleOwner, event: Event) {
+  override fun onStateChanged(
+    source: LifecycleOwner,
+    event: Event,
+  ) {
     master.onGroupLifecycleStateChanged()
   }
 
@@ -140,7 +142,7 @@ class Group(
     handler.removeMessages(MSG_REFRESH)
     handler.sendEmptyMessageDelayed(
       MSG_REFRESH,
-      DELAY
+      DELAY,
     )
   }
 
@@ -166,11 +168,12 @@ class Group(
     }
 
     val oldSelection = selection
-    selection = if (lock || activity.lifecycle.currentState < master.groupsMaxLifecycleState) {
-      emptySet()
-    } else {
-      toPlay.filterTo(mutableSetOf()) { !it.lock }
-    }
+    selection =
+      if (lock || activity.lifecycle.currentState < master.groupsMaxLifecycleState) {
+        emptySet()
+      } else {
+        toPlay.filterTo(mutableSetOf()) { !it.lock }
+      }
     val newSelection = selection
 
     // Next: as Playbacks are split into 2 collections, we then release unused resources and prepare
@@ -202,13 +205,14 @@ class Group(
 
   private fun updatePlaybackPriorities(
     playbacks: Collection<Playback>,
-    selection: Set<Playback>
+    selection: Set<Playback>,
   ) {
     // The smallest Rect that covers all selected Playbacks
-    val cover = selection.fold(Rect()) { acc, playback ->
-      acc.union(playback.token.containerRect)
-      return@fold acc
-    }
+    val cover =
+      selection.fold(Rect()) { acc, playback ->
+        acc.union(playback.token.containerRect)
+        return@fold acc
+      }
 
     // Update playbackPriority
     val target = Pair(cover.exactCenterX(), cover.exactCenterY())
@@ -218,7 +222,7 @@ class Group(
       (playbacks - selection)
         .partitionToMutableSets(
           predicate = { it.isAttached },
-          transform = { it }
+          transform = { it },
         )
         .also { (attached, detached) ->
           detached.forEach { it.playbackPriority = Int.MAX_VALUE }
@@ -278,7 +282,11 @@ class Group(
     if (manager == null || stickyManager === manager) stickyManager = null
   }
 
-  internal fun notifyPlaybackChanged(playable: Playable, from: Playback?, to: Playback?) {
+  internal fun notifyPlaybackChanged(
+    playable: Playable,
+    from: Playback?,
+    to: Playback?,
+  ) {
     for (manager in managers) {
       manager.notifyPlaybackChanged(playable, from, to)
     }

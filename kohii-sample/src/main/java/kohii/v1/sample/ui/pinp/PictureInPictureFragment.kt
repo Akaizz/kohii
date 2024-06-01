@@ -28,13 +28,12 @@ import androidx.core.view.isVisible
 import com.google.android.exoplayer2.Player
 import kohii.v1.core.Playback
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.databinding.FragmentPipBinding
 
 @RequiresApi(VERSION_CODES.O)
 class PictureInPictureFragment : BaseFragment(), Playback.StateListener {
-
   companion object {
     fun newInstance() = PictureInPictureFragment()
   }
@@ -46,7 +45,7 @@ class PictureInPictureFragment : BaseFragment(), Playback.StateListener {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     val binding: FragmentPipBinding = FragmentPipBinding.inflate(inflater, container, false)
     this.binding = binding
@@ -55,7 +54,7 @@ class PictureInPictureFragment : BaseFragment(), Playback.StateListener {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     binding.pipButton.setOnClickListener { minimize() }
@@ -64,8 +63,8 @@ class PictureInPictureFragment : BaseFragment(), Playback.StateListener {
     kohii.register(this)
       .addBucket(binding.playerContainer)
 
-    kohii.setUp(assetVideoUri) {
-      tag = "${javaClass.name}::$videoUrl"
+    kohii.setUp(VIDEO_URI_ASSET) {
+      tag = "${javaClass.name}::$VIDEO_URL"
       repeatMode = Player.REPEAT_MODE_ONE
     }
       .bind(binding.playerView) {
@@ -100,7 +99,7 @@ class PictureInPictureFragment : BaseFragment(), Playback.StateListener {
     width: Int,
     height: Int,
     unAppliedRotationDegrees: Int,
-    pixelWidthHeightRatio: Float
+    pixelWidthHeightRatio: Float,
   ) {
     binding.playerContainer.setAspectRatio(width / height.toFloat())
   }

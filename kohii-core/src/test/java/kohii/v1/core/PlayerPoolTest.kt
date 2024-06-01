@@ -30,7 +30,6 @@ import org.mockito.kotlin.whenever
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PlayerPoolTest {
-
   @Test
   fun `(All) Creating PlayerPool of non-positive size throws IllegalArgumentException`() {
     val mockPlayer: Any = mock()
@@ -40,6 +39,7 @@ class PlayerPoolTest {
     try {
       object : PlayerPool<Any>(0) {
         override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
         override fun destroyPlayer(player: Any) = Unit
       }
       fail("Creating PlayerPool of non-positive size must throw IllegalArgumentException")
@@ -50,6 +50,7 @@ class PlayerPoolTest {
     try {
       object : PlayerPool<Any>(-1) {
         override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
         override fun destroyPlayer(player: Any) = Unit
       }
       fail("Creating PlayerPool of non-positive size must throw IllegalArgumentException")
@@ -65,10 +66,12 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     playerPool.putPlayer(mockMedia, player)
@@ -83,10 +86,12 @@ class PlayerPoolTest {
     val mockPlayer: Any = mock()
     val mockPool: PlayerPool<Any> = mock()
 
-    val playerPool = object : PlayerPool<Any>(poolSize = 1) {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>(poolSize = 1) {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
+      }
 
     try {
       playerPool.putPlayer(mockMedia, mockPlayer)
@@ -104,10 +109,12 @@ class PlayerPoolTest {
     val mockPlayer2: Any = mock()
     val mockPool: PlayerPool<Any> = mock()
 
-    val playerPool = object : PlayerPool<Any>(poolSize = 1) {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>(poolSize = 1) {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
+      }
 
     playerPool.putPlayer(mockMedia, mockPlayer1)
     playerPool.putPlayer(mockMedia, mockPlayer2)
@@ -124,10 +131,12 @@ class PlayerPoolTest {
 
     val mockMedia: Media = mock()
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = Unit
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = Unit
+      }
 
     playerPool.getPlayer(mockMedia)
     verify(mockPool, times(1)).createPlayer(eq(mockMedia))
@@ -140,11 +149,14 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>(100) {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = Unit
-      override fun resetPlayer(player: Any) = mockPool.resetPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>(100) {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = Unit
+
+        override fun resetPlayer(player: Any) = mockPool.resetPlayer(player)
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     val released = playerPool.putPlayer(mockMedia, player)
@@ -160,11 +172,14 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = Unit
-      override fun resetPlayer(player: Any) = mockPool.resetPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = Unit
+
+        override fun resetPlayer(player: Any) = mockPool.resetPlayer(player)
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     if (playerPool.putPlayer(mockMedia, player)) {
@@ -179,10 +194,12 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = Unit
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = Unit
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     playerPool.putPlayer(mockMedia, player)
@@ -198,11 +215,14 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun recyclePlayerForMedia(media: Media): Boolean = false
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun recyclePlayerForMedia(media: Media): Boolean = false
+
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     playerPool.putPlayer(mockMedia, player)
@@ -217,11 +237,14 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun recyclePlayerForMedia(media: Media): Boolean = false
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun recyclePlayerForMedia(media: Media): Boolean = false
+
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     val released = playerPool.putPlayer(mockMedia, player)
@@ -237,11 +260,14 @@ class PlayerPoolTest {
     val mockPool: PlayerPool<Any> = mock()
     whenever(mockPool.createPlayer(any())).thenReturn(mockPlayer)
 
-    val playerPool = object : PlayerPool<Any>() {
-      override fun recyclePlayerForMedia(media: Media): Boolean = false
-      override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
-      override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
-    }
+    val playerPool =
+      object : PlayerPool<Any>() {
+        override fun recyclePlayerForMedia(media: Media): Boolean = false
+
+        override fun createPlayer(media: Media): Any = mockPool.createPlayer(media)
+
+        override fun destroyPlayer(player: Any) = mockPool.destroyPlayer(player)
+      }
 
     val player = playerPool.getPlayer(mockMedia)
     playerPool.putPlayer(mockMedia, player)

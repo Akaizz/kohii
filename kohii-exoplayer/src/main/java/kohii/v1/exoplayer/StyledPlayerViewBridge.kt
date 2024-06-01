@@ -51,9 +51,8 @@ open class StyledPlayerViewBridge(
   context: Context,
   protected val media: Media,
   protected val playerPool: PlayerPool<Player>,
-  private val mediaSourceFactory: MediaSource.Factory
+  private val mediaSourceFactory: MediaSource.Factory,
 ) : AbstractBridge<StyledPlayerView>(), Player.Listener {
-
   protected open val mediaItem: MediaItem = MediaItem.fromUri(media.uri)
 
   private val context = context.applicationContext
@@ -63,7 +62,7 @@ open class StyledPlayerViewBridge(
 
   private var _playbackInfo = PlaybackInfo() // Backing field for PlaybackInfo set/get
   private var _repeatMode = Player.REPEAT_MODE_OFF // Backing field
-  private var _playbackParams = PlaybackParameters.DEFAULT // Backing field
+  private var playbackParams = PlaybackParameters.DEFAULT // Backing field
   private var mediaSource: MediaSource? = null
 
   private var lastSeenTracks: Tracks = Tracks.EMPTY
@@ -221,16 +220,17 @@ open class StyledPlayerViewBridge(
 
   private fun applyPlayerParameters(parameters: PlayerParameters) {
     val player = this.player ?: return // TODO: cache this and apply when player is ready.
-    player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
-      .setMaxVideoSize(parameters.maxVideoWidth, parameters.maxVideoHeight)
-      .setMaxVideoBitrate(parameters.maxVideoBitrate)
-      .setMaxAudioBitrate(parameters.maxAudioBitrate)
-      .build()
+    player.trackSelectionParameters =
+      player.trackSelectionParameters.buildUpon()
+        .setMaxVideoSize(parameters.maxVideoWidth, parameters.maxVideoHeight)
+        .setMaxVideoBitrate(parameters.maxVideoBitrate)
+        .setMaxAudioBitrate(parameters.maxAudioBitrate)
+        .build()
   }
 
   private fun setPlaybackInfo(
     playbackInfo: PlaybackInfo,
-    volumeOnly: Boolean
+    volumeOnly: Boolean,
   ) {
     _playbackInfo = playbackInfo
 
@@ -247,10 +247,11 @@ open class StyledPlayerViewBridge(
   private fun updatePlaybackInfo() {
     player?.also {
       if (it.playbackState == Player.STATE_IDLE) return
-      _playbackInfo = PlaybackInfo(
-        it.currentMediaItemIndex,
-        max(0, it.currentPosition)
-      )
+      _playbackInfo =
+        PlaybackInfo(
+          it.currentMediaItemIndex,
+          max(0, it.currentPosition),
+        )
     }
   }
 
@@ -259,10 +260,11 @@ open class StyledPlayerViewBridge(
   }
 
   private fun prepareMediaSource() {
-    val mediaSource: MediaSource = this.mediaSource ?: run {
-      sourcePrepared = false
-      mediaSourceFactory.createMediaSource(mediaItem).also { this.mediaSource = it }
-    }
+    val mediaSource: MediaSource =
+      this.mediaSource ?: run {
+        sourcePrepared = false
+        mediaSourceFactory.createMediaSource(mediaItem).also { this.mediaSource = it }
+      }
 
     // Player was reset, need to prepare again.
     if (player?.playbackState == Player.STATE_IDLE) {
@@ -272,7 +274,7 @@ open class StyledPlayerViewBridge(
     if (!sourcePrepared) {
       ensurePlayer()
       (player as? ExoPlayer)?.also {
-        it.setMediaSource(mediaSource, /* resetPosition */ playbackInfo.resumeWindow == INDEX_UNSET)
+        it.setMediaSource(mediaSource, playbackInfo.resumeWindow == INDEX_UNSET)
         it.prepare()
         sourcePrepared = true
       }
@@ -295,7 +297,7 @@ open class StyledPlayerViewBridge(
         listenerApplied = true
       }
 
-      it.playbackParameters = _playbackParams
+      it.playbackParameters = playbackParams
       val hasResumePosition = _playbackInfo.resumeWindow != INDEX_UNSET
       if (hasResumePosition) {
         it.seekTo(_playbackInfo.resumeWindow, _playbackInfo.resumePosition)
@@ -307,7 +309,7 @@ open class StyledPlayerViewBridge(
 
   private fun onErrorMessage(
     message: String,
-    cause: Throwable?
+    cause: Throwable?,
   ) {
     // Sub class can have custom reaction about the error here, including not to show this toast
     // (by not calling super.onErrorMessage(message)).
@@ -327,19 +329,20 @@ open class StyledPlayerViewBridge(
       val exception = error.cause
       if (exception is DecoderInitializationException) {
         // Special case for decoder initialization failures.
-        errorString = if (exception.codecInfo == null) {
-          when {
-            exception.cause is MediaCodecUtil.DecoderQueryException ->
-              context.getString(R.string.error_querying_decoders)
+        errorString =
+          if (exception.codecInfo == null) {
+            when {
+              exception.cause is MediaCodecUtil.DecoderQueryException ->
+                context.getString(R.string.error_querying_decoders)
 
-            exception.secureDecoderRequired ->
-              context.getString(R.string.error_no_secure_decoder, exception.mimeType)
+              exception.secureDecoderRequired ->
+                context.getString(R.string.error_no_secure_decoder, exception.mimeType)
 
-            else -> context.getString(R.string.error_no_decoder, exception.mimeType)
+              else -> context.getString(R.string.error_no_decoder, exception.mimeType)
+            }
+          } else {
+            context.getString(R.string.error_instantiating_decoder, exception.codecInfo?.name ?: "")
           }
-        } else {
-          context.getString(R.string.error_instantiating_decoder, exception.codecInfo?.name ?: "")
-        }
       }
 
       if (errorString != null) onErrorMessage(errorString, error)
@@ -369,12 +372,12 @@ open class StyledPlayerViewBridge(
     if (tracks != lastSeenTracks) {
       val context = renderer?.context ?: context
       if (tracks.containsType(C.TRACK_TYPE_VIDEO) &&
-        !tracks.isTypeSupported(C.TRACK_TYPE_VIDEO, /* allowExceedsCapabilities = */ true)
+        !tracks.isTypeSupported(C.TRACK_TYPE_VIDEO, true)
       ) {
         Toast.makeText(context, R.string.error_unsupported_video, Toast.LENGTH_LONG).show()
       }
       if (tracks.containsType(C.TRACK_TYPE_AUDIO) &&
-        !tracks.isTypeSupported(C.TRACK_TYPE_AUDIO, /* allowExceedsCapabilities = */ true)
+        !tracks.isTypeSupported(C.TRACK_TYPE_AUDIO, true)
       ) {
         Toast.makeText(context, R.string.error_unsupported_audio, Toast.LENGTH_LONG).show()
       }

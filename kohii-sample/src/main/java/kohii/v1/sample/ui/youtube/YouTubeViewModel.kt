@@ -34,29 +34,34 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 
 class YouTubeViewModel(application: Application) : AndroidViewModel(application) {
-
   private val jsonFactory = GsonFactory.getDefaultInstance()
   private val httpTransport = NetHttpTransport()
-  private val youtube: YouTube = YouTube.Builder(
-    /* transport = */ httpTransport,
-    /* jsonFactory = */ jsonFactory,
-    /* httpRequestInitializer = */ null
-  )
-    .setApplicationName("Kohii + Youtube, " + BuildConfig.VERSION_NAME)
-    .build()
+  private val youtube: YouTube =
+    YouTube.Builder(
+      // transport =
+      httpTransport,
+      // jsonFactory =
+      jsonFactory,
+      // httpRequestInitializer =
+      null,
+    )
+      .setApplicationName("Kohii + Youtube, " + BuildConfig.VERSION_NAME)
+      .build()
 
-  private val repository = YouTubePlaylistRepository(
-    apiKey = (application as DemoApp).youtubeApiKey,
-    youtube = youtube
-  )
+  private val repository =
+    YouTubePlaylistRepository(
+      apiKey = (application as DemoApp).youtubeApiKey,
+      youtube = youtube,
+    )
 
   private val input = MutableStateFlow<String?>(null)
 
   @OptIn(ExperimentalCoroutinesApi::class)
-  val pagingData: Flow<PagingData<Video>> = input
-    .filterNotNull()
-    .flatMapLatest { repository.playlist(it) }
-    .cachedIn(viewModelScope)
+  val pagingData: Flow<PagingData<Video>> =
+    input
+      .filterNotNull()
+      .flatMapLatest { repository.playlist(it) }
+      .cachedIn(viewModelScope)
 
   fun load(id: String) {
     input.value = id

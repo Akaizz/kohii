@@ -29,11 +29,10 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 class ExoVideoHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_player_container_with_title),
   Playback.StateListener,
   ArtworkHintListener {
-
   internal val container = itemView.findViewById(R.id.playerContainer) as AspectRatioFrameLayout
   internal val videoTitle = itemView.findViewById(R.id.videoTitle) as TextView
   private val thumbnail = itemView.findViewById(R.id.thumbnail) as AppCompatImageView
@@ -52,7 +51,7 @@ class ExoVideoHolder(
     width: Int,
     height: Int,
     unAppliedRotationDegrees: Int,
-    pixelWidthHeightRatio: Float
+    pixelWidthHeightRatio: Float,
   ) {
     aspectRatio = width / height.toFloat()
     container.setAspectRatio(aspectRatio)
@@ -60,17 +59,22 @@ class ExoVideoHolder(
 
   override fun onError(
     playback: Playback,
-    exception: Exception
+    exception: Exception,
   ) {
     Snackbar.make(
       playback.container,
       exception.localizedMessage ?: "Unknown Error",
-      Snackbar.LENGTH_LONG
+      Snackbar.LENGTH_LONG,
     )
       .show()
   }
 
-  override fun onArtworkHint(playback: Playback, shouldShow: Boolean, position: Long, state: Int) {
+  override fun onArtworkHint(
+    playback: Playback,
+    shouldShow: Boolean,
+    position: Long,
+    state: Int,
+  ) {
     thumbnail.isVisible = shouldShow
   }
 }

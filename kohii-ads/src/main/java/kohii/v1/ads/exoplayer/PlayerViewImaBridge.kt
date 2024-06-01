@@ -44,20 +44,20 @@ class PlayerViewImaBridge(
   media: AdMedia,
   playerPool: PlayerPool<Player>,
   imaBridgeConfig: ImaBridgeConfig,
-  private val mediaSourceFactory: DefaultMediaSourceFactory
+  private val mediaSourceFactory: DefaultMediaSourceFactory,
 ) : PlayerViewBridge(
-  context,
-  media,
-  playerPool,
-  mediaSourceFactory
-),
+    context,
+    media,
+    playerPool,
+    mediaSourceFactory,
+  ),
   AdViewProvider,
   AdsLoaderProvider {
-
-  override val mediaItem: MediaItem = MediaItem.Builder()
-    .setUri(media.uri)
-    .setAdTagUri(media.adTagUri)
-    .build()
+  override val mediaItem: MediaItem =
+    MediaItem.Builder()
+      .setUri(media.uri)
+      .setAdTagUri(media.adTagUri)
+      .build()
 
   // Using Application Context so this View instance can survive configuration changes.
   private val adViewGroup: ViewGroup = FrameLayout(context.applicationContext)
@@ -79,8 +79,8 @@ class PlayerViewImaBridge(
             ImaSdkFactory.getInstance().createFriendlyObstruction(
               adOverlayInfo.view,
               getFriendlyObstructionPurpose(adOverlayInfo.purpose),
-              adOverlayInfo.reasonDetail
-            )
+              adOverlayInfo.reasonDetail,
+            ),
           )
         }
       }
@@ -129,7 +129,9 @@ class PlayerViewImaBridge(
   //endregion
 
   private companion object {
-    fun getFriendlyObstructionPurpose(@Purpose purpose: Int): FriendlyObstructionPurpose {
+    fun getFriendlyObstructionPurpose(
+      @Purpose purpose: Int,
+    ): FriendlyObstructionPurpose {
       return when (purpose) {
         AdOverlayInfo.PURPOSE_CONTROLS -> FriendlyObstructionPurpose.VIDEO_CONTROLS
         AdOverlayInfo.PURPOSE_CLOSE_AD -> FriendlyObstructionPurpose.CLOSE_AD

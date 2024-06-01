@@ -41,14 +41,13 @@ class BigPlayerDialog :
   PlayerPanel,
   Playback.Callback,
   Playback.StateListener {
-
   companion object {
     private const val KEY_REBINDER = "kohii:fragment:player:rebinder"
     private const val KEY_RATIO = "kohii:fragment:player:ratio"
 
     fun newInstance(
       rebinder: Rebinder,
-      ratio: Float
+      ratio: Float,
     ) = BigPlayerDialog().also {
       val args = Bundle()
       args.putParcelable(KEY_REBINDER, rebinder)
@@ -68,7 +67,7 @@ class BigPlayerDialog :
 
   private val systemUiOptions by lazy {
     AtomicInteger(
-      requireActivity().window.decorView.systemUiVisibility
+      requireActivity().window.decorView.systemUiVisibility,
     )
   }
 
@@ -100,14 +99,14 @@ class BigPlayerDialog :
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_fbook_player, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentFbookPlayerBinding = FragmentFbookPlayerBinding.bind(view)
@@ -140,26 +139,30 @@ class BigPlayerDialog :
           // Hide the nav bar and status bar
           or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
           or View.SYSTEM_UI_FLAG_FULLSCREEN
-        )
+      )
     } else {
       decorView.systemUiVisibility = 0
       playerCallback?.requestDismiss(this) ?: dismissAllowingStateLoss()
     }
 
     rebinder.with {
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
 
-        override fun kohiiCanPause(): Boolean = true
+          override fun kohiiCanPause(): Boolean = true
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            // TODO: replace with custom ForwardingPlayer.
-            // renderer.useController = true
-            // renderer.setControlDispatcher(kohii.createControlDispatcher(playback))
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // renderer.useController = true
+              // renderer.setControlDispatcher(kohii.createControlDispatcher(playback))
+            }
           }
         }
-      }
       callbacks += this@BigPlayerDialog
     }
       .bind(kohii, binding.playerView) {

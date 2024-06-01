@@ -20,19 +20,18 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.motion.widget.MotionLayout.TransitionListener
 
 interface TransitionListenerAdapter : TransitionListener {
-
   override fun onTransitionTrigger(
     p0: MotionLayout?,
     p1: Int,
     p2: Boolean,
-    p3: Float
+    p3: Float,
   ) {
   }
 
   override fun onTransitionStarted(
     motionLayout: MotionLayout,
     startId: Int,
-    endId: Int
+    endId: Int,
   ) {
   }
 
@@ -40,13 +39,13 @@ interface TransitionListenerAdapter : TransitionListener {
     motionLayout: MotionLayout,
     startId: Int,
     endId: Int,
-    progress: Float
+    progress: Float,
   ) {
   }
 
   override fun onTransitionCompleted(
     motionLayout: MotionLayout,
-    currentId: Int
+    currentId: Int,
   ) {
   }
 }

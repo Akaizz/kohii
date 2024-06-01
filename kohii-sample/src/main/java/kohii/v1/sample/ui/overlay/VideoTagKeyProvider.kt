@@ -28,7 +28,6 @@ import kohii.v1.core.Rebinder
 // This KeyProvider allow a detached View still in key/position map.
 class VideoTagKeyProvider(private val recyclerView: RecyclerView) :
   ItemKeyProvider<Rebinder>(SCOPE_CACHED) {
-
   private val positionToKey = SparseArray<Rebinder>()
   private val keyToPosition = HashMap<Rebinder, Int>()
 
@@ -42,11 +41,12 @@ class VideoTagKeyProvider(private val recyclerView: RecyclerView) :
         override fun onChildViewDetachedFromWindow(view: View) {
           onDetached(view)
         }
-      }
+      },
     )
   }
 
-  internal /* synthetic access */ fun onAttached(view: View) {
+  // Synthetic access
+  internal fun onAttached(view: View) {
     val holder = recyclerView.findContainingViewHolder(view)
     if (holder is VideoItemHolder) {
       val position = holder.absoluteAdapterPosition
@@ -61,7 +61,8 @@ class VideoTagKeyProvider(private val recyclerView: RecyclerView) :
     }
   }
 
-  internal /* synthetic access */ fun onDetached(view: View) {
+  // Synthetic access
+  internal fun onDetached(view: View) {
     val holder = recyclerView.findContainingViewHolder(view)
     if (holder is VideoItemHolder) {
       val position = holder.absoluteAdapterPosition

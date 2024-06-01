@@ -38,7 +38,6 @@ import okio.source
 
 class AdsContainerFragment :
   ViewBindingFragment<FragmentAdsListBinding>(FragmentAdsListBinding::inflate) {
-
   private companion object {
     const val STATE_AD_SAMPLE = "dev_ad_sample"
   }
@@ -58,19 +57,21 @@ class AdsContainerFragment :
         requireBinding().adInfo.text = "No sample selected."
       } else {
         if (value != current) {
-          val adMedia = AdMediaItem(
-            value.contentUri,
-            value.adTagUri
-          )
+          val adMedia =
+            AdMediaItem(
+              value.contentUri,
+              value.adTagUri,
+            )
 
           manilo.setUp(adMedia) {
             tag = "$value"
             repeatMode = Player.REPEAT_MODE_ONE
-            controller = controller { _, renderer ->
-              if (renderer is PlayerView) {
-                renderer.useController = true
+            controller =
+              controller { _, renderer ->
+                if (renderer is PlayerView) {
+                  renderer.useController = true
+                }
               }
-            }
           }.bind(requireBinding().playerView)
           requireBinding().adInfo.text = value.name
         }
@@ -84,43 +85,54 @@ class AdsContainerFragment :
     adSamples = app.moshi
       .adapter(AdSamples::class.java)
       .fromJson(
-        app.assets.open("ads.json").source().buffer()
+        app.assets.open("ads.json").source().buffer(),
       ) ?: AdSamples("No Ads", emptyList())
   }
 
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?,
+  ) {
     super.onViewCreated(view, savedInstanceState)
 
     manilo.register(this).addBucket(requireBinding().playerContainer)
 
     val layoutManager = LinearLayoutManager(view.context)
     requireBinding().adsContainer.layoutManager = layoutManager
-    requireBinding().adsContainer.adapter = object : Adapter<ViewHolder>() {
-      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemView = LayoutInflater.from(parent.context)
-          .inflate(android.R.layout.simple_list_item_activated_1, parent, false)
-        val viewHolder = object : ViewHolder(itemView) {}
-        itemView.setOnClickListener {
-          if (viewHolder.absoluteAdapterPosition in 0 until itemCount) {
-            selectedAdSample = adSamples.samples[viewHolder.absoluteAdapterPosition]
-            // Update the UI state of all visible items. Not an optimized practice.
-            notifyItemRangeChanged(
-              layoutManager.findFirstVisibleItemPosition(),
-              layoutManager.findLastVisibleItemPosition()
-            )
+    requireBinding().adsContainer.adapter =
+      object : Adapter<ViewHolder>() {
+        override fun onCreateViewHolder(
+          parent: ViewGroup,
+          viewType: Int,
+        ): ViewHolder {
+          val itemView =
+            LayoutInflater.from(parent.context)
+              .inflate(android.R.layout.simple_list_item_activated_1, parent, false)
+          val viewHolder = object : ViewHolder(itemView) {}
+          itemView.setOnClickListener {
+            if (viewHolder.absoluteAdapterPosition in 0 until itemCount) {
+              selectedAdSample = adSamples.samples[viewHolder.absoluteAdapterPosition]
+              // Update the UI state of all visible items. Not an optimized practice.
+              notifyItemRangeChanged(
+                layoutManager.findFirstVisibleItemPosition(),
+                layoutManager.findLastVisibleItemPosition(),
+              )
+            }
           }
+          return viewHolder
         }
-        return viewHolder
-      }
 
-      override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val adSample = adSamples.samples[position]
-        (holder.itemView as TextView).text = adSample.name
-        (holder.itemView as TextView).isActivated = adSample == selectedAdSample
-      }
+        override fun onBindViewHolder(
+          holder: ViewHolder,
+          position: Int,
+        ) {
+          val adSample = adSamples.samples[position]
+          (holder.itemView as TextView).text = adSample.name
+          (holder.itemView as TextView).isActivated = adSample == selectedAdSample
+        }
 
-      override fun getItemCount(): Int = adSamples.samples.size
-    }
+        override fun getItemCount(): Int = adSamples.samples.size
+      }
 
     selectedAdSample = savedInstanceState?.getParcelable(STATE_AD_SAMPLE)
   }

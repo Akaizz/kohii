@@ -23,7 +23,7 @@ import kohii.v1.core.Engine
  */
 open class Capsule<T : Any, in A>(
   creator: (A) -> T,
-  onCreate: ((T) -> Unit) = { if (it is Engine<*>) it.master.registerEngine(it) }
+  onCreate: ((T) -> Unit) = { if (it is Engine<*>) it.master.registerEngine(it) },
 ) {
   @Volatile private var instance: T? = null
 

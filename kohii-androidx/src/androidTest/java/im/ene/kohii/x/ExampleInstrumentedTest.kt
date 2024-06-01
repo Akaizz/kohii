@@ -32,8 +32,9 @@ class ExampleInstrumentedTest {
   @Test
   fun useAppContext() {
     // Context of the app under test.
-    val appContext = InstrumentationRegistry.getInstrumentation()
-      .targetContext
+    val appContext =
+      InstrumentationRegistry.getInstrumentation()
+        .targetContext
     assertEquals("im.ene.kohii.x.test", appContext.packageName)
   }
 }

@@ -25,7 +25,6 @@ import kohii.v1.core.Playable
 import kohii.v1.logWarn
 
 internal class PlayableDispatcher(val master: Master) : Handler.Callback {
-
   companion object {
     private const val MSG_PLAY = 100
   }
@@ -49,9 +48,9 @@ internal class PlayableDispatcher(val master: Master) : Handler.Callback {
     "Dispatcher#play: $playable".logWarn()
     val manuallyStartedPlayable = master.manuallyStartedPlayable.get()
     // Has manual controller
-    if (manuallyStartedPlayable != null && /* has Playable started by client */
-      manuallyStartedPlayable.isPlaying() && /* the Playable is playing */
-      manuallyStartedPlayable !== playable /* but not this one */
+    if (manuallyStartedPlayable != null && // has Playable started by client
+      manuallyStartedPlayable.isPlaying() && // the Playable is playing
+      manuallyStartedPlayable !== playable // but not this one
     ) {
       // Pause due to lower priority.
       justPause(playable)
@@ -83,9 +82,9 @@ internal class PlayableDispatcher(val master: Master) : Handler.Callback {
     "Dispatcher#pause: $playable".logWarn()
     val manuallyStartedPlayable = master.manuallyStartedPlayable.get()
     // Has manual controller
-    if (manuallyStartedPlayable != null && /* has Playable started by client */
-      manuallyStartedPlayable.isPlaying() && /* the Playable is playing */
-      manuallyStartedPlayable !== playable /* but not this one */
+    if (manuallyStartedPlayable != null && // has Playable started by client
+      manuallyStartedPlayable.isPlaying() && // the Playable is playing
+      manuallyStartedPlayable !== playable // but not this one
     ) {
       justPause(playable)
       return

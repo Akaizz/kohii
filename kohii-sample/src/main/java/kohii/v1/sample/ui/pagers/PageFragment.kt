@@ -35,32 +35,34 @@ import kohii.v1.sample.data.Video
 import kohii.v1.sample.databinding.FragmentPagerPageBinding
 
 class PageFragment : BaseFragment(), Prioritized {
-
   companion object {
-    private const val pageVideoKey = "kohii:demo:pager:video"
-    private const val pageTagKey = "kohii:demo:pager:tag"
+    private const val KEY_PAGE_VIDEO = "kohii:demo:pager:video"
+    private const val KEY_PAGE_TAG = "kohii:demo:pager:tag"
 
-    fun newInstance() = PageFragment().also {
-      it.arguments = Bundle()
-    }
+    fun newInstance() =
+      PageFragment().also {
+        it.arguments = Bundle()
+      }
 
     fun newInstance(
       position: Int,
-      video: Video
+      video: Video,
     ) = newInstance().also {
       it.arguments?.run {
-        putParcelable(pageVideoKey, video)
-        putInt(pageTagKey, position)
+        putParcelable(KEY_PAGE_VIDEO, video)
+        putInt(KEY_PAGE_TAG, position)
       }
     }
   }
 
   val video: Sources by lazy {
-    val video = arguments?.getParcelable<Video>(
-      pageVideoKey
-    )!!
-    val item = video.playlist.first()
-      .sources.first()
+    val video =
+      arguments?.getParcelable<Video>(
+        KEY_PAGE_VIDEO,
+      )!!
+    val item =
+      video.playlist.first()
+        .sources.first()
     item
   }
 
@@ -70,14 +72,14 @@ class PageFragment : BaseFragment(), Prioritized {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_pager_page, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentPagerPageBinding = FragmentPagerPageBinding.bind(view)
@@ -86,9 +88,10 @@ class PageFragment : BaseFragment(), Prioritized {
       .addBucket(binding.content)
 
     landscape = requireActivity().isLandscape()
-    val pagePos = requireArguments().getInt(
-      pageTagKey
-    )
+    val pagePos =
+      requireArguments().getInt(
+        KEY_PAGE_TAG,
+      )
     val videoTag = "PAGE::$pagePos::${video.file}"
     val playerView: PlayerView = view.findViewById(R.id.playerView)
     kohii.setUp(video.file) {

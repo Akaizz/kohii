@@ -29,5 +29,5 @@ data class AdMediaItem(
   override val uri: Uri,
   override val adTagUri: Uri? = null,
   override val type: String? = null,
-  override val mediaDrm: MediaDrm? = null
+  override val mediaDrm: MediaDrm? = null,
 ) : MediaItem(uri, type, mediaDrm), AdMedia

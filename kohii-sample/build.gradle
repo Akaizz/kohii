@@ -28,6 +28,7 @@ if (file("google-services.json").exists()) {
 }
 
 android {
+  namespace 'kohii.v1.sample'
   compileSdkVersion libs.versions.android.target.sdk.get().toInteger()
 
   signingConfigs {
@@ -74,14 +75,13 @@ android {
       // multiDexEnabled true
       minifyEnabled false
       shrinkResources false
-      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
-          'proguard-rules-debug.pro'
     }
   }
-
   packagingOptions {
-    exclude 'META-INF/services/javax.annotation.processing.Processor'
-    exclude 'META-INF/DEPENDENCIES'
+    resources {
+      excludes +=
+          ['META-INF/services/javax.annotation.processing.Processor', 'META-INF/DEPENDENCIES']
+    }
   }
 
   buildFeatures {
@@ -105,7 +105,7 @@ dependencies {
   implementation project(':kohii-experiments')
   implementation project(':kohii-ads')
 
-  implementation(libs.android.exoplayer)
+  implementation(libs.android.exoplayer.all)
   implementation(libs.android.exoplayer.ima)
   implementation(libs.androidx.media2.widget)
 
@@ -128,33 +128,33 @@ dependencies {
 
   implementation(libs.androidx.viewpager2)
 
-  implementation("com.squareup.moshi:moshi:1.14.0")
-  kapt("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
-  implementation("com.squareup.okio:okio:2.10.0")
+  implementation(libs.square.moshi)
+  kapt(libs.square.moshi.codegen)
+  implementation(libs.okio)
 
-  implementation("com.github.bumptech.glide:glide:4.13.2")
-  kapt("com.github.bumptech.glide:compiler:4.13.2")
-  implementation("com.caverock:androidsvg-aar:1.4")
+  implementation(libs.glide)
+  kapt(libs.compiler)
+  implementation(libs.androidsvg.aar)
 
-  implementation("com.google.firebase:firebase-crashlytics-ktx:18.3.6") {
+  implementation(libs.firebase.crashlytics.ktx) {
     transitive = true
   }
 
-  implementation("com.google.apis:google-api-services-youtube:v3-rev20230319-2.0.0")
-  implementation("com.google.http-client:google-http-client-android:1.43.0")
-  implementation("com.google.api-client:google-api-client-android:2.2.0")
-  implementation("com.google.api-client:google-api-client-gson:2.2.0")
-  implementation("com.google.firebase:firebase-analytics:21.2.1")
+  implementation(libs.google.api.services.youtube)
+  implementation(libs.google.http.client.android)
+  implementation(libs.google.api.client.android)
+  implementation(libs.google.api.client.gson)
+  implementation(libs.firebase.analytics)
 
-  implementation("com.jakewharton.timber:timber:5.0.1")
+  implementation(libs.timber)
 
-  implementation("com.squareup.leakcanary:plumber-android:2.10")
-  debugImplementation("com.squareup.leakcanary:leakcanary-android:2.10")
+  implementation(libs.square.leakcanary.plumber)
+  debugImplementation(libs.square.leakcanary)
 
-  testImplementation("androidx.test:core-ktx:1.5.0")
-  testImplementation("androidx.test:rules:1.5.0")
-  testImplementation("androidx.test:runner:1.5.2")
+  testImplementation(libs.androidx.core.ktx)
+  testImplementation(libs.androidx.rules)
+  testImplementation(libs.androidx.runner)
 
-  androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  androidTestImplementation(libs.androidx.junit.ktx)
+  androidTestImplementation(libs.androidx.espresso.core)
 }

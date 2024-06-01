@@ -21,9 +21,12 @@ package kohii.v1.core
  * changed. Client can use the [Manager.observe] method to register an observer.
  */
 typealias PlayableObserver = (
-  Any /* Playable Tag */,
-  Playback? /* Previous Playback */,
-  Playback? /* Next Playback */
+  // Tag of the Playable
+  Any,
+  // Previous Playback
+  Playback?,
+  // Next Playback
+  Playback?,
 ) -> Unit
 
 /**

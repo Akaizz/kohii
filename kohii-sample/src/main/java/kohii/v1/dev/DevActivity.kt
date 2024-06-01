@@ -21,7 +21,6 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BackPressConsumer
 
 class DevActivity : AppCompatActivity(R.layout.activity_debug) {
-
   override fun onBackPressed() {
     val currentFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
     if (currentFragment !is BackPressConsumer || !currentFragment.consumeBackPress()) {

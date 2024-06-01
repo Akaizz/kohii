@@ -30,7 +30,6 @@ import kohii.v1.media.VolumeInfo
 import java.util.concurrent.CopyOnWriteArraySet
 
 interface Prioritized : Comparable<Prioritized> {
-
   override fun compareTo(other: Prioritized): Int = 0
 }
 
@@ -38,58 +37,57 @@ interface Prioritized : Comparable<Prioritized> {
 interface PlayerEventListener : Player.Listener
 
 interface VolumeChangedListener {
-
   fun onVolumeChanged(volumeInfo: VolumeInfo)
 }
 
 interface ErrorListener {
-
   fun onError(error: Exception)
 }
 
 class PlayerEventListeners : CopyOnWriteArraySet<Player.Listener>(), Player.Listener {
-
   override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters): Unit =
     forEach { it.onPlaybackParametersChanged(playbackParameters) }
 
   override fun onTracksChanged(tracks: Tracks): Unit = forEach { it.onTracksChanged(tracks) }
 
-  override fun onPlayerError(error: PlaybackException): Unit =
-    forEach { it.onPlayerError(error) }
+  override fun onPlayerError(error: PlaybackException): Unit = forEach { it.onPlayerError(error) }
 
-  override fun onIsLoadingChanged(isLoading: Boolean): Unit =
-    forEach { it.onIsLoadingChanged(isLoading) }
+  override fun onIsLoadingChanged(isLoading: Boolean): Unit = forEach { it.onIsLoadingChanged(isLoading) }
 
   override fun onPositionDiscontinuity(
     oldPosition: PositionInfo,
     newPosition: PositionInfo,
-    reason: Int
+    reason: Int,
   ): Unit = forEach { it.onPositionDiscontinuity(oldPosition, newPosition, reason) }
 
-  override fun onRepeatModeChanged(repeatMode: Int): Unit =
-    forEach { it.onRepeatModeChanged(repeatMode) }
+  override fun onRepeatModeChanged(repeatMode: Int): Unit = forEach { it.onRepeatModeChanged(repeatMode) }
 
   override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean): Unit =
     forEach { it.onShuffleModeEnabledChanged(shuffleModeEnabled) }
 
-  override fun onTimelineChanged(timeline: Timeline, reason: Int): Unit =
-    forEach { it.onTimelineChanged(timeline, reason) }
+  override fun onTimelineChanged(
+    timeline: Timeline,
+    reason: Int,
+  ): Unit = forEach { it.onTimelineChanged(timeline, reason) }
 
-  override fun onPlaybackStateChanged(state: Int): Unit =
-    forEach { it.onPlaybackStateChanged(state) }
+  override fun onPlaybackStateChanged(state: Int): Unit = forEach { it.onPlaybackStateChanged(state) }
 
-  override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int): Unit =
-    forEach { it.onPlayWhenReadyChanged(playWhenReady, reason) }
+  override fun onPlayWhenReadyChanged(
+    playWhenReady: Boolean,
+    reason: Int,
+  ): Unit = forEach { it.onPlayWhenReadyChanged(playWhenReady, reason) }
 
   // Keep this to deliver the events to Playback.
   @Suppress("DeprecatedCallableAddReplaceWith", "DEPRECATION")
   @Deprecated("Deprecated in Java")
-  override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+  override fun onPlayerStateChanged(
+    playWhenReady: Boolean,
+    playbackState: Int,
+  ) {
     forEach { it.onPlayerStateChanged(playWhenReady, playbackState) }
   }
 
-  override fun onVideoSizeChanged(videoSize: VideoSize): Unit =
-    forEach { it.onVideoSizeChanged(videoSize) }
+  override fun onVideoSizeChanged(videoSize: VideoSize): Unit = forEach { it.onVideoSizeChanged(videoSize) }
 
   override fun onRenderedFirstFrame(): Unit = forEach { it.onRenderedFirstFrame() }
 
@@ -97,18 +95,15 @@ class PlayerEventListeners : CopyOnWriteArraySet<Player.Listener>(), Player.List
 
   override fun onMetadata(metadata: Metadata): Unit = forEach { it.onMetadata(metadata) }
 
-  override fun onAudioAttributesChanged(audioAttributes: AudioAttributes): Unit =
-    forEach { it.onAudioAttributesChanged(audioAttributes) }
+  override fun onAudioAttributesChanged(audioAttributes: AudioAttributes): Unit = forEach { it.onAudioAttributesChanged(audioAttributes) }
 
   override fun onVolumeChanged(volume: Float): Unit = forEach { it.onVolumeChanged(volume) }
 
-  override fun onAudioSessionIdChanged(audioSessionId: Int): Unit =
-    forEach { it.onAudioSessionIdChanged(audioSessionId) }
+  override fun onAudioSessionIdChanged(audioSessionId: Int): Unit = forEach { it.onAudioSessionIdChanged(audioSessionId) }
 }
 
 class VolumeChangedListeners : CopyOnWriteArraySet<VolumeChangedListener>(), VolumeChangedListener {
-  override fun onVolumeChanged(volumeInfo: VolumeInfo): Unit =
-    forEach { it.onVolumeChanged(volumeInfo) }
+  override fun onVolumeChanged(volumeInfo: VolumeInfo): Unit = forEach { it.onVolumeChanged(volumeInfo) }
 }
 
 class ErrorListeners : CopyOnWriteArraySet<ErrorListener>(), ErrorListener {
@@ -116,7 +111,6 @@ class ErrorListeners : CopyOnWriteArraySet<ErrorListener>(), ErrorListener {
 }
 
 interface VolumeInfoController {
-
   val volumeInfo: VolumeInfo
 
   fun setVolumeInfo(volumeInfo: VolumeInfo): Boolean

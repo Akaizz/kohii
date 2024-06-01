@@ -27,16 +27,14 @@ import kohii.v1.experiments.internal.UnofficialYouTubePlayerRendererProvider
 import kohii.v1.utils.Capsule
 
 class UnofficialYouTubePlayerEngine private constructor(
-  master: Master
+  master: Master,
 ) : Engine<YouTubePlayerView>(
-  master,
-  UnofficialYouTubePlayerPlayableCreator(master)
-) {
-
+    master,
+    UnofficialYouTubePlayerPlayableCreator(master),
+  ) {
   private constructor(context: Context) : this(Master[context])
 
   companion object {
-
     private val capsule =
       Capsule<UnofficialYouTubePlayerEngine, Context>(::UnofficialYouTubePlayerEngine)
 
@@ -50,7 +48,7 @@ class UnofficialYouTubePlayerEngine private constructor(
   override fun prepare(manager: Manager) {
     manager.registerRendererProvider(
       YouTubePlayerView::class.java,
-      UnofficialYouTubePlayerRendererProvider()
+      UnofficialYouTubePlayerRendererProvider(),
     )
   }
 }

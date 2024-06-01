@@ -22,5 +22,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class HolderStateEntry(
   val first: Int,
-  val second: Int
+  val second: Int,
 ) : Parcelable

@@ -26,45 +26,48 @@ import kotlinx.coroutines.withContext
 class YouTubePlaylistPagingSource(
   youtube: YouTube,
   apiKey: String,
-  playlistId: String
+  playlistId: String,
 ) : PagingSource<String, Video>() {
+  private val playlistRequest =
+    youtube.playlistItems()
+      .list(listOf(YouTubeViewModel.YOUTUBE_PLAYLIST_PART))
+      .setPlaylistId(playlistId)
+      .setFields(YouTubeViewModel.YOUTUBE_PLAYLIST_FIELDS)
+      .setMaxResults(YouTubeViewModel.YOUTUBE_PLAYLIST_MAX_RESULTS)
+      .setKey(apiKey)
 
-  private val playlistRequest = youtube.playlistItems()
-    .list(listOf(YouTubeViewModel.YOUTUBE_PLAYLIST_PART))
-    .setPlaylistId(playlistId)
-    .setFields(YouTubeViewModel.YOUTUBE_PLAYLIST_FIELDS)
-    .setMaxResults(YouTubeViewModel.YOUTUBE_PLAYLIST_MAX_RESULTS)
-    .setKey(apiKey)
-
-  private val videosRequest = youtube.videos()
-    .list(listOf(YouTubeViewModel.YOUTUBE_VIDEOS_PART))
-    .setFields(YouTubeViewModel.YOUTUBE_VIDEOS_FIELDS)
-    .setKey(apiKey)
+  private val videosRequest =
+    youtube.videos()
+      .list(listOf(YouTubeViewModel.YOUTUBE_VIDEOS_PART))
+      .setFields(YouTubeViewModel.YOUTUBE_VIDEOS_FIELDS)
+      .setKey(apiKey)
 
   override fun getRefreshKey(state: PagingState<String, Video>): String? = null
 
   override suspend fun load(params: LoadParams<String>): LoadResult<String, Video> {
-    val (ids, prevKey, nextKey) = withContext(Dispatchers.IO) {
-      val response = playlistRequest.setPageToken(params.key).execute()
-      Triple(
-        response.items
-          .map { playlistItem -> playlistItem.snippet.resourceId.videoId }
-          .toList(),
-        response.prevPageToken,
-        response.nextPageToken
-      )
-    }
+    val (ids, prevKey, nextKey) =
+      withContext(Dispatchers.IO) {
+        val response = playlistRequest.setPageToken(params.key).execute()
+        Triple(
+          response.items
+            .map { playlistItem -> playlistItem.snippet.resourceId.videoId }
+            .toList(),
+          response.prevPageToken,
+          response.nextPageToken,
+        )
+      }
 
-    val videos = withContext(Dispatchers.IO) {
-      videosRequest
-        .setId(ids)
-        .execute()
-    }
+    val videos =
+      withContext(Dispatchers.IO) {
+        videosRequest
+          .setId(ids)
+          .execute()
+      }
 
     return LoadResult.Page(
       data = videos.items,
       prevKey = prevKey,
-      nextKey = nextKey
+      nextKey = nextKey,
     )
   }
 }

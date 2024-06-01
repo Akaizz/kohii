@@ -21,7 +21,6 @@ import com.google.android.exoplayer2.Player
 import kohii.v1.logInfo
 
 abstract class AbstractBridge<RENDERER : Any> : Bridge<RENDERER> {
-
   protected val eventListeners = PlayerEventListeners()
   protected val errorListeners = ErrorListeners()
   protected val volumeListeners = VolumeChangedListeners()

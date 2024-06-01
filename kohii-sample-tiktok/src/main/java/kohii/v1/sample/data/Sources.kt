@@ -25,5 +25,5 @@ import kotlinx.parcelize.Parcelize
 class Sources(
   val type: String,
   val mediaTypes: List<String>?,
-  val file: String
+  val file: String,
 ) : Parcelable

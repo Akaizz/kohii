@@ -34,13 +34,11 @@ import kohii.v1.utils.Capsule
 open class StyledPlayerViewEngine constructor(
   master: Master,
   playableCreator: PlayableCreator<StyledPlayerView> = StyledPlayerViewPlayableCreator(master),
-  private val rendererProviderFactory: RendererProviderFactory = ::StyledPlayerViewProvider
+  private val rendererProviderFactory: RendererProviderFactory = ::StyledPlayerViewProvider,
 ) : Engine<StyledPlayerView>(master, playableCreator) {
-
   private constructor(context: Context) : this(Master[context])
 
   companion object {
-
     private val capsule = Capsule(::StyledPlayerViewEngine)
 
     @JvmStatic // convenient static call for Java
@@ -53,8 +51,8 @@ open class StyledPlayerViewEngine constructor(
   override fun prepare(manager: Manager) {
     manager.registerRendererProvider(StyledPlayerView::class.java, rendererProviderFactory())
   }
-
   // TODO: replace with custom ForwardingPlayer.
+
   /* fun createControlDispatcher(playback: Playback): ControlDispatcher {
     requireNotNull(playback.config.controller) {
       "Playback needs to be setup with a Controller to use this method."
@@ -64,7 +62,6 @@ open class StyledPlayerViewEngine constructor(
   } */
 
   class Builder(context: Context) {
-
     private val master = Master[context.applicationContext]
 
     private var playableCreator: PlayableCreator<StyledPlayerView> =
@@ -72,21 +69,24 @@ open class StyledPlayerViewEngine constructor(
 
     private var rendererProviderFactory: RendererProviderFactory = { StyledPlayerViewProvider() }
 
-    fun setPlayableCreator(playableCreator: PlayableCreator<StyledPlayerView>): Builder = apply {
-      this.playableCreator = playableCreator
-    }
+    fun setPlayableCreator(playableCreator: PlayableCreator<StyledPlayerView>): Builder =
+      apply {
+        this.playableCreator = playableCreator
+      }
 
-    fun setRendererProviderFactory(factory: RendererProviderFactory): Builder = apply {
-      this.rendererProviderFactory = factory
-    }
+    fun setRendererProviderFactory(factory: RendererProviderFactory): Builder =
+      apply {
+        this.rendererProviderFactory = factory
+      }
 
-    fun build(): StyledPlayerViewEngine = StyledPlayerViewEngine(
-      master = master,
-      playableCreator = playableCreator,
-      rendererProviderFactory = rendererProviderFactory
-    ).also {
-      master.registerEngine(it)
-    }
+    fun build(): StyledPlayerViewEngine =
+      StyledPlayerViewEngine(
+        master = master,
+        playableCreator = playableCreator,
+        rendererProviderFactory = rendererProviderFactory,
+      ).also {
+        master.registerEngine(it)
+      }
   }
 }
 
@@ -99,23 +99,25 @@ open class StyledPlayerViewEngine constructor(
  */
 fun createStyledPlayerViewEngine(
   context: Context,
-  config: ExoPlayerConfig
+  config: ExoPlayerConfig,
 ): StyledPlayerViewEngine {
   val bridgeCreatorFactory: StyledPlayerViewBridgeCreatorFactory = { appContext ->
     val userAgent = Common.getUserAgent(appContext, BuildConfig.LIB_NAME)
-    val playerPool = config.createDefaultPlayerPool(
-      context = context,
-      userAgent = userAgent
-    )
+    val playerPool =
+      config.createDefaultPlayerPool(
+        context = context,
+        userAgent = userAgent,
+      )
     StyledPlayerViewBridgeCreator(
       playerPool = playerPool,
-      mediaSourceFactory = playerPool.defaultMediaSourceFactory
+      mediaSourceFactory = playerPool.defaultMediaSourceFactory,
     )
   }
 
-  val playableCreator = StyledPlayerViewPlayableCreator.Builder(context.applicationContext)
-    .setBridgeCreatorFactory(bridgeCreatorFactory)
-    .build()
+  val playableCreator =
+    StyledPlayerViewPlayableCreator.Builder(context.applicationContext)
+      .setBridgeCreatorFactory(bridgeCreatorFactory)
+      .build()
 
   return StyledPlayerViewEngine.Builder(context).setPlayableCreator(playableCreator).build()
 }
@@ -134,23 +136,27 @@ fun createStyledPlayerViewEngine(
 fun createStyledPlayerViewEngine(
   context: Context,
   playerCreator: ((Context) -> Player)? = null,
-  rendererProviderFactory: RendererProviderFactory = { StyledPlayerViewProvider() }
+  rendererProviderFactory: RendererProviderFactory = { StyledPlayerViewProvider() },
 ): StyledPlayerViewEngine {
-  val playerPool = if (playerCreator == null) {
-    ExoPlayerPool(
-      context = context.applicationContext,
-      userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME)
-    )
-  } else {
-    object : PlayerPool<Player>() {
-      override fun recyclePlayerForMedia(media: Media): Boolean = false
-      override fun createPlayer(media: Media): Player = playerCreator(context)
-      override fun destroyPlayer(player: Player) = player.release()
-    }
-  }
+  val playerPool =
+    if (playerCreator == null) {
+      ExoPlayerPool(
+        context = context.applicationContext,
+        userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME),
+      )
+    } else {
+      object : PlayerPool<Player>() {
+        override fun recyclePlayerForMedia(media: Media): Boolean = false
 
-  val mediaSourceFactory = (playerPool as? ExoPlayerPool)?.defaultMediaSourceFactory
-    ?: DefaultMediaSourceFactory(context.applicationContext)
+        override fun createPlayer(media: Media): Player = playerCreator(context)
+
+        override fun destroyPlayer(player: Player) = player.release()
+      }
+    }
+
+  val mediaSourceFactory =
+    (playerPool as? ExoPlayerPool)?.defaultMediaSourceFactory
+      ?: DefaultMediaSourceFactory(context.applicationContext)
 
   return StyledPlayerViewEngine.Builder(context)
     .setPlayableCreator(
@@ -158,7 +164,7 @@ fun createStyledPlayerViewEngine(
         .setBridgeCreatorFactory {
           StyledPlayerViewBridgeCreator(playerPool, mediaSourceFactory)
         }
-        .build()
+        .build(),
     )
     .setRendererProviderFactory(rendererProviderFactory)
     .build()

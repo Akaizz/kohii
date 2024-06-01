@@ -48,28 +48,31 @@ import kohii.v1.media.Media
 class PlayerViewImaBridgeCreator(
   private val playerPool: PlayerPool<Player>,
   private val mediaSourceFactory: DefaultMediaSourceFactory,
-  private val imaAdsLoaderBuilder: ImaAdsLoader.Builder? = null
+  private val imaAdsLoaderBuilder: ImaAdsLoader.Builder? = null,
 ) : BridgeCreator<PlayerView> {
-
-  override fun createBridge(context: Context, media: Media): Bridge<PlayerView> {
+  override fun createBridge(
+    context: Context,
+    media: Media,
+  ): Bridge<PlayerView> {
     val adTagUri = (media as? AdMedia)?.adTagUri
     return if (adTagUri != null) {
-      val adsLoaderBuilder = imaAdsLoaderBuilder ?: ImaAdsLoader.Builder(context)
-        .setAdEventListener(Manilo[context]) // For debugging purpose only.
+      val adsLoaderBuilder =
+        imaAdsLoaderBuilder ?: ImaAdsLoader.Builder(context)
+          .setAdEventListener(Manilo[context]) // For debugging purpose only.
       val adsLoader = adsLoaderBuilder.build()
       PlayerViewImaBridge(
         context,
         media,
         playerPool,
         ImaBridgeConfig(adsLoader),
-        mediaSourceFactory
+        mediaSourceFactory,
       )
     } else {
       PlayerViewBridge(
         context,
         media,
         playerPool,
-        mediaSourceFactory
+        mediaSourceFactory,
       )
     }
   }

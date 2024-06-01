@@ -55,36 +55,38 @@ class ExoPlayerPool(
   // DefaultMediaSourceFactory
   // @RestrictTo(LIBRARY_GROUP)
   // Note: Only used within the library group. Client must not access this field.
-  val defaultMediaSourceFactory: DefaultMediaSourceFactory = with(context) {
-    val httpDataSource = DefaultHttpDataSource.Factory().setUserAgent(userAgent)
+  val defaultMediaSourceFactory: DefaultMediaSourceFactory =
+    with(context) {
+      val httpDataSource = DefaultHttpDataSource.Factory().setUserAgent(userAgent)
 
-    // DefaultMediaSourceFactory
-    val mediaCache: Cache = cache ?: ExoPlayerCache.lruCacheSingleton.get(context)
-    val upstreamFactory = DefaultDataSource.Factory(context, httpDataSource)
-    val drmSessionManagerProvider = DefaultDrmSessionManagerProvider()
-    drmSessionManagerProvider.setDrmHttpDataSourceFactory(httpDataSource)
+      // DefaultMediaSourceFactory
+      val mediaCache: Cache = cache ?: ExoPlayerCache.lruCacheSingleton.get(context)
+      val upstreamFactory = DefaultDataSource.Factory(context, httpDataSource)
+      val drmSessionManagerProvider = DefaultDrmSessionManagerProvider()
+      drmSessionManagerProvider.setDrmHttpDataSourceFactory(httpDataSource)
 
-    DefaultMediaSourceFactory(
-      /* dataSourceFactory */ CacheDataSource.Factory()
-      .setCache(mediaCache)
-      .setUpstreamDataSourceFactory(upstreamFactory)
-      .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-    )
-      .setDrmSessionManagerProvider(drmSessionManagerProvider)
-      .setLoadErrorHandlingPolicy(DefaultLoadErrorHandlingPolicy())
-  }
+      DefaultMediaSourceFactory(
+        // dataSourceFactory
+        CacheDataSource.Factory()
+          .setCache(mediaCache)
+          .setUpstreamDataSourceFactory(upstreamFactory)
+          .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR),
+      )
+        .setDrmSessionManagerProvider(drmSessionManagerProvider)
+        .setLoadErrorHandlingPolicy(DefaultLoadErrorHandlingPolicy())
+    },
 ) : PlayerPool<Player>(poolSize) {
-
-  override fun createPlayer(media: Media): Player = KohiiExoPlayer(
-    context = context.applicationContext,
-    clock = clock,
-    renderersFactory = renderersFactory,
-    trackSelector = trackSelectorFactory.createDefaultTrackSelector(context.applicationContext),
-    loadControl = loadControlFactory.createLoadControl(),
-    bandwidthMeter = bandwidthMeterFactory.createBandwidthMeter(context.applicationContext),
-    mediaSourceFactory = defaultMediaSourceFactory,
-    looper = Util.getCurrentOrMainLooper()
-  )
+  override fun createPlayer(media: Media): Player =
+    KohiiExoPlayer(
+      context = context.applicationContext,
+      clock = clock,
+      renderersFactory = renderersFactory,
+      trackSelector = trackSelectorFactory.createDefaultTrackSelector(context.applicationContext),
+      loadControl = loadControlFactory.createLoadControl(),
+      bandwidthMeter = bandwidthMeterFactory.createBandwidthMeter(context.applicationContext),
+      mediaSourceFactory = defaultMediaSourceFactory,
+      looper = Util.getCurrentOrMainLooper(),
+    )
 
   override fun resetPlayer(player: Player) {
     super.resetPlayer(player)

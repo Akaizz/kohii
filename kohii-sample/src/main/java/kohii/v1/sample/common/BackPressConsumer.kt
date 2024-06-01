@@ -17,6 +17,5 @@
 package kohii.v1.sample.common
 
 interface BackPressConsumer {
-
   fun consumeBackPress(): Boolean
 }

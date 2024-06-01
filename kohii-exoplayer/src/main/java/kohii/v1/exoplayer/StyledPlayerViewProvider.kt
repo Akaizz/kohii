@@ -24,14 +24,13 @@ import kohii.v1.core.ViewRendererProvider
 import kohii.v1.media.Media
 
 class StyledPlayerViewProvider : ViewRendererProvider() {
-
   override fun getRendererType(
     container: ViewGroup,
-    media: Media
+    media: Media,
   ): Int {
     // Note: we want to use SurfaceView on API 24 and above. But reusing SurfaceView doesn't seem to
     // be straight forward, as it is not trivial to clean the cache of old video ...
-    return if (media.mediaDrm != null /* || Build.VERSION.SDK_INT >= 24 */) {
+    return if (media.mediaDrm != null) {
       R.layout.kohii_styled_player_surface_view
     } else {
       R.layout.kohii_styled_player_texture_view
@@ -40,7 +39,7 @@ class StyledPlayerViewProvider : ViewRendererProvider() {
 
   override fun createRenderer(
     playback: Playback,
-    rendererType: Int
+    rendererType: Int,
   ): StyledPlayerView {
     return LayoutInflater.from(playback.container.context)
       .inflate(rendererType, playback.container, false) as StyledPlayerView

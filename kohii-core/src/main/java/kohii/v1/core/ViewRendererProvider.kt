@@ -19,19 +19,20 @@ package kohii.v1.core
 import android.view.View
 import kohii.v1.media.Media
 
-abstract class ViewRendererProvider @JvmOverloads constructor(
-  poolSize: Int = 2
-) : RecycledRendererProvider(poolSize) {
-
-  override fun releaseRenderer(
-    playback: Playback,
-    media: Media,
-    renderer: Any?
-  ): Boolean {
-    if (renderer != null) {
-      // View must be removed from its parent before this call.
-      require(renderer is View && (renderer.parent == null && !renderer.isAttachedToWindow))
+abstract class ViewRendererProvider
+  @JvmOverloads
+  constructor(
+    poolSize: Int = 2,
+  ) : RecycledRendererProvider(poolSize) {
+    override fun releaseRenderer(
+      playback: Playback,
+      media: Media,
+      renderer: Any?,
+    ): Boolean {
+      if (renderer != null) {
+        // View must be removed from its parent before this call.
+        require(renderer is View && (renderer.parent == null && !renderer.isAttachedToWindow))
+      }
+      return super.releaseRenderer(playback, media, renderer)
     }
-    return super.releaseRenderer(playback, media, renderer)
   }
-}

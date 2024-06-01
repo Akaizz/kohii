@@ -35,7 +35,6 @@ import kohii.v1.sample.ui.main.DemoItem
 import kohii.v1.sample.ui.nested5.MainAdapter.Companion.STATE_KEY
 
 class RecyclerViewInsideRecyclerViewFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = RecyclerViewInsideRecyclerViewFragment()
   }
@@ -46,7 +45,7 @@ class RecyclerViewInsideRecyclerViewFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     val binding: FragmentRecyclerViewBinding =
       FragmentRecyclerViewBinding.inflate(inflater, container, false)
@@ -58,13 +57,14 @@ class RecyclerViewInsideRecyclerViewFragment : BaseFragment(), DemoContainer {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
 
     val kohii = Kohii[this]
-    val manager = kohii.register(this)
-      .addBucket(binding.recyclerView)
+    val manager =
+      kohii.register(this)
+        .addBucket(binding.recyclerView)
 
     adapter = MainAdapter(kohii, manager, getApp().exoItems)
     if (savedInstanceState != null) adapter.onRestoreState(savedInstanceState)

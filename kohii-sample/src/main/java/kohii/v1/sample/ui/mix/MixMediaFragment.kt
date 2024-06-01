@@ -30,21 +30,21 @@ import kohii.v1.sample.databinding.FragmentRecyclerViewBinding
  */
 @Keep
 class MixMediaFragment : BaseFragment(R.layout.fragment_recycler_view) {
-
   companion object {
     fun newInstance() = MixMediaFragment()
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentRecyclerViewBinding = FragmentRecyclerViewBinding.bind(view)
-    val kohii = Kohii[this].also {
-      it.register(this)
-        .addBucket(binding.recyclerView)
-    }
+    val kohii =
+      Kohii[this].also {
+        it.register(this)
+          .addBucket(binding.recyclerView)
+      }
 
     binding.recyclerView.also {
       it.setHasFixedSize(true)

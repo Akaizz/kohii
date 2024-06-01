@@ -35,17 +35,18 @@ import kohii.v1.sample.R
 fun setVideo(
   view: PlayerView,
   video: Video,
-  kohii: Kohii
+  kohii: Kohii,
 ) {
   (view.findViewById(R.id.exo_content_frame) as? AspectRatioFrameLayout)
     ?.setAspectRatio(video.width / video.height)
 
-  val rebinder = kohii.setUp(MediaItem(video.url, "mp4")) {
-    tag = "${video.javaClass.canonicalName}::${video.url}"
-    preload = true
-    repeatMode = Player.REPEAT_MODE_ONE
-  }
-    .bind(view)
+  val rebinder =
+    kohii.setUp(MediaItem(video.url, "mp4")) {
+      tag = "${video.javaClass.canonicalName}::${video.url}"
+      preload = true
+      repeatMode = Player.REPEAT_MODE_ONE
+    }
+      .bind(view)
   view.setTag(R.id.motion_view_tag, rebinder)
   ViewCompat.setTransitionName(view, video.url)
 }

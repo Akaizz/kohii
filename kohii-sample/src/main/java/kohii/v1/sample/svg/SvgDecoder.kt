@@ -33,10 +33,9 @@ import java.io.InputStream
  * Decodes an SVG internal representation from an [InputStream].
  */
 class SvgDecoder : ResourceDecoder<InputStream, SVG> {
-
   override fun handles(
     source: InputStream,
-    options: Options
+    options: Options,
   ): Boolean {
     // TODO: Can we tell?
     return true
@@ -47,7 +46,7 @@ class SvgDecoder : ResourceDecoder<InputStream, SVG> {
     source: InputStream,
     width: Int,
     height: Int,
-    options: Options
+    options: Options,
   ): Resource<SVG>? {
     try {
       val svg = SVG.getFromInputStream(source)

@@ -19,17 +19,17 @@ package kohii.v1.sample.ui.nested1
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.R.layout
 import kohii.v1.sample.common.inflateView
 
 internal class VerticalItemsAdapter(
   private val kohii: Kohii,
-  private val preferItemCount: Int = Int.MAX_VALUE / 2
+  private val preferItemCount: Int = Int.MAX_VALUE / 2,
 ) : Adapter<VerticalItemViewHolder>() {
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): VerticalItemViewHolder {
     val itemView = parent.inflateView(layout.holder_player_view)
     return VerticalItemViewHolder(itemView)
@@ -41,10 +41,10 @@ internal class VerticalItemsAdapter(
 
   override fun onBindViewHolder(
     holder: VerticalItemViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.container.setAspectRatio(16 / 9F)
-    kohii.setUp(assetVideoUri) {
+    kohii.setUp(VIDEO_URI_ASSET) {
       tag = "NESTED::RV::VER::${holder.absoluteAdapterPosition}"
     }
       .bind(holder.container)

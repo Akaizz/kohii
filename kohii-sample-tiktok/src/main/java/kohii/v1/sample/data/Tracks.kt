@@ -23,5 +23,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 class Tracks(
   val kind: String,
-  val file: String
+  val file: String,
 ) : Parcelable

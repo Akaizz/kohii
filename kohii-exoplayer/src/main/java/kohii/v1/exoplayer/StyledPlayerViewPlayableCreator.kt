@@ -32,37 +32,37 @@ typealias StyledPlayerViewBridgeCreatorFactory = (Context) -> BridgeCreator<Styl
 class StyledPlayerViewPlayableCreator internal constructor(
   private val master: Master,
   private val bridgeCreatorFactory: StyledPlayerViewBridgeCreatorFactory =
-    defaultBridgeCreatorFactory
+    defaultBridgeCreatorFactory,
 ) : PlayableCreator<StyledPlayerView>(StyledPlayerView::class.java) {
-
   constructor(context: Context) : this(Master[context.applicationContext])
 
   companion object {
-
     // Only pass Application to this method.
     private val defaultBridgeCreatorFactory: StyledPlayerViewBridgeCreatorFactory = { context ->
       // ExoPlayerProvider
-      val playerPool = ExoPlayerPool(
-        context = context,
-        userAgent = Common.getUserAgent(context, BuildConfig.LIB_NAME)
-      )
+      val playerPool =
+        ExoPlayerPool(
+          context = context,
+          userAgent = Common.getUserAgent(context, BuildConfig.LIB_NAME),
+        )
       StyledPlayerViewBridgeCreator(playerPool, playerPool.defaultMediaSourceFactory)
     }
   }
 
-  private val bridgeCreator: Lazy<BridgeCreator<StyledPlayerView>> = lazy(NONE) {
-    bridgeCreatorFactory(master.app)
-  }
+  private val bridgeCreator: Lazy<BridgeCreator<StyledPlayerView>> =
+    lazy(NONE) {
+      bridgeCreatorFactory(master.app)
+    }
 
   override fun createPlayable(
     config: Config,
-    media: Media
+    media: Media,
   ): Playable {
     return StyledPlayerViewPlayable(
       master,
       media,
       config,
-      bridgeCreator.value.createBridge(master.app, media)
+      bridgeCreator.value.createBridge(master.app, media),
     )
   }
 
@@ -71,19 +71,20 @@ class StyledPlayerViewPlayableCreator internal constructor(
   }
 
   class Builder(context: Context) {
-
     private val app = context.applicationContext
 
     private var bridgeCreatorFactory: StyledPlayerViewBridgeCreatorFactory =
       defaultBridgeCreatorFactory
 
-    fun setBridgeCreatorFactory(factory: StyledPlayerViewBridgeCreatorFactory): Builder = apply {
-      this.bridgeCreatorFactory = factory
-    }
+    fun setBridgeCreatorFactory(factory: StyledPlayerViewBridgeCreatorFactory): Builder =
+      apply {
+        this.bridgeCreatorFactory = factory
+      }
 
-    fun build(): PlayableCreator<StyledPlayerView> = StyledPlayerViewPlayableCreator(
-      Master[app],
-      bridgeCreatorFactory
-    )
+    fun build(): PlayableCreator<StyledPlayerView> =
+      StyledPlayerViewPlayableCreator(
+        Master[app],
+        bridgeCreatorFactory,
+      )
   }
 }

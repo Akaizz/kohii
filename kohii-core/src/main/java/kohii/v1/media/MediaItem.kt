@@ -27,13 +27,12 @@ import kotlinx.parcelize.Parcelize
 open class MediaItem(
   override val uri: Uri,
   override val type: String? = null,
-  override val mediaDrm: MediaDrm? = null
+  override val mediaDrm: MediaDrm? = null,
 ) : Media, Parcelable {
-
   constructor(
     url: String,
     type: String? = null,
-    mediaDrm: MediaDrm? = null
+    mediaDrm: MediaDrm? = null,
   ) : this(Uri.parse(url), type, mediaDrm)
 
   override fun equals(other: Any?): Boolean {

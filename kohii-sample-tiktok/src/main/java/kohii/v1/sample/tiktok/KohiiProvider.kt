@@ -26,10 +26,10 @@ import kohii.v1.utils.Capsule
  * Using [Capsule] to contain a singleton of my custom [Kohii] instance.
  */
 object KohiiProvider {
-
-  private val capsule = Capsule<Kohii, Context>(creator = { context ->
-    createKohii(context, ExoPlayerConfig.FAST_START)
-  })
+  private val capsule =
+    Capsule<Kohii, Context>(creator = { context ->
+      createKohii(context, ExoPlayerConfig.FAST_START)
+    })
 
   operator fun get(context: Context): Kohii = capsule.get(context)
 }

@@ -25,5 +25,5 @@ import kotlinx.parcelize.Parcelize
 data class DemoItem(
   @StringRes val title: Int = 0,
   @StringRes val subTitle: Int = 0,
-  val fragmentClass: Class<out Fragment>
+  val fragmentClass: Class<out Fragment>,
 ) : Parcelable

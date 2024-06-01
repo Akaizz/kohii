@@ -33,9 +33,8 @@ internal class FbookAdapter(
   val videos: List<Video>,
   val fragment: FbookFragment,
   val shouldBindVideo: (Rebinder?) -> Boolean,
-  val volumeClick: (VideoViewHolder) -> Unit
+  val volumeClick: (VideoViewHolder) -> Unit,
 ) : Adapter<FbookItemHolder>() {
-
   companion object {
     const val TYPE_TEXT = 100
     const val TYPE_PHOTO = 200
@@ -63,18 +62,19 @@ internal class FbookAdapter(
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): FbookItemHolder {
     return when (viewType) {
       TYPE_TEXT -> TextViewHolder(parent)
       TYPE_PHOTO -> PhotoViewHolder(parent)
-      TYPE_VIDEO -> VideoViewHolder(parent, kohii, shouldBindVideo).also { vh ->
-        vh.volume.setOnClickListener { volumeClick(vh) }
-        vh.playAgain.setOnClickListener {
-          // Once completed, a Playback needs to be reset to starting position.
-          if (vh.playAgain.isVisible) vh.playback?.rewind()
+      TYPE_VIDEO ->
+        VideoViewHolder(parent, kohii, shouldBindVideo).also { vh ->
+          vh.volume.setOnClickListener { volumeClick(vh) }
+          vh.playAgain.setOnClickListener {
+            // Once completed, a Playback needs to be reset to starting position.
+            if (vh.playAgain.isVisible) vh.playback?.rewind()
+          }
         }
-      }
 
       else -> throw IllegalArgumentException("Unknown type: $viewType")
     }
@@ -84,7 +84,7 @@ internal class FbookAdapter(
 
   override fun onBindViewHolder(
     holder: FbookItemHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(videos[position % videos.size])
   }
@@ -92,7 +92,7 @@ internal class FbookAdapter(
   override fun onBindViewHolder(
     holder: FbookItemHolder,
     position: Int,
-    payloads: MutableList<Any>
+    payloads: MutableList<Any>,
   ) {
     val payload = payloads.firstOrNull { it is VolumeInfo } as VolumeInfo?
     if (payload != null && holder is VideoViewHolder) {

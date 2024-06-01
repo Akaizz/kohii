@@ -30,15 +30,14 @@ internal class NestedScrollViewBucket(
   manager: Manager,
   override val root: NestedScrollView,
   strategy: Strategy,
-  selector: Selector
+  selector: Selector,
 ) : Bucket(manager, root, strategy, selector), OnScrollChangeListener {
-
   override fun onScrollChange(
     v: NestedScrollView,
     scrollX: Int,
     scrollY: Int,
     oldScrollX: Int,
-    oldScrollY: Int
+    oldScrollY: Int,
   ) {
     manager.refresh()
   }

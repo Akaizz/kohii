@@ -19,7 +19,6 @@ package kohii.v1.exoplayer
 import com.google.android.exoplayer2.LoadControl
 
 interface LoadControlFactory {
-
   /**
    * Returns a [LoadControl].
    */

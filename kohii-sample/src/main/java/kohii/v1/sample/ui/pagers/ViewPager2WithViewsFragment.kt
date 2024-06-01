@@ -36,16 +36,14 @@ import kohii.v1.sample.ui.main.DemoItem
 
 // ViewPager2 whose pages are Views
 class ViewPager2WithViewsFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = ViewPager2WithViewsFragment()
   }
 
   class VideoViewHolder(
     val kohii: Kohii,
-    itemView: View
+    itemView: View,
   ) : ViewHolder(itemView) {
-
     fun bind(video: Sources) {
       val itemTag = "$javaClass::$absoluteAdapterPosition::${video.file}"
       kohii.setUp(video.file) {
@@ -59,11 +57,11 @@ class ViewPager2WithViewsFragment : BaseFragment(), DemoContainer {
 
   class VideoPagerAdapter(
     val kohii: Kohii,
-    private val videos: List<Video>
+    private val videos: List<Video>,
   ) : Adapter<VideoViewHolder>() {
     override fun onCreateViewHolder(
       parent: ViewGroup,
-      viewType: Int
+      viewType: Int,
     ): VideoViewHolder {
       val view = parent.inflateView(R.layout.widget_video_container)
       return VideoViewHolder(kohii, view)
@@ -71,10 +69,11 @@ class ViewPager2WithViewsFragment : BaseFragment(), DemoContainer {
 
     override fun onBindViewHolder(
       holder: VideoViewHolder,
-      position: Int
+      position: Int,
     ) {
-      val video = videos[position % videos.size].playlist.first()
-        .sources.first()
+      val video =
+        videos[position % videos.size].playlist.first()
+          .sources.first()
       holder.bind(video)
     }
 
@@ -86,14 +85,14 @@ class ViewPager2WithViewsFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_pager_2_vertical, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentPager2VerticalBinding = FragmentPager2VerticalBinding.bind(view)

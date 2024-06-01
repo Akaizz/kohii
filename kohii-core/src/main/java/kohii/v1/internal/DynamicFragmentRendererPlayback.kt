@@ -38,9 +38,8 @@ internal class DynamicFragmentRendererPlayback(
   manager: Manager,
   bucket: Bucket,
   container: ViewGroup,
-  config: Config
+  config: Config,
 ) : Playback(manager, bucket, container, config) {
-
   init {
     check(tag != Master.NO_TAG) {
       "Using Fragment as Renderer requires a unique tag when setting up the Playable."
@@ -92,18 +91,20 @@ internal class DynamicFragmentRendererPlayback(
         return true
       } else {
         if (fragmentManager.isDestroyed) return false
-        manager.lifecycleOwner.lifecycle.addObserver(object : LifecycleEventObserver {
-          override fun onStateChanged(
-            source: LifecycleOwner,
-            event: Event
-          ) {
-            if (fragmentManager.isStateSaved) return
-            source.lifecycle.removeObserver(this)
-            if (container.isAttachedToWindow) {
-              onAttachRenderer(renderer)
+        manager.lifecycleOwner.lifecycle.addObserver(
+          object : LifecycleEventObserver {
+            override fun onStateChanged(
+              source: LifecycleOwner,
+              event: Event,
+            ) {
+              if (fragmentManager.isStateSaved) return
+              source.lifecycle.removeObserver(this)
+              if (container.isAttachedToWindow) {
+                onAttachRenderer(renderer)
+              }
             }
-          }
-        })
+          },
+        )
         return true
       }
     }
@@ -129,7 +130,7 @@ internal class DynamicFragmentRendererPlayback(
   @Suppress("MemberVisibilityCanBePrivate")
   internal fun scheduleAttachFragment(
     container: ViewGroup,
-    fragment: Fragment
+    fragment: Fragment,
   ) {
     fragmentManager.registerFragmentLifecycleCallbacks(
       object : FragmentLifecycleCallbacks() {
@@ -137,7 +138,7 @@ internal class DynamicFragmentRendererPlayback(
           fm: FragmentManager,
           f: Fragment,
           v: View,
-          savedInstanceState: Bundle?
+          savedInstanceState: Bundle?,
         ) {
           if (f === fragment) {
             fm.unregisterFragmentLifecycleCallbacks(this)
@@ -145,13 +146,13 @@ internal class DynamicFragmentRendererPlayback(
           }
         }
       },
-      false
+      false,
     )
   }
 
   internal fun addViewToContainer(
     view: View,
-    container: ViewGroup
+    container: ViewGroup,
   ) {
     if (container.childCount > 1) {
       throw IllegalStateException("Container must not have more than one children.")

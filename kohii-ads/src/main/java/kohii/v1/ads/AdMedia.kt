@@ -23,6 +23,5 @@ import kohii.v1.media.Media
  * A [Media] type that optionally contains information about Advertisement media.
  */
 interface AdMedia : Media {
-
   val adTagUri: Uri?
 }

@@ -35,7 +35,6 @@ import kohii.v1.sample.ui.combo.LandscapeFullscreenFragment
 import kohii.v1.sample.ui.main.MainListFragment
 
 class MainActivity : BaseActivity(), PlayerInfoHolder, LandscapeFullscreenFragment.Callback {
-
   private lateinit var binding: MainActivityBinding
   private var playerInfo: PlayerInfo? = null
 
@@ -53,26 +52,33 @@ class MainActivity : BaseActivity(), PlayerInfoHolder, LandscapeFullscreenFragme
 
     supportFragmentManager.registerFragmentLifecycleCallbacks(
       object : FragmentLifecycleCallbacks() {
-        override fun onFragmentStarted(fm: FragmentManager, f: Fragment) {
+        override fun onFragmentStarted(
+          fm: FragmentManager,
+          f: Fragment,
+        ) {
           if (f !is BaseFragment) return
           if (f !is DemoContainer) {
             this@MainActivity.updateTitle(getString(R.string.app_name))
             return
           }
           val titleId = f.demoItem?.title ?: 0
-          val title = if (titleId == 0) {
-            f.javaClass.simpleName.splitCases()
-          } else {
-            getString(titleId)
-          }
+          val title =
+            if (titleId == 0) {
+              f.javaClass.simpleName.splitCases()
+            } else {
+              getString(titleId)
+            }
           this@MainActivity.updateTitle(title)
         }
 
-        override fun onFragmentStopped(fm: FragmentManager, f: Fragment) {
+        override fun onFragmentStopped(
+          fm: FragmentManager,
+          f: Fragment,
+        ) {
           if (f is DemoContainer) this@MainActivity.updateTitle(getString(R.string.app_name))
         }
       },
-      false
+      false,
     )
 
     if (savedInstanceState == null) {
@@ -80,7 +86,7 @@ class MainActivity : BaseActivity(), PlayerInfoHolder, LandscapeFullscreenFragme
         .replace(
           R.id.fragmentContainer,
           MainListFragment.newInstance(),
-          MainListFragment::class.java.simpleName
+          MainListFragment::class.java.simpleName,
         )
         .commit()
     }
@@ -96,7 +102,7 @@ class MainActivity : BaseActivity(), PlayerInfoHolder, LandscapeFullscreenFragme
   @RequiresApi(VERSION_CODES.O)
   override fun onPictureInPictureModeChanged(
     isInPictureInPictureMode: Boolean,
-    newConfig: Configuration
+    newConfig: Configuration,
   ) {
     super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     val decorView = window.decorView
@@ -126,12 +132,11 @@ class MainActivity : BaseActivity(), PlayerInfoHolder, LandscapeFullscreenFragme
 
 data class PlayerInfo(
   val adapterPos: Int,
-  val viewTop: Int
+  val viewTop: Int,
 )
 
 // Implemented by host (Activity) to manage shared elements transition information.
 interface PlayerInfoHolder {
-
   fun recordPlayerInfo(info: PlayerInfo?)
 
   fun fetchPlayerInfo(): PlayerInfo?

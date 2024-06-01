@@ -29,16 +29,15 @@ import kohii.v1.sample.databinding.HolderPlayerViewBinding
 import kotlin.LazyThreadSafetyMode.NONE
 
 class SinglePlayerFragment : AppCompatDialogFragment(), Playback.Callback {
-
   companion object {
-
     private const val EXTRA_REBINDER = "${BuildConfig.APPLICATION_ID}::debug::rebinder"
 
-    fun newInstance(selectionKey: SelectionKey) = SinglePlayerFragment().also {
-      val args = Bundle()
-      args.putParcelable(EXTRA_REBINDER, selectionKey)
-      it.arguments = args
-    }
+    fun newInstance(selectionKey: SelectionKey) =
+      SinglePlayerFragment().also {
+        val args = Bundle()
+        args.putParcelable(EXTRA_REBINDER, selectionKey)
+        it.arguments = args
+      }
   }
 
   private val kohii: Kohii by lazy(NONE) { Kohii[this] }
@@ -63,7 +62,7 @@ class SinglePlayerFragment : AppCompatDialogFragment(), Playback.Callback {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     _binding = HolderPlayerViewBinding.inflate(inflater, container, false)
     return binding.root
@@ -71,7 +70,7 @@ class SinglePlayerFragment : AppCompatDialogFragment(), Playback.Callback {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     binding.playerContainer.setAspectRatio(16 / 9F)
@@ -107,7 +106,6 @@ class SinglePlayerFragment : AppCompatDialogFragment(), Playback.Callback {
   }
 
   interface Callback {
-
     fun onShown(selectionKey: SelectionKey)
 
     fun onDismiss(selectionKey: SelectionKey)

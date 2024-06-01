@@ -26,9 +26,8 @@ import kohii.v1.sample.common.BaseViewHolder
 
 internal class VideoViewHolder(
   parent: ViewGroup,
-  private val pagePos: Int
+  private val pagePos: Int,
 ) : BaseViewHolder(parent, R.layout.holder_player_container), Playback.ArtworkHintListener {
-
   internal val content = itemView.findViewById(R.id.playerContainer) as AspectRatioFrameLayout
   internal val container = itemView.findViewById(R.id.container) as ViewGroup
   internal val thumbnail = itemView.findViewById(R.id.thumbnail) as View
@@ -46,7 +45,7 @@ internal class VideoViewHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     thumbnail.isVisible = shouldShow
   }

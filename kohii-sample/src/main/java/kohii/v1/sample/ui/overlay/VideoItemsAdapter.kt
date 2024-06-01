@@ -30,9 +30,8 @@ internal class VideoItemsAdapter(
   private val videos: List<Video>,
   private val kohii: Kohii,
   val shouldBindVideo: (Rebinder?) -> Boolean,
-  val onVideoClick: (Int, Rebinder) -> Unit
+  val onVideoClick: (Int, Rebinder) -> Unit,
 ) : Adapter<BaseViewHolder>(), BaseViewHolder.OnClickListener {
-
   init {
     setHasStableIds(true)
   }
@@ -42,19 +41,20 @@ internal class VideoItemsAdapter(
     transView: View?,
     adapterPos: Int,
     itemId: Long,
-    payload: Any?
+    payload: Any?,
   ) {
     onVideoClick(adapterPos, payload as Rebinder)
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
-  ): BaseViewHolder = VideoItemHolder(
-    from(parent.context),
-    parent,
-    this
-  )
+    viewType: Int,
+  ): BaseViewHolder =
+    VideoItemHolder(
+      from(parent.context),
+      parent,
+      this,
+    )
 
   override fun getItemId(position: Int): Long {
     return position.toLong()
@@ -66,7 +66,7 @@ internal class VideoItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     val item = videos[position % videos.size]
     if (holder is VideoItemHolder) {

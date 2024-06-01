@@ -34,11 +34,10 @@ import kotlin.properties.Delegates
 internal class VideoItemHolder(
   inflater: LayoutInflater,
   parent: ViewGroup,
-  private val clickListener: OnClickListener
+  private val clickListener: OnClickListener,
 ) : BaseViewHolder(inflater, R.layout.holder_video_text_overlay, parent),
   Playback.ArtworkHintListener,
   OnClickListener {
-
   override fun onClick(v: View?) {
     clickListener.onItemClick(v!!, null, absoluteAdapterPosition, itemId, rebinder)
   }
@@ -63,7 +62,7 @@ internal class VideoItemHolder(
         videoImage = null
         videoFile = null
       }
-    }
+    },
   )
 
   internal var videoFile: String? = null
@@ -100,7 +99,7 @@ internal class VideoItemHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     if (!shouldShow) {
       thumbnail.animate()

@@ -32,7 +32,6 @@ import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.databinding.ActivityDevScrollviewBinding
 
 class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
-
   lateinit var binding: ActivityDevScrollviewBinding
 
   lateinit var kohii: Kohii
@@ -41,7 +40,7 @@ class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     binding = ActivityDevScrollviewBinding.inflate(inflater, container, false)
     return binding.root
@@ -49,67 +48,82 @@ class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     kohii = Kohii[this]
-    manager = kohii.register(this)
-      .addBucket(binding.scrollView)
+    manager =
+      kohii.register(this)
+        .addBucket(binding.scrollView)
 
-    kohii.setUp(DemoApp.assetVideoUri) {
+    kohii.setUp(DemoApp.VIDEO_URI_ASSET) {
       tag = "player::0"
       repeatMode = Player.REPEAT_MODE_ONE
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
 
-        override fun kohiiCanPause(): Boolean = true
+          override fun kohiiCanPause(): Boolean = true
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            // TODO: replace with custom ForwardingPlayer.
-            // val controller = kohii.createControlDispatcher(playback)
-            // renderer.setControlDispatcher(controller)
-            renderer.useController = true
-            renderer.tag = controller
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val controller = kohii.createControlDispatcher(playback)
+              // renderer.setControlDispatcher(controller)
+              renderer.useController = true
+              renderer.tag = controller
+            }
+          }
+
+          override fun teardownRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val tag = renderer.tag
+              // if (tag is ControlDispatcher) renderer.tag = null
+            }
           }
         }
-
-        override fun teardownRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            // TODO: replace with custom ForwardingPlayer.
-            // val tag = renderer.tag
-            // if (tag is ControlDispatcher) renderer.tag = null
-          }
-        }
-      }
     }
       .bind(binding.playerView1)
 
     kohii.setUp("https://content.jwplatform.com/manifests/Cl6EVHgQ.m3u8") {
       tag = "player::1"
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
 
-        override fun kohiiCanPause(): Boolean = true
+          override fun kohiiCanPause(): Boolean = true
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            // TODO: replace with custom ForwardingPlayer.
-            // val controller = kohii.createControlDispatcher(playback)
-            // renderer.setControlDispatcher(controller)
-            // renderer.useController = true
-            // renderer.tag = controller
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val controller = kohii.createControlDispatcher(playback)
+              // renderer.setControlDispatcher(controller)
+              // renderer.useController = true
+              // renderer.tag = controller
+            }
+          }
+
+          override fun teardownRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val tag = renderer.tag
+              // if (tag is ControlDispatcher) renderer.tag = null
+            }
           }
         }
-
-        override fun teardownRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            // TODO: replace with custom ForwardingPlayer.
-            // val tag = renderer.tag
-            // if (tag is ControlDispatcher) renderer.tag = null
-          }
-        }
-      }
     }
       .bind(binding.playerView2)
   }
@@ -124,6 +138,7 @@ class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
         container.useController = false // if you want to only use the global controller.
         binding.controlView.player = container.player
         // TODO: replace with custom ForwardingPlayer.
+
         /* val controller = container.tag
         if (controller is ControlDispatcher) {
           binding.controlView.setControlDispatcher(controller)

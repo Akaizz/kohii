@@ -24,14 +24,14 @@ import kohii.v1.sample.R.string
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class NestedTextViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, layout.widget_simple_textview) {
-
   override fun bind(item: Any?) {
     super.bind(item)
-    (itemView as TextView).text = itemView.context.getString(
-      string.lib_intro
-    )
-      .parseAsHtml()
+    (itemView as TextView).text =
+      itemView.context.getString(
+        string.lib_intro,
+      )
+        .parseAsHtml()
   }
 }

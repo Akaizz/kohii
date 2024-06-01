@@ -37,17 +37,14 @@ import kotlin.math.abs
 
 // ViewPager2 whose pages are Fragments
 class ViewPager2WithFragmentsFragment : BaseFragment(), DemoContainer {
-
   companion object {
-    fun newInstance() =
-      ViewPager2WithFragmentsFragment()
+    fun newInstance() = ViewPager2WithFragmentsFragment()
   }
 
   class VideoPagerAdapter(
     private val videos: List<Video>,
-    fragment: Fragment
+    fragment: Fragment,
   ) : FragmentStateAdapter(fragment) {
-
     override fun getItemCount() = Int.MAX_VALUE / 2
 
     override fun createFragment(position: Int): Fragment {
@@ -60,14 +57,14 @@ class ViewPager2WithFragmentsFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_pager_2_horizontal, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentPager2HorizontalBinding = FragmentPager2HorizontalBinding.bind(view)

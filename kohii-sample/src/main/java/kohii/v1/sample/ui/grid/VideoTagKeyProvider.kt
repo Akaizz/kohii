@@ -23,23 +23,24 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener
 
 internal class VideoTagKeyProvider(
-  val recyclerView: RecyclerView
+  val recyclerView: RecyclerView,
 ) : ItemKeyProvider<SelectionKey>(SCOPE_CACHED) {
-
   private val posToKey = SparseArray<SelectionKey>()
   private val keyToPos = HashMap<SelectionKey, Int>()
 
   init {
     require(recyclerView.adapter?.hasStableIds() == true)
-    recyclerView.addOnChildAttachStateChangeListener(object : OnChildAttachStateChangeListener {
-      override fun onChildViewDetachedFromWindow(view: View) {
-        onDetached(view)
-      }
+    recyclerView.addOnChildAttachStateChangeListener(
+      object : OnChildAttachStateChangeListener {
+        override fun onChildViewDetachedFromWindow(view: View) {
+          onDetached(view)
+        }
 
-      override fun onChildViewAttachedToWindow(view: View) {
-        onAttached(view)
-      }
-    })
+        override fun onChildViewAttachedToWindow(view: View) {
+          onAttached(view)
+        }
+      },
+    )
   }
 
   override fun getKey(position: Int): SelectionKey? {

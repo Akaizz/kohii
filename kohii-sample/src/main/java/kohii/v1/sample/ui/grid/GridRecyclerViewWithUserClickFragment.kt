@@ -32,7 +32,6 @@ class GridRecyclerViewWithUserClickFragment :
   DemoContainer,
   GridContentFragment.VideoGridCallback,
   SinglePlayerFragment.Callback {
-
   companion object {
     fun newInstance() = GridRecyclerViewWithUserClickFragment()
   }
@@ -46,7 +45,7 @@ class GridRecyclerViewWithUserClickFragment :
     set(value) {
       val from = field
       field = value
-      if (from == value /* equals */) return
+      if (from == value) return
       if (value != null) {
         videoFragment.select(value)
         val tag = value.rebinder.tag.toString()
@@ -61,14 +60,14 @@ class GridRecyclerViewWithUserClickFragment :
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_grid, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     videoFragment = childFragmentManager.findFragmentById(R.id.mainPanel) as GridContentFragment

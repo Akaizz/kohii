@@ -21,11 +21,10 @@ import android.view.ViewGroup
 import androidx.viewbinding.ViewBinding
 
 abstract class ViewBindingHolder<V : ViewBinding> private constructor(
-  val binding: V
+  val binding: V,
 ) : BaseViewHolder(binding.root) {
-
   constructor(
     parent: ViewGroup,
-    bindingCreator: (LayoutInflater, ViewGroup?, Boolean) -> V
+    bindingCreator: (LayoutInflater, ViewGroup?, Boolean) -> V,
   ) : this(bindingCreator(LayoutInflater.from(parent.context), parent, false))
 }

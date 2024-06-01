@@ -27,18 +27,17 @@ import kohii.v1.media.Media
 
 class StyledPlayerViewBridgeCreator(
   private val playerPool: PlayerPool<Player>,
-  private val mediaSourceFactory: MediaSource.Factory
+  private val mediaSourceFactory: MediaSource.Factory,
 ) : BridgeCreator<StyledPlayerView> {
-
   override fun createBridge(
     context: Context,
-    media: Media
+    media: Media,
   ): Bridge<StyledPlayerView> {
     return StyledPlayerViewBridge(
       context,
       media,
       playerPool,
-      mediaSourceFactory
+      mediaSourceFactory,
     )
   }
 

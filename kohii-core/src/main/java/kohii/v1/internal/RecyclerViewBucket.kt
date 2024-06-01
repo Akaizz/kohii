@@ -34,9 +34,8 @@ internal class RecyclerViewBucket(
   manager: Manager,
   override val root: RecyclerView,
   strategy: Strategy,
-  selector: Selector
+  selector: Selector,
 ) : Bucket(manager, root, strategy, selector), RecyclerView.OnChildAttachStateChangeListener {
-
   companion object {
     internal fun RecyclerView.fetchOrientation(): Int {
       val layout = this.layoutManager ?: return NONE_AXIS
@@ -62,11 +61,16 @@ internal class RecyclerViewBucket(
     }
   }
 
-  private val scrollListener = object : OnScrollListener() {
-    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-      manager.refresh()
+  private val scrollListener =
+    object : OnScrollListener() {
+      override fun onScrolled(
+        recyclerView: RecyclerView,
+        dx: Int,
+        dy: Int,
+      ) {
+        manager.refresh()
+      }
     }
-  }
 
   override fun onAdded() {
     super.onAdded()

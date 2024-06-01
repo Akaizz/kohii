@@ -22,8 +22,8 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import kohii.v1.sample.R.id
 
 internal class HorizontalItemViewHolder(itemView: View) : ViewHolder(itemView) {
-
-  internal val container = itemView.findViewById(
-    id.playerContainer
-  ) as AspectRatioFrameLayout
+  internal val container =
+    itemView.findViewById(
+      id.playerContainer,
+    ) as AspectRatioFrameLayout
 }

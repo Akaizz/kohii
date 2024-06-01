@@ -28,18 +28,17 @@ import kohii.v1.media.Media
 @Deprecated(message = "PlayerView is deprecated. Use the StyledPlayerViewBridgeCreator instead.")
 class PlayerViewBridgeCreator(
   private val playerPool: PlayerPool<Player>,
-  private val mediaSourceFactory: MediaSource.Factory
+  private val mediaSourceFactory: MediaSource.Factory,
 ) : BridgeCreator<PlayerView> {
-
   override fun createBridge(
     context: Context,
-    media: Media
+    media: Media,
   ): Bridge<PlayerView> {
     return PlayerViewBridge(
       context,
       media,
       playerPool,
-      mediaSourceFactory
+      mediaSourceFactory,
     )
   }
 

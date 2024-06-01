@@ -20,10 +20,9 @@ import android.content.Context
 import kohii.v1.media.Media
 
 interface BridgeCreator<RENDERER : Any> {
-
   fun createBridge(
     context: Context,
-    media: Media
+    media: Media,
   ): Bridge<RENDERER>
 
   fun cleanUp()

@@ -21,10 +21,9 @@ import kohii.v1.core.Playback
 import kohii.v1.core.ViewRendererProvider
 
 internal class VideoViewProvider : ViewRendererProvider() {
-
   override fun createRenderer(
     playback: Playback,
-    rendererType: Int
+    rendererType: Int,
   ): Any {
     val container = playback.container
     return LayoutInflater.from(container.context)

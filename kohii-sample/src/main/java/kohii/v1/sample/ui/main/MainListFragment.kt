@@ -28,7 +28,6 @@ import kohii.v1.sample.common.getApp
 import kohii.v1.sample.databinding.FragmentRecyclerViewBinding
 
 class MainListFragment : BaseFragment() {
-
   companion object {
     fun newInstance() = MainListFragment()
   }
@@ -36,33 +35,35 @@ class MainListFragment : BaseFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_recycler_view, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentRecyclerViewBinding = FragmentRecyclerViewBinding.bind(view)
-    binding.recyclerView.adapter = DemoItemsAdapter(getApp().demoItems) {
-      val fragment: Fragment = it.fragmentClass.newInstance().apply {
-        val bundle = Bundle()
-        bundle.putParcelable(KEY_DEMO_ITEM, it)
-        arguments = bundle
-      }
+    binding.recyclerView.adapter =
+      DemoItemsAdapter(getApp().demoItems) {
+        val fragment: Fragment =
+          it.fragmentClass.newInstance().apply {
+            val bundle = Bundle()
+            bundle.putParcelable(KEY_DEMO_ITEM, it)
+            arguments = bundle
+          }
 
-      parentFragmentManager.commit {
-        setReorderingAllowed(true) // Optimize for shared element transition
-        replace(
-          R.id.fragmentContainer,
-          fragment,
-          it.fragmentClass.canonicalName
-        )
-        addToBackStack(null)
+        parentFragmentManager.commit {
+          setReorderingAllowed(true) // Optimize for shared element transition
+          replace(
+            R.id.fragmentContainer,
+            fragment,
+            it.fragmentClass.canonicalName,
+          )
+          addToBackStack(null)
+        }
       }
-    }
   }
 }

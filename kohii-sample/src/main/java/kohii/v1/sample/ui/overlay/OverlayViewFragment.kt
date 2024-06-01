@@ -58,7 +58,6 @@ class OverlayViewFragment :
   TransitionListenerAdapter,
   BackPressConsumer,
   DemoContainer {
-
   companion object {
     fun newInstance() = OverlayViewFragment()
   }
@@ -67,21 +66,22 @@ class OverlayViewFragment :
 
   private val overlayViewModel: OverlayViewModel by viewModels()
 
-  private val sheetCallback = object : BottomSheetCallback() {
-    override fun onSlide(
-      bottomSheet: View,
-      slideOffset: Float
-    ) {
-      overlayBinding.container.progress = 1F - slideOffset.coerceIn(0F, 1F)
-    }
+  private val sheetCallback =
+    object : BottomSheetCallback() {
+      override fun onSlide(
+        bottomSheet: View,
+        slideOffset: Float,
+      ) {
+        overlayBinding.container.progress = 1F - slideOffset.coerceIn(0F, 1F)
+      }
 
-    override fun onStateChanged(
-      bottomSheet: View,
-      state: Int
-    ) {
-      if (state == STATE_HIDDEN) deselectRebinder()
+      override fun onStateChanged(
+        bottomSheet: View,
+        state: Int,
+      ) {
+        if (state == STATE_HIDDEN) deselectRebinder()
+      }
     }
-  }
 
   private var playback: Playback? = null
   private var selection by Delegates.observable<Pair<Int, Rebinder?>>(
@@ -107,7 +107,7 @@ class OverlayViewFragment :
           playback = null
         }
       }
-    }
+    },
   )
 
   private lateinit var kohii: Kohii
@@ -120,7 +120,7 @@ class OverlayViewFragment :
   override fun onCreateView(
     inflater: LayoutInflater,
     parent: ViewGroup?,
-    state: Bundle?
+    state: Bundle?,
   ): View? {
     binding = FragmentRecyclerViewMotionBinding.inflate(inflater, parent, false)
     overlayBinding = binding.motionLayout
@@ -130,20 +130,25 @@ class OverlayViewFragment :
   @SuppressLint("SetTextI18n")
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     kohii = Kohii[this]
-    manager = kohii.register(this)
-      .addBucket(binding.recyclerView)
-      .addBucket(overlayBinding.videoPlayerContainer)
+    manager =
+      kohii.register(this)
+        .addBucket(binding.recyclerView)
+        .addBucket(overlayBinding.videoPlayerContainer)
 
-    adapter = VideoItemsAdapter(
-      getApp().videos,
-      kohii,
-      shouldBindVideo = { /* the Rebinder is not selected */ it != selection.second },
-      onVideoClick = { pos, rebinder -> selectRebinder(pos, rebinder) }
-    )
+    adapter =
+      VideoItemsAdapter(
+        getApp().videos,
+        kohii,
+        shouldBindVideo = {
+          // the Rebinder is not selected
+          it != selection.second
+        },
+        onVideoClick = { pos, rebinder -> selectRebinder(pos, rebinder) },
+      )
 
     binding.recyclerView.let {
       it.setHasFixedSize(true)
@@ -159,11 +164,12 @@ class OverlayViewFragment :
 
     // We will fetch the behavior manually ...
     // overlaySheet = BottomSheetBehavior.from(binding.motionLayout) // don't do this :(
-    overlaySheet = run {
-      val behavior = overlayBinding.container.viewBehavior()
-      check(behavior is BottomSheetBehavior)
-      behavior
-    }
+    overlaySheet =
+      run {
+        val behavior = overlayBinding.container.viewBehavior()
+        check(behavior is BottomSheetBehavior)
+        behavior
+      }
 
     if (savedInstanceState == null) overlaySheet.state = STATE_HIDDEN
     overlaySheet.addBottomSheetCallback(sheetCallback)
@@ -221,7 +227,7 @@ class OverlayViewFragment :
     motionLayout: MotionLayout,
     startId: Int,
     endId: Int,
-    progress: Float
+    progress: Float,
   ) {
     overlayBinding.overlayPlayerView.useController = progress < 0.2
   }
@@ -244,7 +250,7 @@ class OverlayViewFragment :
 
   internal fun selectRebinder(
     position: Int,
-    rebinder: Rebinder
+    rebinder: Rebinder,
   ) {
     overlayViewModel.selectedRebinder.value = position to rebinder
   }

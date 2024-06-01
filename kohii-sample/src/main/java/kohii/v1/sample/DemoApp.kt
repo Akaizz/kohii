@@ -63,25 +63,29 @@ import kotlin.LazyThreadSafetyMode.NONE
  * @author eneim (2018/06/26).
  */
 class DemoApp : Application() {
-
   companion object {
-
-    const val assetVideoUri = "file:///android_asset/bbb_45s_hevc.webm"
+    const val VIDEO_URI_ASSET = "file:///android_asset/bbb_45s_hevc.webm"
   }
 
-  internal val moshi: Moshi = Moshi.Builder()
-    .add(object : JsonAdapter<Uri>() {
-      @FromJson
-      override fun fromJson(reader: JsonReader): Uri = reader.nextString().toUri()
+  internal val moshi: Moshi =
+    Moshi.Builder()
+      .add(
+        object : JsonAdapter<Uri>() {
+          @FromJson
+          override fun fromJson(reader: JsonReader): Uri = reader.nextString().toUri()
 
-      @ToJson
-      override fun toJson(writer: JsonWriter, value: Uri?) {
-        writer.value(value?.toString() ?: "")
-      }
+          @ToJson
+          override fun toJson(
+            writer: JsonWriter,
+            value: Uri?,
+          ) {
+            writer.value(value?.toString() ?: "")
+          }
 
-      override fun toString(): String = "JsonAdapter(Uri)"
-    })
-    .build()
+          override fun toString(): String = "JsonAdapter(Uri)"
+        },
+      )
+      .build()
 
   val videos by lazy(NONE) {
     val jsonAdapter: JsonAdapter<List<Video>> =
@@ -101,39 +105,40 @@ class DemoApp : Application() {
   }
 
   val demoItems by lazy(NONE) {
-    val youtubeDemos: Collection<DemoItem> = if (youtubeApiKey.isNotEmpty()) {
-      listOf(
-        DemoItem(
-          R.string.demo_title_youtube_2,
-          R.string.demo_desc_youtube_2,
-          YouTubeFragment::class.java
+    val youtubeDemos: Collection<DemoItem> =
+      if (youtubeApiKey.isNotEmpty()) {
+        listOf(
+          DemoItem(
+            R.string.demo_title_youtube_2,
+            R.string.demo_desc_youtube_2,
+            YouTubeFragment::class.java,
+          ),
         )
-      )
-    } else {
-      emptyList()
-    }
+      } else {
+        emptyList()
+      }
 
     setOf(
       DemoItem(
         R.string.demo_title_recycler_view_0,
         R.string.demo_desc_recycler_view_0,
-        GridRecyclerViewWithUserClickFragment::class.java
+        GridRecyclerViewWithUserClickFragment::class.java,
       ),
       DemoItem(
         R.string.demo_title_manual_1,
         R.string.demo_desc_manual_1,
-        ManualRecyclerViewFragment::class.java
+        ManualRecyclerViewFragment::class.java,
       ),
       DemoItem(
         R.string.demo_title_ads_1,
         R.string.demo_desc_ads_1,
-        AdsContainerFragment::class.java
+        AdsContainerFragment::class.java,
       ),
       DemoItem(
         R.string.demo_title_fbook,
         R.string.demo_desc_fbook,
-        FbookFragment::class.java
-      )
+        FbookFragment::class.java,
+      ),
     )
       .plus(youtubeDemos)
       .plus(
@@ -141,94 +146,94 @@ class DemoApp : Application() {
           DemoItem(
             R.string.demo_title_recycler_view_1,
             R.string.demo_desc_recycler_view_1,
-            VerticalListRecyclerViewFragment::class.java
+            VerticalListRecyclerViewFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_recycler_view_2,
             R.string.demo_desc_recycler_view_2,
-            ExoPlayerVideosFragment::class.java
+            ExoPlayerVideosFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_recycler_view_3,
             R.string.demo_desc_recycler_view_3,
-            OverlayViewFragment::class.java
+            OverlayViewFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_recycler_view_4,
             R.string.demo_desc_recycler_view_4,
-            EchoFragment::class.java
+            EchoFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_nested_scrollview_1,
             R.string.demo_desc_nested_scrollview_1,
-            MotionFragment::class.java
+            MotionFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_nested_scrollview_2,
             R.string.demo_desc_nested_scrollview_2,
-            ScrollViewFragment::class.java
+            ScrollViewFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_pager_1,
             R.string.demo_desc_pager_1,
-            ViewPager1WithFragmentsFragment::class.java
+            ViewPager1WithFragmentsFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_pager_2,
             R.string.demo_desc_pager_2,
-            ViewPager1WithViewsFragment::class.java
+            ViewPager1WithViewsFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            ViewPager1WithRecyclerViewFragmentsFragment::class.java
+            ViewPager1WithRecyclerViewFragmentsFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_pager_3,
             R.string.demo_desc_pager_3,
-            ViewPager2WithFragmentsFragment::class.java
+            ViewPager2WithFragmentsFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_pager_4,
             R.string.demo_desc_pager_4,
-            ViewPager2WithViewsFragment::class.java
+            ViewPager2WithViewsFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            ViewPager2WithRecyclerViewFragmentsFragment::class.java
+            ViewPager2WithRecyclerViewFragmentsFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            NestedScrollViewInsideRecyclerViewFragment::class.java
+            NestedScrollViewInsideRecyclerViewFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            VerticalRecyclerViewInsideNestedScrollViewFragment::class.java
+            VerticalRecyclerViewInsideNestedScrollViewFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            HorizontalRecyclerViewInsideNestedScrollViewFragment::class.java
+            HorizontalRecyclerViewInsideNestedScrollViewFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            VerticalFixedHeightRecyclerViewInsideNestedScrollViewFragment::class.java
+            VerticalFixedHeightRecyclerViewInsideNestedScrollViewFragment::class.java,
           ),
           DemoItem(
             0,
             0,
-            RecyclerViewInsideRecyclerViewFragment::class.java
+            RecyclerViewInsideRecyclerViewFragment::class.java,
           ),
           DemoItem(
             R.string.demo_title_master_detail,
             R.string.demo_desc_master_detail,
-            MasterDetailFragment::class.java
-          )
-        )
+            MasterDetailFragment::class.java,
+          ),
+        ),
       )
       .toList()
   }

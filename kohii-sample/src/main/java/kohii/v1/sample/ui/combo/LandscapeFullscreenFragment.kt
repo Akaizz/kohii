@@ -37,19 +37,19 @@ import kohii.v1.sample.databinding.FragmentPlayerHorizontalBinding
 import java.util.concurrent.atomic.AtomicInteger
 
 class LandscapeFullscreenFragment : BaseFragment() {
-
   companion object {
     private const val KEY_INIT_DATA = "kohii:fragment:player:init_data"
     private const val KEY_REBINDER = "kohii:fragment:player:rebinder"
 
     fun newInstance(
       rebinder: Rebinder,
-      initData: InitData
+      initData: InitData,
     ): LandscapeFullscreenFragment {
-      val bundle = Bundle().also {
-        it.putParcelable(KEY_REBINDER, rebinder)
-        it.putParcelable(KEY_INIT_DATA, initData)
-      }
+      val bundle =
+        Bundle().also {
+          it.putParcelable(KEY_REBINDER, rebinder)
+          it.putParcelable(KEY_INIT_DATA, initData)
+        }
       return LandscapeFullscreenFragment().also { it.arguments = bundle }
     }
   }
@@ -92,24 +92,25 @@ class LandscapeFullscreenFragment : BaseFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_player_horizontal, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val binding: FragmentPlayerHorizontalBinding = FragmentPlayerHorizontalBinding.bind(view)
     val container =
       binding.playerView.findViewById(R.id.exo_content_frame) as AspectRatioFrameLayout
 
-    val (initData, rebinder) = requireArguments().let {
-      requireNotNull(it.getParcelable<InitData>(KEY_INIT_DATA)) to
-        requireNotNull(it.getParcelable<Rebinder>(KEY_REBINDER))
-    }
+    val (initData, rebinder) =
+      requireArguments().let {
+        requireNotNull(it.getParcelable<InitData>(KEY_INIT_DATA)) to
+          requireNotNull(it.getParcelable<Rebinder>(KEY_REBINDER))
+      }
 
     container.setAspectRatio(initData.aspectRatio)
 
@@ -117,19 +118,23 @@ class LandscapeFullscreenFragment : BaseFragment() {
     kohii.register(this)
       .addBucket(binding.playerContainer)
     rebinder.with {
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
 
-        override fun kohiiCanPause(): Boolean = true
+          override fun kohiiCanPause(): Boolean = true
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            // TODO: replace with custom ForwardingPlayer.
-            // renderer.useController = true
-            // renderer.setControlDispatcher(kohii.createControlDispatcher(playback))
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // renderer.useController = true
+              // renderer.setControlDispatcher(kohii.createControlDispatcher(playback))
+            }
           }
         }
-      }
     }
       .bind(kohii, binding.playerView)
 
@@ -149,7 +154,7 @@ class LandscapeFullscreenFragment : BaseFragment() {
             // Hide the nav bar and status bar
             or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             or View.SYSTEM_UI_FLAG_FULLSCREEN
-          )
+        )
       } else {
         // it.supportActionBar?.show()
         callback?.showToolbar()
@@ -175,7 +180,6 @@ class LandscapeFullscreenFragment : BaseFragment() {
   }
 
   interface Callback {
-
     fun hideToolbar()
 
     fun showToolbar()

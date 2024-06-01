@@ -25,7 +25,6 @@ import kohii.v1.media.Media
  * A [PlayerPool] for the [MediaPlayer].
  */
 open class MediaPlayerPool(private val context: Context) : PlayerPool<MediaPlayer>() {
-
   override fun recyclePlayerForMedia(media: Media): Boolean = media.mediaDrm == null
 
   override fun createPlayer(media: Media): MediaPlayer = MediaPlayer(context)

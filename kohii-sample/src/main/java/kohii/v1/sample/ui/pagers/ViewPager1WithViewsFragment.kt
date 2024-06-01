@@ -37,19 +37,17 @@ import kotlin.math.abs
 
 // ViewPager whose pages are Views
 class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = ViewPager1WithViewsFragment()
   }
 
   class PagerPagesAdapter(
     val kohii: Kohii,
-    private val videos: List<Video>
+    private val videos: List<Video>,
   ) : PagerAdapter() {
-
     override fun isViewFromObject(
       view: View,
-      `object`: Any
+      `object`: Any,
     ): Boolean {
       return view === `object`
     }
@@ -58,14 +56,15 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
 
     override fun instantiateItem(
       container: ViewGroup,
-      position: Int
+      position: Int,
     ): Any {
       // Normal creation
       val view = container.inflateView(R.layout.widget_video_container)
       container.addView(view)
       // Now bind the content
-      val video = videos[position % videos.size].playlist.first()
-        .sources.first()
+      val video =
+        videos[position % videos.size].playlist.first()
+          .sources.first()
       val itemTag = "$javaClass::$position::${video.file}"
       kohii.setUp(video.file) {
         tag = itemTag
@@ -80,7 +79,7 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
     override fun destroyItem(
       container: ViewGroup,
       position: Int,
-      `object`: Any
+      `object`: Any,
     ) {
       if (`object` is View) {
         container.removeView(`object`)
@@ -94,7 +93,7 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     val binding: FragmentPagerBinding = FragmentPagerBinding.inflate(inflater, container, false)
     this.binding = binding
@@ -103,7 +102,7 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val kohii = Kohii[this]

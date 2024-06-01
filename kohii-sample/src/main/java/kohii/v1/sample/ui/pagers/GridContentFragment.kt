@@ -29,15 +29,15 @@ import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.databinding.FragmentRecyclerviewGridBinding
 
 class GridContentFragment : BaseFragment(), Prioritized {
-
   companion object {
     private const val EXTRA_PAGE_POS = "kohii.v1.demo.pager::page"
 
-    fun newInstance(pagePos: Int = -1) = GridContentFragment().also {
-      val args = Bundle()
-      args.putInt(EXTRA_PAGE_POS, pagePos)
-      it.arguments = args
-    }
+    fun newInstance(pagePos: Int = -1) =
+      GridContentFragment().also {
+        val args = Bundle()
+        args.putInt(EXTRA_PAGE_POS, pagePos)
+        it.arguments = args
+      }
   }
 
   private lateinit var kohii: Kohii
@@ -48,7 +48,7 @@ class GridContentFragment : BaseFragment(), Prioritized {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     binding = FragmentRecyclerviewGridBinding.inflate(inflater, container, false)
     return binding.root
@@ -56,7 +56,7 @@ class GridContentFragment : BaseFragment(), Prioritized {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     kohii = Kohii[this]
@@ -64,11 +64,12 @@ class GridContentFragment : BaseFragment(), Prioritized {
       .addBucket(binding.container)
 
     val spanCount = resources.getInteger(R.integer.grid_span)
-    val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-      override fun getSpanSize(position: Int): Int {
-        return if (position % 6 == 3 || position % 6 == spanCount) 2 else 1
+    val spanSizeLookup =
+      object : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+          return if (position % 6 == 3 || position % 6 == spanCount) 2 else 1
+        }
       }
-    }
 
     (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup = spanSizeLookup
     binding.container.adapter = ItemsAdapter(kohii, pagePos)

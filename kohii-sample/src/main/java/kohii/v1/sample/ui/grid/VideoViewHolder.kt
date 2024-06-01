@@ -28,9 +28,8 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class VideoViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_player_container), Playback.ArtworkHintListener {
-
   private val root: AspectRatioFrameLayout = itemView.findViewById(R.id.playerContainer)
   internal val container: FrameLayout = itemView.findViewById(R.id.container)
   internal val thumbnail: ImageView = itemView.findViewById(R.id.thumbnail)
@@ -48,24 +47,25 @@ internal class VideoViewHolder(
     get() = videoTag?.let { Rebinder(it) }
 
   internal val itemDetails: ItemDetails<SelectionKey>
-    get() = object : ItemDetails<SelectionKey>() {
-      override fun getSelectionKey(): SelectionKey? {
-        val rebinder = this@VideoViewHolder.rebinder
-        return if (rebinder != null) {
-          SelectionKey(absoluteAdapterPosition, rebinder)
-        } else {
-          null
+    get() =
+      object : ItemDetails<SelectionKey>() {
+        override fun getSelectionKey(): SelectionKey? {
+          val rebinder = this@VideoViewHolder.rebinder
+          return if (rebinder != null) {
+            SelectionKey(absoluteAdapterPosition, rebinder)
+          } else {
+            null
+          }
         }
-      }
 
-      override fun getPosition() = absoluteAdapterPosition
-    }
+        override fun getPosition() = absoluteAdapterPosition
+      }
 
   override fun onArtworkHint(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     // Using animation to ease user's eyes when the thumbnail is shown/hidden
     thumbnail.animate()

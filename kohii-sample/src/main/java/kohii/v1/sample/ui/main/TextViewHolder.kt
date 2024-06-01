@@ -22,7 +22,6 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 class TextViewHolder(parent: ViewGroup) : BaseViewHolder(parent, R.layout.holder_main_text) {
-
   private val textView: TextView = itemView.findViewById(R.id.textContent)
 
   override fun bind(item: Any?) {

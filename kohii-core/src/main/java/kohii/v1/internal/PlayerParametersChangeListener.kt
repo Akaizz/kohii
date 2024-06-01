@@ -19,6 +19,5 @@ package kohii.v1.internal
 import kohii.v1.core.PlayerParameters
 
 internal interface PlayerParametersChangeListener {
-
   fun onPlayerParametersChanged(parameters: PlayerParameters)
 }

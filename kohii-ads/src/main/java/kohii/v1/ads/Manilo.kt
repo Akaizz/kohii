@@ -49,17 +49,17 @@ import kohii.v1.utils.Capsule
  */
 class Manilo(
   master: Master,
-  playableCreator: PlayableCreator<PlayerView> = PlayerViewPlayableCreator.Builder(master.app)
-    .setBridgeCreatorFactory(defaultBridgeCreatorFactory)
-    .build(),
-  rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider
+  playableCreator: PlayableCreator<PlayerView> =
+    PlayerViewPlayableCreator.Builder(master.app)
+      .setBridgeCreatorFactory(defaultBridgeCreatorFactory)
+      .build(),
+  rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider,
 ) : Kohii(
-  master,
-  playableCreator,
-  rendererProviderFactory
-),
+    master,
+    playableCreator,
+    rendererProviderFactory,
+  ),
   AdEventListener {
-
   private constructor(context: Context) : this(Master[context])
 
   /**
@@ -68,25 +68,28 @@ class Manilo(
    */
   constructor(
     context: Context,
-    playerPool: PlayerPool<Player> = ExoPlayerPool(
-      context = context.applicationContext,
-      userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME)
-    ),
+    playerPool: PlayerPool<Player> =
+      ExoPlayerPool(
+        context = context.applicationContext,
+        userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME),
+      ),
     imaAdsLoaderBuilder: ImaAdsLoader.Builder?,
-    rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider
+    rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider,
   ) : this(
     master = Master[context],
-    playableCreator = PlayerViewPlayableCreator.Builder(context.applicationContext)
-      .setBridgeCreatorFactory {
-        PlayerViewImaBridgeCreator(
-          playerPool,
-          mediaSourceFactory = (playerPool as? ExoPlayerPool)?.defaultMediaSourceFactory
-            ?: DefaultMediaSourceFactory(context),
-          imaAdsLoaderBuilder = imaAdsLoaderBuilder
-        )
-      }
-      .build(),
-    rendererProviderFactory = rendererProviderFactory
+    playableCreator =
+      PlayerViewPlayableCreator.Builder(context.applicationContext)
+        .setBridgeCreatorFactory {
+          PlayerViewImaBridgeCreator(
+            playerPool,
+            mediaSourceFactory =
+              (playerPool as? ExoPlayerPool)?.defaultMediaSourceFactory
+                ?: DefaultMediaSourceFactory(context),
+            imaAdsLoaderBuilder = imaAdsLoaderBuilder,
+          )
+        }
+        .build(),
+    rendererProviderFactory = rendererProviderFactory,
   )
 
   /**
@@ -97,15 +100,16 @@ class Manilo(
     context: Context,
     config: ExoPlayerConfig,
     imaAdsLoaderBuilder: ImaAdsLoader.Builder?,
-    rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider
+    rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider,
   ) : this(
     context = context,
-    playerPool = config.createDefaultPlayerPool(
-      context = context,
-      userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME)
-    ),
+    playerPool =
+      config.createDefaultPlayerPool(
+        context = context,
+        userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME),
+      ),
     imaAdsLoaderBuilder = imaAdsLoaderBuilder,
-    rendererProviderFactory = rendererProviderFactory
+    rendererProviderFactory = rendererProviderFactory,
   )
 
   /**
@@ -119,29 +123,29 @@ class Manilo(
     context: Context,
     playerCreator: ((Context) -> Player)? = null,
     imaAdsLoaderBuilder: ImaAdsLoader.Builder?,
-    rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider
+    rendererProviderFactory: RendererProviderFactory = ::PlayerViewProvider,
   ) : this(
     context = context.applicationContext,
-    playerPool = if (playerCreator == null) {
-      ExoPlayerPool(
-        context = context.applicationContext,
-        userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME)
-      )
-    } else {
-      object : PlayerPool<Player>() {
-        override fun recyclePlayerForMedia(media: Media): Boolean = false
-        override fun createPlayer(media: Media): Player =
-          playerCreator(context.applicationContext)
+    playerPool =
+      if (playerCreator == null) {
+        ExoPlayerPool(
+          context = context.applicationContext,
+          userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME),
+        )
+      } else {
+        object : PlayerPool<Player>() {
+          override fun recyclePlayerForMedia(media: Media): Boolean = false
 
-        override fun destroyPlayer(player: Player) = player.release()
-      }
-    },
+          override fun createPlayer(media: Media): Player = playerCreator(context.applicationContext)
+
+          override fun destroyPlayer(player: Player) = player.release()
+        }
+      },
     imaAdsLoaderBuilder = imaAdsLoaderBuilder,
-    rendererProviderFactory = rendererProviderFactory
+    rendererProviderFactory = rendererProviderFactory,
   )
 
   companion object {
-
     private val capsule = Capsule(::Manilo)
 
     operator fun get(context: Context): Manilo = capsule.get(context)
@@ -151,15 +155,16 @@ class Manilo(
     // Only pass Application to this method.
     private val defaultBridgeCreatorFactory: PlayerViewBridgeCreatorFactory = { context ->
       // ExoPlayerProvider
-      val playerPool = ExoPlayerPool(
-        context = context,
-        userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME)
-      )
+      val playerPool =
+        ExoPlayerPool(
+          context = context,
+          userAgent = Common.getUserAgent(context.applicationContext, BuildConfig.LIB_NAME),
+        )
 
       // BridgeCreator
       PlayerViewImaBridgeCreator(
         playerPool = playerPool,
-        mediaSourceFactory = playerPool.defaultMediaSourceFactory
+        mediaSourceFactory = playerPool.defaultMediaSourceFactory,
       )
     }
   }

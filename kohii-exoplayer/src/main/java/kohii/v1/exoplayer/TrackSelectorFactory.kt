@@ -24,7 +24,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
  * [DefaultTrackSelector] when needed.
  */
 interface TrackSelectorFactory {
-
   /**
    * Creates a new [DefaultTrackSelector] instance, given the [Context] of the Application.
    */

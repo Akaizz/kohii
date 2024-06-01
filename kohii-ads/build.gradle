@@ -18,6 +18,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 
 android {
+  namespace 'kohii.v1.ads'
   compileSdkVersion libs.versions.android.target.sdk.get().toInteger()
 
   defaultConfig {
@@ -62,12 +63,12 @@ dependencies {
   implementation(libs.android.exoplayer.ui)
   implementation(libs.android.exoplayer.ima)
 
-  testImplementation("androidx.test:core-ktx:1.5.0")
-  testImplementation("androidx.test:rules:1.5.0")
-  testImplementation("androidx.test:runner:1.5.2")
+  testImplementation(libs.androidx.core.ktx)
+  testImplementation(libs.androidx.rules)
+  testImplementation(libs.androidx.runner)
 
-  androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  androidTestImplementation(libs.androidx.junit.ktx)
+  androidTestImplementation(libs.androidx.espresso.core)
 }
 
 project.archivesBaseName = "kohii-ads"

@@ -32,10 +32,12 @@ import kohii.v1.sample.tiktok.databinding.HolderVerticalVideoBinding
 
 class VideosAdapter(
   private val videos: List<Video>,
-  val kohii: Kohii
+  val kohii: Kohii,
 ) : Adapter<VideoViewHolder>() {
-
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
+  override fun onCreateViewHolder(
+    parent: ViewGroup,
+    viewType: Int,
+  ): VideoViewHolder {
     val binding: HolderVerticalVideoBinding =
       HolderVerticalVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     return VideoViewHolder(binding)
@@ -43,7 +45,10 @@ class VideosAdapter(
 
   override fun getItemCount(): Int = Int.MAX_VALUE / 2
 
-  override fun onBindViewHolder(holder: VideoViewHolder, pos: Int) {
+  override fun onBindViewHolder(
+    holder: VideoViewHolder,
+    pos: Int,
+  ) {
     holder.videoItem = videos[pos % videos.size]
     val videoFile = requireNotNull(holder.videoFile)
     kohii.setUp(videoFile) {
@@ -51,27 +56,29 @@ class VideosAdapter(
       threshold = 0.5F
       preload = true
       repeatMode = Player.REPEAT_MODE_ONE
-      artworkHintListener = object : ArtworkHintListener {
-        override fun onArtworkHint(
-          playback: Playback,
-          shouldShow: Boolean,
-          position: Long,
-          state: Int
-        ) {
-          holder.binding.thumbnailContainer.isVisible = playback.playable?.isPlaying() == false
-        }
-      }
-
-      controller = controller(kohiiCanStart = true, kohiiCanPause = true) { playback, _ ->
-        val playable = playback.playable ?: return@controller
-        holder.binding.container.setOnClickListener {
-          if (playable.isPlaying()) {
-            playback.manager.pause(playable)
-          } else {
-            playback.manager.play(playable)
+      artworkHintListener =
+        object : ArtworkHintListener {
+          override fun onArtworkHint(
+            playback: Playback,
+            shouldShow: Boolean,
+            position: Long,
+            state: Int,
+          ) {
+            holder.binding.thumbnailContainer.isVisible = playback.playable?.isPlaying() == false
           }
         }
-      }
+
+      controller =
+        controller(kohiiCanStart = true, kohiiCanPause = true) { playback, _ ->
+          val playable = playback.playable ?: return@controller
+          holder.binding.container.setOnClickListener {
+            if (playable.isPlaying()) {
+              playback.manager.pause(playable)
+            } else {
+              playback.manager.play(playable)
+            }
+          }
+        }
     }.bind(holder.binding.playerView) {
       it.addStateListener(holder)
     }

@@ -31,19 +31,19 @@ import kohii.v1.sample.common.InitData
 import kohii.v1.sample.databinding.FragmentPlayerBinding
 
 class PlayerDialogFragment : AppCompatDialogFragment(), Playback.Callback {
-
   companion object {
     private const val KEY_INIT_DATA = "kohii::player::init_data"
     private const val KEY_REBINDER = "kohii:player:dialog:rebinder"
 
     fun newInstance(
       rebinder: Rebinder,
-      initData: InitData
+      initData: InitData,
     ): PlayerDialogFragment {
-      val bundle = Bundle().also {
-        it.putParcelable(KEY_REBINDER, rebinder)
-        it.putParcelable(KEY_INIT_DATA, initData)
-      }
+      val bundle =
+        Bundle().also {
+          it.putParcelable(KEY_REBINDER, rebinder)
+          it.putParcelable(KEY_INIT_DATA, initData)
+        }
       return PlayerDialogFragment()
         .also { it.arguments = bundle }
     }
@@ -51,7 +51,6 @@ class PlayerDialogFragment : AppCompatDialogFragment(), Playback.Callback {
 
   // Interface to tell ParentFragment about status of this Dialog.
   interface Callback {
-
     fun onDialogActive()
 
     fun onDialogInActive(rebinder: Rebinder)
@@ -72,7 +71,7 @@ class PlayerDialogFragment : AppCompatDialogFragment(), Playback.Callback {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     val binding: FragmentPlayerBinding = FragmentPlayerBinding.inflate(inflater, container, false)
     this.binding = binding
@@ -81,16 +80,17 @@ class PlayerDialogFragment : AppCompatDialogFragment(), Playback.Callback {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val initData = requireNotNull(requireArguments().getParcelable<InitData>(KEY_INIT_DATA))
     binding.playerContainer.setAspectRatio(initData.aspectRatio)
 
-    kohii = Kohii[this].also {
-      it.register(this)
-        .addBucket(binding.playerContainer)
-    }
+    kohii =
+      Kohii[this].also {
+        it.register(this)
+          .addBucket(binding.playerContainer)
+      }
   }
 
   override fun onStart() {

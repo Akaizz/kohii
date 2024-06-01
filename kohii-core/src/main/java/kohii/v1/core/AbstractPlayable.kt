@@ -33,9 +33,8 @@ abstract class AbstractPlayable<RENDERER : Any>(
   protected val master: Master,
   media: Media,
   config: Config,
-  protected val bridge: Bridge<RENDERER>
+  protected val bridge: Bridge<RENDERER>,
 ) : Playable(media, config), Playback.Callback, PlayerParametersChangeListener {
-
   override val tag: Any = config.tag
 
   private var playRequested: Boolean = false
@@ -106,7 +105,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
         master.trySavePlaybackInfo(this)
         master.tearDown(
           playable = this,
-          clearState = if (oldManager is Manager) !oldManager.isChangingConfigurations() else true
+          clearState = if (oldManager is Manager) !oldManager.isChangingConfigurations() else true,
         )
       } else if (oldManager === null) {
         master.tryRestorePlaybackInfo(this)
@@ -130,25 +129,27 @@ abstract class AbstractPlayable<RENDERER : Any>(
         }
       }
 
-      this.manager = if (newPlayback != null) {
-        newPlayback.manager
-      } else {
-        val changingConfiguration = oldPlayback?.manager?.isChangingConfigurations() == true
-        if (changingConfiguration) {
-          if (!onConfigChange()) {
-            // On config change, if the Playable doesn't support, we need to pause the Video.
-            onPause()
-            null
-          } else {
-            master // to prevent the Playable from being destroyed when Manager is null.
-          }
+      this.manager =
+        if (newPlayback != null) {
+          newPlayback.manager
         } else {
-          // TODO(eneim): rethink this to support off-screen manual playback/kohiiCanPause().
-          /* if (master.manuallyStartedPlayable.get() === this && isPlaying()) master
-          else null */
-          null
+          val changingConfiguration = oldPlayback?.manager?.isChangingConfigurations() == true
+          if (changingConfiguration) {
+            if (!onConfigChange()) {
+              // On config change, if the Playable doesn't support, we need to pause the Video.
+              onPause()
+              null
+            } else {
+              master // to prevent the Playable from being destroyed when Manager is null.
+            }
+          } else {
+            // TODO(eneim): rethink this to support off-screen manual playback/kohiiCanPause().
+
+            /* if (master.manuallyStartedPlayable.get() === this && isPlaying()) master
+            else null */
+            null
+          }
         }
-      }
 
       if (newPlayback != null) {
         newPlayback.playable = this
@@ -230,7 +231,10 @@ abstract class AbstractPlayable<RENDERER : Any>(
     }
   }
 
-  protected open fun onRendererAttached(playback: Playback, renderer: Any?) {
+  protected open fun onRendererAttached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     playback.onRendererAttached(renderer)
   }
 
@@ -248,14 +252,17 @@ abstract class AbstractPlayable<RENDERER : Any>(
     }
   }
 
-  protected open fun onRendererDetached(playback: Playback, renderer: Any?) {
+  protected open fun onRendererDetached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     playback.onRendererDetached(renderer)
   }
 
   override fun onPlaybackPriorityChanged(
     playback: Playback,
     oldPriority: Int,
-    newPriority: Int
+    newPriority: Int,
   ) {
     "Playable#onPlaybackPriorityChanged $playback, $oldPriority --> $newPriority, $this".logInfo()
     if (newPriority == 0) {
@@ -263,13 +270,14 @@ abstract class AbstractPlayable<RENDERER : Any>(
       master.preparePlayable(this, playback.config.preload)
     } else {
       val memoryMode = master.preferredMemoryMode(this.memoryMode)
-      val priorityToRelease = when (memoryMode) {
-        AUTO, LOW -> 1
-        NORMAL -> 2
-        BALANCED -> 2 // Same as 'NORMAL', but will keep the 'relative' Playback alive.
-        HIGH -> 8
-        INFINITE -> Int.MAX_VALUE
-      }
+      val priorityToRelease =
+        when (memoryMode) {
+          AUTO, LOW -> 1
+          NORMAL -> 2
+          BALANCED -> 2 // Same as 'NORMAL', but will keep the 'relative' Playback alive.
+          HIGH -> 8
+          INFINITE -> Int.MAX_VALUE
+        }
       if (newPriority >= priorityToRelease) {
         master.trySavePlaybackInfo(this)
         master.releasePlayable(this)
@@ -286,7 +294,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
   override fun onVolumeInfoChanged(
     playback: Playback,
     from: VolumeInfo,
-    to: VolumeInfo
+    to: VolumeInfo,
   ) {
     "Playable#onVolumeInfoChanged $playback, $from --> $to, $this".logInfo()
     if (from != to) bridge.volumeInfo = to
@@ -308,7 +316,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
 
   override fun onNetworkTypeChanged(
     from: NetworkType,
-    to: NetworkType
+    to: NetworkType,
   ) {
     "Playable#onNetworkTypeChanged $playback, $this".logInfo()
     playback?.onNetworkTypeChanged(to)

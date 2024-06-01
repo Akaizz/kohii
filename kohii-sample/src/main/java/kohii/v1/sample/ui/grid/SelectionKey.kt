@@ -23,5 +23,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SelectionKey(
   val position: Int,
-  val rebinder: Rebinder
+  val rebinder: Rebinder,
 ) : Parcelable

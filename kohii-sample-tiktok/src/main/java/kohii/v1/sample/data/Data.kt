@@ -32,13 +32,13 @@ data class Item(
   val uri: String,
   val extension: String?,
   @Json(name = "drm_scheme") val drmScheme: String?,
-  @Json(name = "drm_license_url") val drmLicenseUrl: String?
+  @Json(name = "drm_license_url") val drmLicenseUrl: String?,
 ) : Parcelable
 
 @JsonClass(generateAdapter = true)
 @Parcelize
 data class DrmItem(
-  val item: Item
+  val item: Item,
 ) : MediaDrm {
   override val type: String
     get() = item.drmScheme!!

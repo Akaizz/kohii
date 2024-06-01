@@ -24,24 +24,24 @@ import kohii.v1.sample.common.BaseViewHolder
 
 class DemoItemsAdapter(
   val items: List<DemoItem>,
-  private val onClick: (DemoItem) -> Unit
+  private val onClick: (DemoItem) -> Unit,
 ) : Adapter<BaseViewHolder>() {
-
   override fun getItemViewType(position: Int): Int {
     return if (position <= 0) R.layout.holder_main_text else R.layout.holder_main_demo_item
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return when (viewType) {
       R.layout.holder_main_text -> TextViewHolder(parent)
-      R.layout.holder_main_demo_item -> DemoItemViewHolder(parent).also { holder ->
-        holder.itemView.setOnClickListener {
-          onClick(items[holder.absoluteAdapterPosition - 1])
+      R.layout.holder_main_demo_item ->
+        DemoItemViewHolder(parent).also { holder ->
+          holder.itemView.setOnClickListener {
+            onClick(items[holder.absoluteAdapterPosition - 1])
+          }
         }
-      }
 
       else -> throw IllegalArgumentException("Unknown type: $viewType")
     }
@@ -51,11 +51,12 @@ class DemoItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     if (position <= 0) {
-      val content = holder.getString(R.string.lib_intro)
-        .parseAsHtml()
+      val content =
+        holder.getString(R.string.lib_intro)
+          .parseAsHtml()
       holder.bind(content)
     } else {
       holder.bind(items[position - 1])

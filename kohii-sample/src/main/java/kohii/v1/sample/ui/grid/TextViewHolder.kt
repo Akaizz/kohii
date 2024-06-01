@@ -24,9 +24,8 @@ import kohii.v1.sample.R.string
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class TextViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, layout.widget_simple_textview) {
-
   val textContent = itemView as TextView
 
   init {
@@ -35,7 +34,8 @@ internal class TextViewHolder(
 
   override fun bind(item: Any?) {
     super.bind(item)
-    textContent.text = itemView.context.getString(string.lib_intro)
-      .parseAsHtml()
+    textContent.text =
+      itemView.context.getString(string.lib_intro)
+        .parseAsHtml()
   }
 }

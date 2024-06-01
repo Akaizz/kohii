@@ -26,23 +26,24 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 class YouTubePlaylistPagingAdapter(
-  private val engine: Engine<YouTubePlayerView>
-) : PagingDataAdapter<Video, BaseViewHolder>(object : DiffUtil.ItemCallback<Video>() {
-  override fun areItemsTheSame(
-    oldItem: Video,
-    newItem: Video
-  ): Boolean {
-    return newItem.id === oldItem.id
-  }
+  private val engine: Engine<YouTubePlayerView>,
+) : PagingDataAdapter<Video, BaseViewHolder>(
+    object : DiffUtil.ItemCallback<Video>() {
+      override fun areItemsTheSame(
+        oldItem: Video,
+        newItem: Video,
+      ): Boolean {
+        return newItem.id === oldItem.id
+      }
 
-  override fun areContentsTheSame(
-    oldItem: Video,
-    newItem: Video
-  ): Boolean {
-    return newItem.statistics == oldItem.statistics
-  }
-}) {
-
+      override fun areContentsTheSame(
+        oldItem: Video,
+        newItem: Video,
+      ): Boolean {
+        return newItem.statistics == oldItem.statistics
+      }
+    },
+  ) {
   override fun getItemViewType(position: Int): Int {
     val item = peek(position)
     return if (item == null) {
@@ -54,7 +55,7 @@ class YouTubePlaylistPagingAdapter(
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return when (viewType) {
       R.layout.holder_youtube_container -> YouTubeViewHolder(parent, viewType)
@@ -65,7 +66,7 @@ class YouTubePlaylistPagingAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     if (holder is YouTubeViewHolder) {
       val item = getItem(position)

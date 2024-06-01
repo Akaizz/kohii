@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kohii.v1.sample.R
 
 class NestedRecyclerViewViewHolder(itemView: View) : MainViewHolder(itemView) {
-
   val container: RecyclerView = itemView.findViewById(R.id.recyclerView)
   val layoutManager: LinearLayoutManager
     get() = container.layoutManager as LinearLayoutManager
