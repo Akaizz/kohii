@@ -11,7 +11,6 @@
 /kohii/.gitignore
 /kohii-sample/.gitignore
 /kohii/proguard-rules.pro
-/kohii-sample/proguard-rules.pro
 /kohii/build/
 /kohii-sample/build/
 /kohii-sample/libs/
