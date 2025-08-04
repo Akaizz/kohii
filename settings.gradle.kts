@@ -24,7 +24,6 @@ pluginManagement {
 include(":kohii-core")
 include(":kohii-exoplayer")
 include(":kohii-androidx")
-include(":kohii-ads")
 include(":kohii-experiments")
 include(":kohii-sample")
 include(":kohii-sample-tiktok")
