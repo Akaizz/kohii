@@ -2,10 +2,10 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="kohii-sample-tiktok">
+      <SelectionState runConfigName="kohii-sample">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="kohii-sample">
+      <SelectionState runConfigName="kohii-sample-tiktok">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
