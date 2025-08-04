@@ -126,11 +126,11 @@ afterEvaluate { project ->
     }
   }
 
-  signing {
-    publishing.publications.all { publication ->
-      sign publication
-    }
-  }
+//  signing {
+//    publishing.publications.all { publication ->
+//      sign publication
+//    }
+//  }
 }
 
 // Command:
