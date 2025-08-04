@@ -25,11 +25,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.PlayerView
-import kohii.v1.ads.AdMediaItem
-import kohii.v1.ads.Manilo
-import kohii.v1.core.controller
 import kohii.v1.sample.DemoApp
 import kohii.v1.sample.common.ViewBindingFragment
 import kohii.v1.sample.databinding.FragmentAdsListBinding
@@ -42,7 +37,6 @@ class AdsContainerFragment :
     const val STATE_AD_SAMPLE = "dev_ad_sample"
   }
 
-  private lateinit var manilo: Manilo
   private lateinit var adSamples: AdSamples
 
   private var selectedAdSample: AdSample? = null
@@ -52,28 +46,10 @@ class AdsContainerFragment :
       field = value
       if (value == null) {
         if (current != null) {
-          manilo.cancel("$current")
         }
         requireBinding().adInfo.text = "No sample selected."
       } else {
         if (value != current) {
-          val adMedia =
-            AdMediaItem(
-              value.contentUri,
-              value.adTagUri,
-            )
-
-          manilo.setUp(adMedia) {
-            tag = "$value"
-            repeatMode = Player.REPEAT_MODE_ONE
-            controller =
-              controller { _, renderer ->
-                if (renderer is PlayerView) {
-                  renderer.useController = true
-                }
-              }
-          }.bind(requireBinding().playerView)
-          requireBinding().adInfo.text = value.name
         }
       }
     }
@@ -81,7 +57,6 @@ class AdsContainerFragment :
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     val app = (requireContext().applicationContext as DemoApp)
-    manilo = app.manilo
     adSamples = app.moshi
       .adapter(AdSamples::class.java)
       .fromJson(
@@ -94,8 +69,6 @@ class AdsContainerFragment :
     savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
-
-    manilo.register(this).addBucket(requireBinding().playerContainer)
 
     val layoutManager = LinearLayoutManager(view.context)
     requireBinding().adsContainer.layoutManager = layoutManager

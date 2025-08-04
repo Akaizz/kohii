@@ -47,19 +47,19 @@ apply plugin: 'io.github.gradle-nexus.publish-plugin'
 group = libs.versions.release.groupid.get()
 version = libs.versions.release.name.get()
 
-//def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok")]
+def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok")]
 
 apply plugin: 'binary-compatibility-validator'
-//apiValidation {
-//  sampleProjects.forEach {
-//    ignoredProjects += it.name
-//  }
-//}
+apiValidation {
+  sampleProjects.forEach {
+    ignoredProjects += it.name
+  }
+}
 
 apply plugin: "org.jetbrains.dokka"
 tasks.withType(DokkaMultiModuleTask).configureEach {
   outputDirectory.set(file("$rootDir/docs/api"))
-  //removeChildTasks(sampleProjects)
+  removeChildTasks(sampleProjects)
 }
 
 def getRepositoryUsername() {

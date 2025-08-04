@@ -103,7 +103,7 @@ dependencies {
   implementation project(':kohii-exoplayer')
   implementation project(':kohii-androidx')
   implementation project(':kohii-experiments')
-  implementation project(':kohii-ads')
+  //implementation project(':kohii-ads')
 
   implementation(libs.android.exoplayer.all)
   implementation(libs.android.exoplayer.ima)
