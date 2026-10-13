@@ -20,7 +20,8 @@ Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm s�
   thông). Đã dùng chung một meter cho mỗi `ExoPlayerConfig`.
 - Buffer mặc định 50 giây → 12 giây; cache LRU 24 MB → 10% dung lượng trống (32–256 MB), chuyển
   sang `cacheDir`.
-- Build: AGP 8.12.3, Gradle 8.13, Kotlin 2.0.21, compileSdk 36, minSdk 24, targetSdk (sample) 35;
+- Build: AGP 8.9.2, Gradle 8.13, Kotlin 2.1.0 (cùng phiên bản với app), compileSdk 36, minSdk 24,
+  targetSdk (sample) 36;
   bỏ repo chết (`maven.fabric.io`, `jitpack.io`, snapshot của OSSRH); bỏ các mục không dùng trong
   version catalog; đổi DSL deprecated (`compileSdkVersion`, `lintOptions`, `packagingOptions`,
   `kotlinOptions`, `archivesBaseName`); thêm `publishing { singleVariant('release') }` mà AGP 8 bắt
@@ -135,8 +136,12 @@ Nên dùng `LruCache`.
   tới khi dump lại.
 - **P1. Chưa có kênh phát hành**: `gradle/release_maven.gradle` vẫn publish lên `oss.sonatype.org`
   (Sonatype OSSRH, đã ngừng hoạt động giữa 2025), và group `im.ene.kohii` thuộc tác giả gốc nên bản
-  fork không publish vào đó được. Workflow publish snapshot đã bị bỏ. Cần chọn cách phân phối cho app
-  (Maven nội bộ, GitHub Packages, hoặc include Kohii dạng module source).
+  fork không publish vào đó được. Workflow publish snapshot đã bị bỏ. App hiện vẫn dùng
+  `im.ene.kohii:kohii-core/kohii-exoplayer:1.4.0.2017001` (bản gốc, build với ExoPlayer 2.17.1) cùng
+  các dependency `com.google.android.exoplayer:*:2.17.1`. Để dùng bản fork, cần đổi group (ví dụ
+  `vn.gapowork.android`, đã dùng cho các thư viện nội bộ khác của app) và publish lên Maven nội bộ,
+  hoặc dùng JitPack (app đã dùng cho các fork `com.github.Akaizz:*`), hoặc include dạng module source.
+  Sau khi chuyển, bỏ các dependency ExoPlayer 2 khỏi app nếu không còn chỗ nào dùng.
 - **P2. Jetifier vẫn bật** (`android.enableJetifier=true`) dù có thể không còn thư viện support cũ;
   làm build chậm. Kiểm tra bằng `./gradlew checkJetifier` rồi tắt.
 - **P2. Version không đồng bộ**: `gradle.properties` ghi `VERSION_NAME=1.4.0.2017001`,
@@ -146,8 +151,8 @@ Nên dùng `LruCache`.
   `UnusedResources`, `UnusedIds` ở mọi module.
 - **P2. Code chết**: `buildSrc/.../Dependencies.kt` không được dùng, còn tham chiếu ExoPlayer 2 và
   Media2. `.github/FUNDING.yml` trỏ tới tài khoản tác giả gốc.
-- **P2. Sample target SDK 35**: Android 15 bắt buộc edge-to-edge, giao diện sample có thể bị thanh hệ
-  thống che.
+- **P2. Sample target SDK 36**: từ Android 15 app bắt buộc edge-to-edge (Android 16 bỏ luôn cách tắt),
+  giao diện sample có thể bị thanh hệ thống che.
 
 ## 5. Thứ tự đề xuất
 
