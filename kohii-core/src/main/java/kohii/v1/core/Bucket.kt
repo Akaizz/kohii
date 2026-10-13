@@ -246,7 +246,8 @@ abstract class Bucket constructor(
   open fun onRemoved() {
     logInfo { "Bucket is removed: $this" }
     root.removeOnAttachStateChangeListener(rootAttachStateChangeListener)
-    mutableListOf(containers)
+    // Iterate a copy: removing a Playback also removes its container from 'containers'.
+    containers.toMutableList()
       .onEach(manager::onRemoveContainer)
       .clear()
   }

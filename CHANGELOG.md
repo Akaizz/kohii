@@ -56,6 +56,12 @@
   bandwidth for every player.
 - (kohii-core): Debug log messages are only built when logging is enabled. The internal log helpers
   now take a lambda (`logDebug { "..." }`) instead of being `String` extensions.
+- (kohii-core): `Manager.removeBucket()` now removes the Playbacks of the removed Bucket. Before,
+  they stayed bound to their containers until the Manager was destroyed or the container was bound
+  again.
+- (kohii-core): `Engine.cancel(container)` now unbinds the container when it belongs to a Manager
+  other than the first one of its Activity (for example, a Fragment's Manager when the Activity is
+  also registered). Before, only a pending (not yet attached) binding was cancelled.
 
 ### Migration
 

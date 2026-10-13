@@ -446,7 +446,7 @@ class Master private constructor(context: Context) : PlayableManager {
 
     groups.asSequence()
       .flatMap { it.managers.asSequence() }
-      .map { it.playbacks[container] }
+      .mapNotNull { it.playbacks[container] }
       .firstOrNull()
       ?.also { playback ->
         playback.manager.removePlayback(playback)
