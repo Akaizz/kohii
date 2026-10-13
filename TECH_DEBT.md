@@ -5,35 +5,7 @@ Phạm vi: `kohii-core`, `kohii-exoplayer`, hai app sample, cấu hình build v�
 
 Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm sớm, **P2** dọn dẹp khi có thời gian.
 
-> Lưu ý: nhánh này chưa được build lần nào sau khi đổi sang Media3 1.10.1 và bộ công cụ mới (môi
-> trường viết review không có Android SDK). Lần build đầu tiên có thể còn lỗi biên dịch cần sửa.
-
-## 0. Đã xử lý trên nhánh `media3`
-
-- Chuyển từ ExoPlayer 2 sang Media3 1.10.1, rà các API dùng trong thư viện theo mã nguồn 1.10.1
-  (chỉ có `NetworkTypeObserver.register(Listener)` bị deprecated, đã đổi sang bản có `Executor`).
-- `PlayerViewBridge.ensurePlayer()` gọi `applyPlayerParameters()` trước khi gán player, nên giới hạn
-  độ phân giải/bitrate bị bỏ qua với mọi player lấy từ pool. Đã sửa.
-- Log debug ghép chuỗi (và gọi `toString()`) cả ở bản release, kể cả trên đường refresh khi scroll.
-  Đã đổi sang hàm `inline` nhận lambda.
-- Mỗi player trong pool có một `DefaultBandwidthMeter` riêng (HLS/DASH phải ước lượng lại băng
-  thông). Đã dùng chung một meter cho mỗi `ExoPlayerConfig`.
-- Buffer mặc định 50 giây → 12 giây; cache LRU 24 MB → 10% dung lượng trống (32–256 MB), chuyển
-  sang `cacheDir`.
-- Build: AGP 8.9.2, Gradle 8.13, Kotlin 2.1.0 (cùng phiên bản với app), compileSdk 36, minSdk 24,
-  targetSdk (sample) 36;
-  bỏ repo chết (`maven.fabric.io`, `jitpack.io`, snapshot của OSSRH); bỏ các mục không dùng trong
-  version catalog; đổi DSL deprecated (`compileSdkVersion`, `lintOptions`, `packagingOptions`,
-  `kotlinOptions`, `archivesBaseName`); thêm `publishing { singleVariant('release') }` mà AGP 8 bắt
-  buộc để có component `release` cho `gradle/release_maven.gradle`.
-- CI: thay hai workflow cũ (dùng `actions/cache@v2` đã bị GitHub ngừng hỗ trợ) bằng `ci.yml` chạy
-  `./gradlew check assembleDebug` với `checkout@v4`, `setup-java@v4`, `gradle/actions/setup-gradle@v4`.
-  Bỏ workflow publish snapshot lên Sonatype OSSRH (đã ngừng hoạt động).
-- Phát hành qua JitPack thay cho OSSRH (group `com.github.Akaizz.kohii`); `kohii-exoplayer` khai báo
-  `kohii-core` dạng `api` nên app chỉ cần khai báo `kohii-exoplayer`.
-- Xóa `buildSrc` (code chết, không file build nào dùng). Nó buộc Gradle biên dịch Kotlin DSL và tải
-  thêm `kotlin-stdlib`/`kotlin-gradle-plugin` trước mọi bản build, từng làm build trên JitPack lỗi khi
-  Maven Central trả về `429 Too Many Requests`.
+Những gì đã xử lý được ghi trong `CHANGELOG.md` và lịch sử git, không nhắc lại ở đây.
 
 ## 1. Rủi ro và lỗi trong code
 
@@ -129,14 +101,12 @@ Nên dùng `LruCache`.
   `PlayerViewPlayable` và một số màn sample; logic 1.1.x trong `Bucket.selectByOrientation`.
 - **P2. API deprecated còn public**: `PlayerEventListener`, các hằng số trong `Common`
   (`REPEAT_MODE_*`, `STATE_*`), các type alias `StyledPlayerView*`. Có thể xóa ở lần tăng version lớn.
-- **P2. Gần như không có test**: chỉ có `PlayerPoolTest`. Logic chọn video
-  (`Manager.splitPlaybacks`, `Bucket.selectByOrientation`) và vòng đời `Playable` chưa có test.
+- **P2. Ít test**: chỉ có `PlayerPoolTest` và `RemoveBindingTest` (`removeBucket`,
+  `Engine.cancel`). Logic chọn video (`Manager.splitPlaybacks`, `Bucket.selectByOrientation`) và vòng
+  đời `Playable` chưa có test.
 
 ## 4. Build, CI và phát hành
 
-- **P0. Cập nhật file `.api`**: chạy `./gradlew apiDump` và commit. Các file `.api` đang được sửa
-  tay (phần do Kotlin sinh cho `KohiiExoPlayer` không khớp), nên `apiCheck` trong CI sẽ thất bại cho
-  tới khi dump lại.
 - **P1. Chuyển app sang bản JitPack**: JitPack đã build thành công 2 thư viện
   (`com.github.Akaizz.kohii:kohii-core`/`kohii-exoplayer`, cấu hình trong `jitpack.yml`). Còn lại:
   đổi app từ `im.ene.kohii:*:1.4.0.2017001` (bản gốc, ExoPlayer 2.17.1) sang bản này, sửa
@@ -155,9 +125,8 @@ Nên dùng `LruCache`.
 
 ## 5. Thứ tự đề xuất
 
-1. Build nhánh `media3`, sửa lỗi biên dịch nếu có, chạy `./gradlew apiDump` và commit.
-2. Chuyển app sang bản JitPack.
-3. Bỏ Toast tự hiện trong `PlayerViewBridge`.
-4. Dọn pool khi thiếu bộ nhớ, sửa `MemoryMode.LOW` trên Android 14+.
-5. Viết test cho logic chọn video trước khi tối ưu đường refresh.
-6. Dọn code chết, API deprecated, version name.
+1. Chuyển app sang bản JitPack.
+2. Bỏ Toast tự hiện trong `PlayerViewBridge`.
+3. Dọn pool khi thiếu bộ nhớ, sửa `MemoryMode.LOW` trên Android 14+.
+4. Viết test cho logic chọn video trước khi tối ưu đường refresh.
+5. Dọn code chết, API deprecated, version name.
