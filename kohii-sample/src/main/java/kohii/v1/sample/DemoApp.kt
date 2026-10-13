@@ -28,7 +28,6 @@ import com.squareup.moshi.ToJson
 import com.squareup.moshi.Types
 import kohii.v1.sample.data.Item
 import kohii.v1.sample.data.Video
-import kohii.v1.sample.ui.ads.AdsContainerFragment
 import kohii.v1.sample.ui.combo.ExoPlayerVideosFragment
 import kohii.v1.sample.ui.echo.EchoFragment
 import kohii.v1.sample.ui.fbook.FbookFragment
@@ -127,11 +126,6 @@ class DemoApp : Application() {
         R.string.demo_title_manual_1,
         R.string.demo_desc_manual_1,
         ManualRecyclerViewFragment::class.java,
-      ),
-      DemoItem(
-        R.string.demo_title_ads_1,
-        R.string.demo_desc_ads_1,
-        AdsContainerFragment::class.java,
       ),
       DemoItem(
         R.string.demo_title_fbook,

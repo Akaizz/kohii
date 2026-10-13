@@ -1,7 +1,7 @@
 # Review: tech debt và hiệu năng
 
-Phạm vi: `kohii-core`, `kohii-exoplayer`, `kohii-experiments`, `kohii-ads`, cấu hình build và CI,
-trên nhánh `media3` (sau khi chuyển sang Media3 1.4.1 và bỏ `kohii-androidx`).
+Phạm vi: `kohii-core`, `kohii-exoplayer`, `kohii-experiments`, cấu hình build và CI, trên nhánh
+`media3` (sau khi chuyển sang Media3 1.4.1, bỏ `kohii-androidx` và `kohii-ads`).
 
 Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm sớm, **P2** dọn dẹp khi có thời gian.
 
@@ -147,9 +147,6 @@ dài, map này lớn dần suốt vòng đời app. Nên dùng `LruCache`.
   (`REPEAT_MODE_*`, `STATE_*`). Có thể xóa ở lần tăng version lớn.
 - **`AtomicReference` không cần thiết**: `Master.manuallyStartedPlayable` chỉ được dùng trên main
   thread.
-- **`kohii-ads` đã chết**: module bị tắt trong `settings.gradle.kts`, vẫn dùng
-  `setAdsLoaderProvider` (deprecated trong Media3). Cần viết lại bằng
-  `setLocalAdInsertionComponents` hoặc xóa hẳn.
 - **`kohii-experiments`**: dùng thư viện YouTube player không chính thức bản 11.1.0 (có `TODO`
   nâng lên 12) và xuất nó qua `api(...)`.
 - **Gần như không có test**: `kohii-core` chỉ có `PlayerPoolTest`. Các logic quan trọng
@@ -190,4 +187,4 @@ dài, map này lớn dần suốt vòng đời app. Nên dùng `LruCache`.
    12 giây và cache LRU lớn hơn, xem `CHANGELOG.md`.)
 4. Bỏ delegation trong `KohiiExoPlayer`/`HybridMediaItem`, **trước khi** nâng Media3.
 5. Nâng AGP/Kotlin, rồi nâng Media3 lên bản mới nhất.
-6. Dọn code chết, version catalog, quyết định số phận `kohii-ads`.
+6. Dọn code chết và version catalog.

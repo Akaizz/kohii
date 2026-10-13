@@ -53,11 +53,6 @@
 /kohiix/kohiix.iml
 /kohiix/src/androidTest/
 /kohiix/src/test/
-/kohii-ads/src/androidTest/
-/kohii-ads/src/test/
-/kohii-ads/.gitignore
-/kohii-ads/consumer-rules.pro
-/kohii-ads/kohii-ads.iml
 /docs/api/
 /docs/changelog.md
 /docs/code_of_conduct.md
@@ -73,7 +68,6 @@
 .classpath
 .project
 /.idea/dictionaries/
-/kohii-ads/build/
 /kohii-core/build/
 /kohii-experiments/build/
 /.idea/markdown-navigator-enh.xml

@@ -53,6 +53,8 @@
 
 ### Removed
 
+- (kohii-ads): The module is removed (it was already excluded from the build), together with the
+  placeholder Ads screen of the sample app.
 - (kohii-androidx): The module is removed. It was built on AndroidX Media2, which is deprecated in
   favor of Media3. Use `kohii-exoplayer` (Media3 ExoPlayer) instead.
 - (kohii-experiments): YouTube experiment that uses the (deprecated) Official YouTube Player API.

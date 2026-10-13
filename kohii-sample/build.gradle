@@ -107,10 +107,8 @@ dependencies {
   implementation project(':kohii-core')
   implementation project(':kohii-exoplayer')
   implementation project(':kohii-experiments')
-  //implementation project(':kohii-ads')
 
   implementation(libs.androidx.media3.exoplayer)
-  implementation(libs.androidx.media3.exoplayer.ima)
   implementation(libs.androidx.media3.ui)
 
   implementation(libs.androidx.core)
