@@ -1,7 +1,7 @@
 # Review: tech debt và hiệu năng
 
-Phạm vi: `kohii-core`, `kohii-exoplayer`, `kohii-experiments`, cấu hình build và CI, trên nhánh
-`media3` (sau khi chuyển sang Media3 1.4.1, bỏ `kohii-androidx` và `kohii-ads`).
+Phạm vi: `kohii-core`, `kohii-exoplayer`, cấu hình build và CI, trên nhánh `media3` (sau khi
+chuyển sang Media3 1.4.1, bỏ `kohii-androidx`, `kohii-ads` và `kohii-experiments`).
 
 Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm sớm, **P2** dọn dẹp khi có thời gian.
 
@@ -147,8 +147,6 @@ dài, map này lớn dần suốt vòng đời app. Nên dùng `LruCache`.
   (`REPEAT_MODE_*`, `STATE_*`). Có thể xóa ở lần tăng version lớn.
 - **`AtomicReference` không cần thiết**: `Master.manuallyStartedPlayable` chỉ được dùng trên main
   thread.
-- **`kohii-experiments`**: dùng thư viện YouTube player không chính thức bản 11.1.0 (có `TODO`
-  nâng lên 12) và xuất nó qua `api(...)`.
 - **Gần như không có test**: `kohii-core` chỉ có `PlayerPoolTest`. Các logic quan trọng
   (`Manager.splitPlaybacks`, `Bucket.selectByOrientation`, lifecycle của `Playable`) chưa có test.
 

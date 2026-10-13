@@ -4,7 +4,6 @@ android-documentation-plugin = "1.8.10"
 androidsvg-aar = "1.4"
 binary-compatibility-validator = "0.13.0"
 compiler = "4.13.2"
-core = "11.1.0"
 core-ktx = "1.5.0"
 dokka-gradle-plugin = "1.8.10"
 espresso-core = "3.5.1"
@@ -12,10 +11,6 @@ firebase-analytics = "21.2.1"
 firebase-crashlytics-gradle = "2.9.4"
 firebase-crashlytics-ktx = "18.3.6"
 glide = "4.13.2"
-google-api-client-android = "2.2.0"
-google-api-client-gson = "2.2.0"
-google-api-services-youtube = "v3-rev20230319-2.0.0"
-google-http-client-android = "1.43.0"
 google-services = "4.3.15"
 gradle = "8.4.1"
 junit = "4.13.2"
@@ -145,16 +140,11 @@ compose-paging = "androidx.paging:paging-compose:1.0.0-alpha18"
 coil-common = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
-android-youtube-player-core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "core" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka-gradle-plugin" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebase-analytics" }
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebase-crashlytics-ktx" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "google-api-client-android" }
-google-api-client-gson = { module = "com.google.api-client:google-api-client-gson", version.ref = "google-api-client-gson" }
-google-api-services-youtube = { module = "com.google.apis:google-api-services-youtube", version.ref = "google-api-services-youtube" }
-google-http-client-android = { module = "com.google.http-client:google-http-client-android", version.ref = "google-http-client-android" }
 google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 junit = { module = "junit:junit", version.ref = "junit" }

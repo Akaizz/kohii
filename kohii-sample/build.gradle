@@ -54,7 +54,6 @@ android {
     versionCode libs.versions.release.code.get().toInteger()
     versionName libs.versions.release.name.get()
 
-    buildConfigField("String", "YT_API_KEY", "\"${kohii_yt_api_key}\"")
 
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     testApplicationId 'kohii.v1.sample.test'
@@ -106,7 +105,6 @@ configurations {
 dependencies {
   implementation project(':kohii-core')
   implementation project(':kohii-exoplayer')
-  implementation project(':kohii-experiments')
 
   implementation(libs.androidx.media3.exoplayer)
   implementation(libs.androidx.media3.ui)
@@ -142,10 +140,6 @@ dependencies {
     transitive = true
   }
 
-  implementation(libs.google.api.services.youtube)
-  implementation(libs.google.http.client.android)
-  implementation(libs.google.api.client.android)
-  implementation(libs.google.api.client.gson)
   implementation(libs.firebase.analytics)
 
   implementation(libs.timber)

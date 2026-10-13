@@ -53,6 +53,9 @@
 
 ### Removed
 
+- (kohii-experiments): The module is removed, together with the YouTube demo of the sample app and
+  its Google API dependencies. It played YouTube videos through the unofficial
+  android-youtube-player library (a WebView).
 - (kohii-ads): The module is removed (it was already excluded from the build), together with the
   placeholder Ads screen of the sample app.
 - (kohii-androidx): The module is removed. It was built on AndroidX Media2, which is deprecated in

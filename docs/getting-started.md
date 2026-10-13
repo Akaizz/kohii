@@ -42,25 +42,3 @@ Kohii** includes the **ExoPlayer** release number in its release name to tell de
 version of **ExoPlayer** it uses. For example **Kohii** `1.0.0.2010004` will use **
 ExoPlayer** `2.10.4` for playback logic, but **Kohii** `1.0.0.2011000` will use **
 ExoPlayer** `2.11.0` instead.
-
-- `kohii-experiments`
-
-This artifacts includes experimental implementations. In short the playback logic provided by this
-package should be used with caution. Most important things to mention are [1] **Kohii** doesn't
-guarantee the compatibility of the experiments, [2] Developers want to adopt these experiments are
-suggested to copy-paste and modify the code to meet their need.
-
-Currently, `kohii-experiments` provides playback logic for **YouTube Playback** based on the
-Official [YouTube Android Player API](https://developers.google.com/youtube/android/player) and the
-Unofficial [YouTube Player library for Android and Chromecast](https://github.com/PierfrancescoSoffritti/android-youtube-player)
-. Using this package as below:
-
-```groovy
-def kohiiVersion = '1.4.0.2017001' // always use latest available version
-
-implementation "im.ene.kohii:kohii-core:${kohiiVersion}"
-implementation "im.ene.kohii:kohii-experiments:${kohiiVersion}"
-```
-
-!!! warning
-Again, please use this package with caution!

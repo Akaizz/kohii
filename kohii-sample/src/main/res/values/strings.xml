@@ -262,22 +262,6 @@
     It also supports floating Player (same concept as Picture-In-Picture, but not for Activity).
   </string>
 
-  <string name="demo_title_youtube_1">
-    Kohii + YouTube (1)
-  </string>
-
-  <string name="demo_desc_youtube_1">
-    Kohii with YouTube video using the YouTube Android Player API.
-  </string>
-
-  <string name="demo_title_youtube_2">
-    Kohii + YouTube
-  </string>
-
-  <string name="demo_desc_youtube_2">
-    Kohii with YouTube videos. https://github.com/PierfrancescoSoffritti/android-youtube-player library is used for playing back the videos.
-  </string>
-
   <string name="demo_title_debug">
     Kohii + Debug
   </string>

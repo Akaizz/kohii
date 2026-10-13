@@ -87,10 +87,3 @@
 
 # Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
 -dontwarn org.codehaus.mojo.animal_sniffer.*
-
-# -keep class com.google.api.** { *; }
--keepclassmembers class * {
-  @com.google.api.client.util.Key <fields>;
-}
-
--dontwarn com.google.protobuf.java_com_google_ads_interactivemedia_v3__sdk_1p_binary_b0308732GeneratedExtensionRegistryLite$Loader

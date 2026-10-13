@@ -50,7 +50,6 @@ import kohii.v1.sample.ui.pagers.ViewPager2WithFragmentsFragment
 import kohii.v1.sample.ui.pagers.ViewPager2WithRecyclerViewFragmentsFragment
 import kohii.v1.sample.ui.pagers.ViewPager2WithViewsFragment
 import kohii.v1.sample.ui.sview.ScrollViewFragment
-import kohii.v1.sample.ui.youtube.YouTubeFragment
 import okio.buffer
 import okio.source
 import timber.log.Timber
@@ -97,25 +96,7 @@ class DemoApp : Application() {
     jsonAdapter.fromJson(assets.open("medias.json").source().buffer()) ?: emptyList()
   }
 
-  val youtubeApiKey: String by lazy(NONE) {
-    val keyId = resources.getIdentifier("google_api_key", "string", packageName)
-    return@lazy if (keyId > 0) getString(keyId) else BuildConfig.YT_API_KEY
-  }
-
   val demoItems by lazy(NONE) {
-    val youtubeDemos: Collection<DemoItem> =
-      if (youtubeApiKey.isNotEmpty()) {
-        listOf(
-          DemoItem(
-            R.string.demo_title_youtube_2,
-            R.string.demo_desc_youtube_2,
-            YouTubeFragment::class.java,
-          ),
-        )
-      } else {
-        emptyList()
-      }
-
     setOf(
       DemoItem(
         R.string.demo_title_recycler_view_0,
@@ -133,7 +114,6 @@ class DemoApp : Application() {
         FbookFragment::class.java,
       ),
     )
-      .plus(youtubeDemos)
       .plus(
         setOf(
           DemoItem(
