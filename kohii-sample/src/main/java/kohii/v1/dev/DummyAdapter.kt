@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2020 Nam Nguyen, nam@ene.im
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package kohii.v1.dev
+
+import android.view.View
+import android.view.ViewGroup
+import androidx.media3.common.Player
+import androidx.media3.ui.PlayerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import kohii.v1.core.Manager
+import kohii.v1.core.Playback
+import kohii.v1.core.Playback.Controller
+import kohii.v1.exoplayer.Kohii
+import kohii.v1.sample.DemoApp
+
+internal class DummyAdapter(
+  val kohii: Kohii,
+  val manager: Manager,
+  val enterFullscreenListener: (DummyAdapter, DummyViewHolder, View, Any) -> Unit = { _, _, _, _ -> },
+) : Adapter<DummyViewHolder>() {
+  override fun onCreateViewHolder(
+    parent: ViewGroup,
+    viewType: Int,
+  ): DummyViewHolder {
+    val holder = DummyViewHolder(parent)
+    holder.enterFullscreen.setOnClickListener {
+      enterFullscreenListener(
+        this,
+        holder,
+        holder.playerView,
+        "player::${holder.absoluteAdapterPosition}",
+      )
+    }
+    return holder
+  }
+
+  override fun getItemCount() = Int.MAX_VALUE / 2
+
+  override fun onBindViewHolder(
+    holder: DummyViewHolder,
+    position: Int,
+  ) {
+    bindVideo(holder)
+  }
+
+  fun bindVideo(holder: DummyViewHolder) {
+    kohii.setUp(DemoApp.VIDEO_URI_ASSET) {
+      tag = "player::${holder.absoluteAdapterPosition}"
+      repeatMode = Player.REPEAT_MODE_ONE
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
+
+          override fun kohiiCanPause(): Boolean = true
+
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // renderer.useController = true
+              // renderer.setControlDispatcher(kohii.createControlDispatcher(playback))
+            }
+          }
+        }
+    }
+      .bind(holder.playerView)
+  }
+}

@@ -1,0 +1,96 @@
+# Project information
+site_name: 'Kohii'
+site_description: 'Android Video Playback made easy.'
+site_author: '2019 Nam Nguyen, nam@ene.im'
+site_url: 'https://eneim.github.io/kohii'
+remote_branch: gh-pages
+
+# Repository
+repo_name: 'Kohii'
+repo_url: 'https://github.com/eneim/kohii'
+
+# Copyright
+copyright: 'Copyright &copy; 2019 Nam Nguyen, nam@ene.im'
+
+# Configuration
+theme:
+  name: 'material'
+  language: 'en'
+  favicon: 'art/favicon.ico'
+  logo: 'art/ic_launcher-web.png'
+  palette:
+    primary: 'blue grey'
+    accent: 'cyan'
+  font:
+    # text: 'Open Sans'
+    text: 'Noto Sans JP' # 'Inter', 'Karla', 'Noto Sans JP', 'Montserrat', 'Open Sans'
+    code: 'Roboto Mono' # 'Oxygen Mono', 'Fira Code', 'Roboto Mono'
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/eneim/kohii
+
+google_analytics:
+  - 'UA-72567780-9'
+  - 'auto'
+
+# CSS
+extra_css:
+  - 'css/main.css'
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+      use_pygments: True
+      noclasses: True
+      pygments_style: perldoc
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - tables
+  - footnotes
+
+# Plugins
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+# Navigation
+nav:
+  - 'Overview': index.md
+  - 'Glossary': glossary.md
+  - 'Using Kohii':
+      - 'Getting start': getting-started.md
+      - 'Basic usages': usage-basic.md
+      - 'Advance usages':
+          - 'Summary': advance-summary.md
+          - 'Using custom Kohii creators': advance-builder.md
+          - 'Using unique tag': advance-unique-tag.md
+          - 'Show/Hide thumbnail': advance-thumbnail.md
+          - 'Switching renderers': advance-switch-renderer.md
+          - 'Reusing renderer': advance-reuse-renderer-instance.md
+          - 'Using MemoryMode': advance-memory-mode.md
+          - 'Multiple playbacks': advance-multiple-playbacks.md
+          - 'Manual playback (experimental)': advance-manual-playback.md
+      - 'Demo app': demos.md
+  - 'Extending Kohii':
+      - 'Custom Engine': custom-engine.md
+  - 'Changelog': changelog.md
+  - 'API': api/index.html
+  - 'Code of Conduct': code_of_conduct.md

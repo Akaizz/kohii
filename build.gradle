@@ -1,0 +1,164 @@
+import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
+
+/*
+ * Copyright (c) 2018 Nam Nguyen, nam@ene.im
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+  repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
+    maven { url 'https://maven.fabric.io/public' }
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+
+  dependencies {
+    //noinspection GradleDependency
+    classpath(libs.gradle)
+    classpath(libs.kotlin.gradle.plugin)
+    classpath(libs.google.services)
+    classpath(libs.firebase.crashlytics.gradle)
+    classpath(libs.ktlint.gradle)
+    classpath(libs.dokka.gradle.plugin)
+    classpath(libs.binary.compatibility.validator)
+    classpath(libs.publish.plugin)
+  }
+}
+
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
+// Setup for the Nexus Publish Plugin.
+group = libs.versions.release.groupid.get()
+version = libs.versions.release.name.get()
+
+def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok")]
+
+apply plugin: 'binary-compatibility-validator'
+apiValidation {
+  sampleProjects.forEach {
+    ignoredProjects += it.name
+  }
+}
+
+apply plugin: "org.jetbrains.dokka"
+tasks.withType(DokkaMultiModuleTask).configureEach {
+  outputDirectory.set(file("$rootDir/docs/api"))
+  removeChildTasks(sampleProjects)
+}
+
+def getRepositoryUsername() {
+  return hasProperty('mavenCentralRepositoryUsername') ? mavenCentralRepositoryUsername : ""
+}
+
+def getRepositoryPassword() {
+  return hasProperty('mavenCentralRepositoryPassword') ? mavenCentralRepositoryPassword : ""
+}
+
+nexusPublishing {
+  repositories {
+    sonatype {
+      username = getRepositoryUsername()
+      password = getRepositoryPassword()
+    }
+  }
+}
+
+allprojects {
+  repositories {
+    google()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    /* flatDir {
+      dirs 'libs'
+    } */
+  }
+
+  apply plugin: "org.jlleitschuh.gradle.ktlint" // Version should be inherited from parent
+  apply plugin: "org.jetbrains.dokka"
+
+  tasks.withType(JavaCompile).configureEach { task ->
+    task.sourceCompatibility = JavaVersion.VERSION_1_8
+    task.targetCompatibility = JavaVersion.VERSION_1_8
+  }
+
+  //noinspection UnnecessaryQualifiedReference
+  tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile).configureEach { task ->
+    task.kotlinOptions {
+      jvmTarget = "1.8"
+    }
+  }
+
+  //noinspection UnnecessaryQualifiedReference
+  tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinCompile).configureEach { task ->
+    task.kotlinOptions {
+      freeCompilerArgs += [
+          '-Xjvm-default=all'
+      ]
+    }
+  }
+
+  tasks.withType(Test) {
+    testLogging {
+      events "skipped", "failed", "passed"
+    }
+  }
+
+  tasks.withType(DokkaTaskPartial).configureEach {
+    dokkaSourceSets.configureEach {
+      jdkVersion.set(8)
+      skipDeprecated.set(true)
+
+      externalDocumentationLink {
+        url.set("https://developer.android.com/reference/".toURL())
+      }
+    }
+  }
+
+  afterEvaluate { p ->
+    if (p.hasProperty("android")) {
+      p.android.lintOptions {
+        // FIXME(eneim): temporarily disable.
+        disable "RestrictedApi", "VisibleForTests", "UnusedResources", "UnusedIds"
+      }
+    }
+
+    if (p.hasProperty("android") && p.hasProperty("dependencies")) {
+      p.dependencies {
+        // dokkaHtmlPartialPlugin("org.jetbrains.dokka:android-documentation-plugin:1.8.10")
+        dokkaPlugin(libs.android.documentation.plugin)
+      }
+    }
+  }
+}
+
+task clean(type: Delete) {
+  delete rootProject.buildDir
+}
+
+tasks.wrapper {
+  distributionType = Wrapper.DistributionType.ALL
+}
+
+// copy from https://github.com/chrisbanes/tivi
+// read from gradle.properties for a value, or use default instead.
+String lookUpProf(String propertyName, String defaultValue) {
+  def propertyValue = project.properties[propertyName]
+  return propertyValue != null ? propertyValue : defaultValue
+}
