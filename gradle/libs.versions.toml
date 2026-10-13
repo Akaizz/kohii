@@ -33,7 +33,6 @@ release-code = "10500"
 release-name = "1.5.0.2018005-SNAPSHOT"
 release-groupid = "im.ene.kohii"
 
-androidx-media2 = "1.2.1"
 androidx-media3 = "1.4.1"
 androidx-annotation-experimental = "1.3.1"
 androidx-lifecycle = "2.6.1"
@@ -73,11 +72,6 @@ androidsvg-aar = { module = "com.caverock:androidsvg-aar", version.ref = "androi
 androidx-core-ktx = { module = "androidx.test:core-ktx", version.ref = "core-ktx" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "junit-ktx" }
-androidx-media2-common = { module = "androidx.media2:media2-common", version.ref = "androidx-media2" }
-androidx-media2-widget = { module = "androidx.media2:media2-widget", version.ref = "androidx-media2" }
-androidx-media2-player = { module = "androidx.media2:media2-player", version.ref = "androidx-media2" }
-androidx-media2-exoplayer = { module = "androidx.media2:media2-exoplayer", version.ref = "androidx-media2" }
-androidx-media2-session = { module = "androidx.media2:media2-session", version.ref = "androidx-media2" }
 
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "androidx-media3" }
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "androidx-media3" }

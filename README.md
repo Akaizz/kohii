@@ -92,5 +92,4 @@ kohii.setUp(videoUrl).bind(playerView);
 Kotlin.
 
 The core library doesn't come with any actual playback logic. Actual implementation comes with
-extension libraries. The extensions require corresponding 3rd libraries: ``kohii-exoplayer`` will
-requires ``androidx.media3`` (ExoPlayer), ``kohii-androidx`` will requires ``androidx.media2``.
+extension libraries: ``kohii-exoplayer`` uses ``androidx.media3`` (ExoPlayer) for playback.

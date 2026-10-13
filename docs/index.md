@@ -86,5 +86,4 @@ do using `Kohii`:
 using the **Kotlin&trade;** language.
 
 The core library doesn't come with any actual playback logic. Actual implementation comes with
-extension libraries. The extensions require corresponding 3rd libraries: `kohii-exoplayer` will
-require `exoplayer`, `kohii-androidx` will require `androidx.media2`.
+extension libraries: `kohii-exoplayer` uses `androidx.media3` (ExoPlayer) for playback.

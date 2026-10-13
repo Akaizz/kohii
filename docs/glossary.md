@@ -19,7 +19,7 @@ anything. In the future, we will try to expand the concept of container to other
 The idea of **Renderer** and **Container** allows **Kohii** to build the abstractions around them
 where a renderer can be attached to a container, detached from a container and passed around, and
 therefore renderers can be reused for unlimited number of Videos. This behavior is supported out of
-the box by `kohii-exoplayer` and `kohii-androidx` packages.
+the box by the `kohii-exoplayer` package.
 
 ## Playback and Playable
 

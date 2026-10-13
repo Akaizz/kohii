@@ -43,27 +43,6 @@ version of **ExoPlayer** it uses. For example **Kohii** `1.0.0.2010004` will use
 ExoPlayer** `2.10.4` for playback logic, but **Kohii** `1.0.0.2011000` will use **
 ExoPlayer** `2.11.0` instead.
 
-- `kohii-androidx`
-
-This artifact contains the implementation of `kohii-core` that uses **AndroidX Media2** as
-playback *backend*. As a result, you will also need to include necessary **AndroidX Media2**
-artifacts as well. The setup would be the same as `kohii-exoplayer`, accept that you need these
-instead of **ExoPlayer**:
-
-```groovy
-def kohiiVersion = '1.4.0.2017001' // always use latest available version
-
-implementation "im.ene.kohii:kohii-core:${kohiiVersion}"
-implementation "im.ene.kohii:kohii-androidx:${kohiiVersion}"
-
-def media2Version = '1.0.3'
-
-implementation "androidx.media2:media2-widget:${media2Version}"
-implementation "androidx.media2:media2-common:${media2Version}"
-implementation "androidx.media2:media2-player:${media2Version}"
-implementation "androidx.media2:media2-session:${media2Version}"
-```
-
 - `kohii-experiments`
 
 This artifacts includes experimental implementations. In short the playback logic provided by this
