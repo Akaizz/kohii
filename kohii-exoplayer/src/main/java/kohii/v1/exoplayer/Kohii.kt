@@ -54,7 +54,9 @@ open class Kohii constructor(
   private constructor(context: Context) : this(Master[context])
 
   companion object {
-    private val capsule = Capsule(::Kohii)
+    // The explicit types select the (Context) constructor: Kotlin 2 cannot infer it on its own, as
+    // Kohii also has a (Master, ...) constructor.
+    private val capsule: Capsule<Kohii, Context> = Capsule(::Kohii)
 
     @JvmStatic // convenient static call for Java
     operator fun get(context: Context) = capsule.get(context)
