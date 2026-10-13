@@ -55,10 +55,11 @@ data class ExoPlayerConfig(
   internal val allowedVideoJoiningTimeMs: Long = DefaultRenderersFactory.DEFAULT_ALLOWED_VIDEO_JOINING_TIME_MS,
   internal val extensionRendererMode: Int = DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF,
   internal val mediaCodecSelector: MediaCodecSelector = MediaCodecSelector.DEFAULT,
-  // DefaultLoadControl parameters
+  // DefaultLoadControl parameters. The buffer is shorter than ExoPlayer's default (50s), as videos in a
+  // feed are often skipped after a few seconds: buffering more only wastes the bandwidth.
   internal val allocator: DefaultAllocator = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE),
-  internal val minBufferMs: Int = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
-  internal val maxBufferMs: Int = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS,
+  internal val minBufferMs: Int = FEED_BUFFER_MS,
+  internal val maxBufferMs: Int = FEED_BUFFER_MS,
   internal val bufferForPlaybackMs: Int = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
   internal val bufferForPlaybackAfterRebufferMs: Int = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
   internal val prioritizeTimeOverSizeThresholds: Boolean = DefaultLoadControl.DEFAULT_PRIORITIZE_TIME_OVER_SIZE_THRESHOLDS,
@@ -69,8 +70,12 @@ data class ExoPlayerConfig(
   internal val cache: Cache? = null,
 ) : LoadControlFactory, BandwidthMeterFactory, TrackSelectorFactory {
   companion object {
+    // Duration of media to buffer ahead of the playback position, tuned for feeds.
+    private const val FEED_BUFFER_MS = 12_000
+
     /**
-     * Every fields are default, following the setup by ExoPlayer.
+     * Default setup: ExoPlayer's defaults, except that it buffers up to 12 seconds ahead instead of
+     * 50 seconds.
      */
     @JvmStatic
     val DEFAULT = ExoPlayerConfig()

@@ -22,6 +22,12 @@
   favor of `createKohii`. Use the IDE quick-fix (ReplaceWith) to migrate.
 - (kohii-exoplayer): `ExoPlayerConfig.trackSelectorParameters` is nullable; `null` (default) uses
   the default `DefaultTrackSelector.Parameters` for the Application Context.
+- (kohii-exoplayer): `ExoPlayerConfig.DEFAULT` buffers up to 12 seconds ahead (`minBufferMs` and
+  `maxBufferMs`) instead of ExoPlayer's 50 seconds, as videos in a feed are often skipped after a
+  few seconds.
+- (kohii-exoplayer): `ExoPlayerCache.lruCacheSingleton` is stored in the app's cache directory
+  (instead of the external files directory) and uses 10% of the free space, between 32 MB and
+  256 MB (instead of 24 MB). The cache in the old location is deleted.
 - (kohii-exoplayer): The library opts in to Media3 `@UnstableApi` internally, so clients only need
   to opt in when they use unstable Media3 APIs directly.
 
