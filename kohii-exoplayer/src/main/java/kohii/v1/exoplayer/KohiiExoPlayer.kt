@@ -81,6 +81,10 @@ open class KohiiExoPlayer(
       .setLooper(looper),
   )
 
+  // Media3 declares this as a Java default method of Player (returning AUDIO_SESSION_ID_UNSET),
+  // and Kotlin's interface delegation does not forward default methods.
+  override fun getAudioSessionId(): Int = player.audioSessionId
+
   private val volumeChangedListeners by lazy(NONE) { VolumeChangedListeners() }
   private var playerVolumeInfo = VolumeInfo.DEFAULT_ACTIVE // backing field.
 

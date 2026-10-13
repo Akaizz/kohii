@@ -62,6 +62,9 @@
 - (kohii-core): `Engine.cancel(container)` now unbinds the container when it belongs to a Manager
   other than the first one of its Activity (for example, a Fragment's Manager when the Activity is
   also registered). Before, only a pending (not yet attached) binding was cancelled.
+- (kohii-exoplayer): `KohiiExoPlayer.getAudioSessionId()` now returns the session id of the wrapped
+  player. Media3 1.10 moved it to a Java default method of `Player`, which Kotlin's interface
+  delegation does not forward, so it always returned `C.AUDIO_SESSION_ID_UNSET`.
 
 ### Migration
 

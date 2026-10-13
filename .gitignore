@@ -37,7 +37,7 @@
 /kohii-exoplayer/.gitignore
 /kohii-exoplayer/consumer-rules.pro
 /kohii-exoplayer/src/androidTest/
-/kohii-exoplayer/src/test/
+#/kohii-exoplayer/src/test/
 /kohii-core/src/androidTest/
 /kohii-core/src/main/java/.scannerwork/
 #/kohii-core/src/test/
