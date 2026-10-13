@@ -33,7 +33,7 @@ internal class MasterDispatcher(val master: Master) : Handler(Looper.getMainLoop
         debugOnly {
           val request = master.requests[container]
           if (request != null) {
-            "Request bind: ${request.tag}, $container, ${request.playable}".logInfo()
+            logInfo { "Request bind: ${request.tag}, $container, ${request.playable}" }
           }
         }
         container.doOnAttach {

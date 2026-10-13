@@ -177,6 +177,6 @@ class Manilo(
 
   // This callback only works when [Manilo] uses a default [ImaAdsLoader.Builder].
   override fun onAdEvent(adEvent: AdEvent) {
-    "AdEvent: $adEvent".logInfo()
+    logInfo { "AdEvent: $adEvent" }
   }
 }

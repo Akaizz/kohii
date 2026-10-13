@@ -89,12 +89,12 @@ abstract class Bucket constructor(
   private val containerAttachStateChangeListener =
     object : OnAttachStateChangeListener {
       override fun onViewAttachedToWindow(v: View) {
-        "Bucket# container is attached: $v, $this".logInfo()
+        logInfo { "Bucket# container is attached: $v, $this" }
         manager.onContainerAttachedToWindow(v)
       }
 
       override fun onViewDetachedFromWindow(v: View) {
-        "Bucket# container is detached: $v, $this".logInfo()
+        logInfo { "Bucket# container is detached: $v, $this" }
         manager.onContainerDetachedFromWindow(v)
       }
     }
@@ -209,7 +209,7 @@ abstract class Bucket constructor(
 
   @CallSuper
   open fun onAdded() {
-    "Bucket is added: $this".logInfo()
+    logInfo { "Bucket is added: $this" }
     if (root.isAttachedToWindow) {
       rootAttachStateChangeListener.onViewAttachedToWindow(root)
     }
@@ -218,7 +218,7 @@ abstract class Bucket constructor(
 
   @CallSuper
   open fun onAttached() {
-    "Bucket is attached: $this".logInfo()
+    logInfo { "Bucket is attached: $this" }
     behaviorHolder.value?.let {
       val behavior = it.behavior
       if (behavior != null) {
@@ -230,7 +230,7 @@ abstract class Bucket constructor(
 
   @CallSuper
   open fun onDetached() {
-    "Bucket is detached: $this".logInfo()
+    logInfo { "Bucket is detached: $this" }
     if (behaviorHolder.isInitialized()) {
       behaviorHolder.value?.let {
         val behavior = it.behavior
@@ -244,7 +244,7 @@ abstract class Bucket constructor(
 
   @CallSuper
   open fun onRemoved() {
-    "Bucket is removed: $this".logInfo()
+    logInfo { "Bucket is removed: $this" }
     root.removeOnAttachStateChangeListener(rootAttachStateChangeListener)
     mutableListOf(containers)
       .onEach(manager::onRemoveContainer)

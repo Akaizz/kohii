@@ -51,12 +51,12 @@ abstract class AbstractBridge<RENDERER : Any> : Bridge<RENDERER> {
 
   @CallSuper
   override fun play() {
-    "Bridge#play $this".logInfo()
+    logInfo { "Bridge#play $this" }
   }
 
   @CallSuper
   override fun pause() {
-    "Bridge#pause $this".logInfo()
+    logInfo { "Bridge#pause $this" }
   }
 
   // For backward compatibility.

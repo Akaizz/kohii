@@ -18,14 +18,15 @@ public abstract interface annotation class kohii/v1/Experiment : java/lang/annot
 }
 
 public final class kohii/v1/ExtensionsKt {
-	public static final fun logDebug (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun logDebug$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public static final fun logError (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun logError$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public static final fun logInfo (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun logInfo$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public static final fun logWarn (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun logWarn$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun getLOG_TAG ()Ljava/lang/String;
+	public static final fun logDebug (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun logDebug$default (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun logError (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun logError$default (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun logInfo (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun logInfo$default (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun logWarn (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun logWarn$default (Ljava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public static final fun onEachAcquired (Landroidx/core/util/Pools$Pool;Lkotlin/jvm/functions/Function1;)V
 	public static final fun viewBehavior (Landroid/view/View;)Landroidx/coordinatorlayout/widget/CoordinatorLayout$Behavior;
 }

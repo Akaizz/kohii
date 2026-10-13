@@ -223,7 +223,7 @@ class Manager internal constructor(
 
   internal fun onContainerAttachedToWindow(container: Any?) {
     val playback = playbacks[container]
-    "Manager#onContainerAttachedToWindow: $playback".logDebug()
+    logDebug { "Manager#onContainerAttachedToWindow: $playback" }
     if (playback != null) {
       onPlaybackAttached(playback)
       onPlaybackActive(playback)
@@ -234,7 +234,7 @@ class Manager internal constructor(
   internal fun onContainerDetachedFromWindow(container: Any?) {
     // A detached Container can be re-attached later (in case of RecyclerView)
     val playback = playbacks[container]
-    "Manager#onContainerDetachedFromWindow: $playback".logDebug()
+    logDebug { "Manager#onContainerDetachedFromWindow: $playback" }
     if (playback != null) {
       if (playback.isAttached) {
         if (playback.isActive) onPlaybackInActive(playback)
@@ -357,7 +357,7 @@ class Manager internal constructor(
     from: Playback?,
     to: Playback?,
   ) {
-    "Manager#notifyPlaybackChanged ${playable.tag}, $from, $to, $this".logInfo()
+    logInfo { "Manager#notifyPlaybackChanged ${playable.tag}, $from, $to, $this" }
     playableObservers[playable.tag]?.invoke(playable.tag, from, to)
   }
 

@@ -87,7 +87,7 @@ open class PlayerViewBridge(
     }
 
   override fun prepare(loadSource: Boolean) {
-    "Bridge#prepare loadSource=$loadSource, $this".logInfo()
+    logInfo { "Bridge#prepare loadSource=$loadSource, $this" }
     super.addEventListener(this)
 
     if (player == null) {
@@ -107,7 +107,7 @@ open class PlayerViewBridge(
   override var renderer: PlayerView? = null
     set(value) {
       if (field === value) return // same reference
-      "Bridge#renderer $field -> $value, $this".logInfo()
+      logInfo { "Bridge#renderer $field -> $value, $this" }
       this.lastSeenTracks = Tracks.EMPTY
       this.inErrorState = false
       if (value == null) {
@@ -126,7 +126,7 @@ open class PlayerViewBridge(
     }
 
   override fun ready() {
-    "Bridge#ready, $this".logInfo()
+    logInfo { "Bridge#ready, $this" }
     prepareMediaSource()
     requireNotNull(player) { "Player must be available." }
     ensurePlayerView()
@@ -145,7 +145,7 @@ open class PlayerViewBridge(
   }
 
   override fun reset(resetPlayer: Boolean) {
-    "Bridge#reset resetPlayer=$resetPlayer, $this".logInfo()
+    logInfo { "Bridge#reset resetPlayer=$resetPlayer, $this" }
     if (resetPlayer) {
       _playbackInfo = PlaybackInfo()
     } else {
@@ -163,7 +163,7 @@ open class PlayerViewBridge(
   }
 
   override fun release() {
-    "Bridge#release, $this".logInfo()
+    logInfo { "Bridge#release, $this" }
     this.removeEventListener(this)
     // this.playerView = null // Bridge's owner must do this.
     this.renderer?.player = null
@@ -196,7 +196,7 @@ open class PlayerViewBridge(
 
   override var volumeInfo: VolumeInfo = player?.getVolumeInfo() ?: VolumeInfo.DEFAULT_ACTIVE
     set(value) {
-      "Bridge#volumeInfo $field -> $value, $this".logInfo()
+      logInfo { "Bridge#volumeInfo $field -> $value, $this" }
       if (field == value) return
       field = value
       player?.setVolumeInfo(value)
@@ -225,7 +225,7 @@ open class PlayerViewBridge(
     }
 
   private fun applyPlayerParameters(parameters: PlayerParameters) {
-    val player = this.player ?: return // TODO: cache this and apply when player is ready.
+    val player = this.player ?: return // Applied again in ensurePlayer() once a player is set.
     player.trackSelectionParameters =
       player.trackSelectionParameters.buildUpon()
         .setMaxVideoSize(parameters.maxVideoWidth, parameters.maxVideoHeight)
@@ -291,9 +291,9 @@ open class PlayerViewBridge(
     if (player == null) {
       sourcePrepared = false
       listenerApplied = false
-      val player = playerPool.getPlayer(this.media)
+      this.player = playerPool.getPlayer(this.media)
+      // Must be called after the player is set, otherwise the parameters are not applied.
       applyPlayerParameters(playerParameters)
-      this.player = player
     }
 
     requireNotNull(player).also {
@@ -329,7 +329,7 @@ open class PlayerViewBridge(
 
   //region Player.Listener implementation
   override fun onPlayerError(error: PlaybackException) {
-    "Bridge#onPlayerError error=${error.cause}, message=${error.cause?.message}, $this".logError()
+    logError { "Bridge#onPlayerError error=${error.cause}, message=${error.cause?.message}, $this" }
     if (renderer == null) {
       var errorString: String? = null
       val exception = error.cause

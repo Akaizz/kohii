@@ -25,6 +25,14 @@
 - (kohii-exoplayer): The library opts in to Media3 `@UnstableApi` internally, so clients only need
   to opt in when they use unstable Media3 APIs directly.
 
+### Fixed
+
+- (kohii-exoplayer): `PlayerParameters` (max video size and bitrates) are now applied when the
+  Bridge acquires a new player from the pool. Before, they were silently ignored until the next
+  change.
+- (kohii-core): Debug log messages are only built when logging is enabled. The internal log helpers
+  now take a lambda (`logDebug { "..." }`) instead of being `String` extensions.
+
 ### Migration
 
 - Replace `com.google.android.exoplayer2.*` imports with their `androidx.media3.*` counterparts

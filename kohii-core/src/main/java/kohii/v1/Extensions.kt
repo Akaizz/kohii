@@ -108,33 +108,40 @@ fun View.viewBehavior(): Behavior<*>? {
   return if (behavior is BehaviorWrapper) behavior.delegate else behavior
 }
 
-// Because I want to compose the message first, then log it.
+@PublishedApi
+internal val LOG_TAG = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log"
+
+// The message is only composed when logging is enabled, so release builds pay nothing for it.
 @RestrictTo(LIBRARY_GROUP_PREFIX)
-fun String.logDebug(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.d(tag, this)
-  }
+inline fun logDebug(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.d(tag, message())
 }
 
 @RestrictTo(LIBRARY_GROUP_PREFIX)
-fun String.logInfo(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.i(tag, this)
-  }
+inline fun logInfo(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.i(tag, message())
 }
 
 @RestrictTo(LIBRARY_GROUP_PREFIX)
-fun String.logWarn(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.w(tag, this)
-  }
+inline fun logWarn(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.w(tag, message())
 }
 
 @RestrictTo(LIBRARY_GROUP_PREFIX)
-fun String.logError(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.e(tag, this)
-  }
+inline fun logError(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.e(tag, message())
 }
 
 internal inline fun debugOnly(action: () -> Unit) {

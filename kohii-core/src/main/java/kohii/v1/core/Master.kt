@@ -215,7 +215,7 @@ class Master private constructor(context: Context) : PlayableManager {
     options: Options,
     callback: ((Playback) -> Unit)? = null,
   ) {
-    "Master#bind tag=$tag, playable=$playable, container=$container, options=$options".logInfo()
+    logInfo { "Master#bind tag=$tag, playable=$playable, container=$container, options=$options" }
     // Remove any queued binding requests for the same container.
     dispatcher.removeMessages(MSG_BIND_PLAYABLE, container)
     // Remove any queued releasing request for the same Playable, since we are binding it now.
@@ -252,7 +252,7 @@ class Master private constructor(context: Context) : PlayableManager {
     playable: Playable,
     clearState: Boolean,
   ) {
-    "Master#onTearDown: $playable, clear: $clearState".logDebug()
+    logDebug { "Master#onTearDown: $playable, clear: $clearState" }
     check(playable.manager == null || playable.manager === this) {
       "Teardown $playable, found manager: ${playable.manager}"
     }
@@ -270,7 +270,7 @@ class Master private constructor(context: Context) : PlayableManager {
   }
 
   internal fun trySavePlaybackInfo(playable: Playable) {
-    "Master#trySavePlaybackInfo: $playable".logDebug()
+    logDebug { "Master#trySavePlaybackInfo: $playable" }
     val key =
       if (playable.tag !== NO_TAG) {
         playable.tag
@@ -284,14 +284,14 @@ class Master private constructor(context: Context) : PlayableManager {
 
     if (!playbackInfoStore.containsKey(key)) {
       val info = playable.playbackInfo
-      "Master#trySavePlaybackInfo: $info, $playable".logInfo()
+      logInfo { "Master#trySavePlaybackInfo: $info, $playable" }
       playbackInfoStore[key] = info
     }
   }
 
   // If this method is called, it must be before any call to playable.bridge.prepare(flag)
   internal fun tryRestorePlaybackInfo(playable: Playable) {
-    "Master#tryRestorePlaybackInfo: $playable".logDebug()
+    logDebug { "Master#tryRestorePlaybackInfo: $playable" }
     val cache =
       if (playable.tag !== NO_TAG) {
         playbackInfoStore.remove(playable.tag)
@@ -300,7 +300,7 @@ class Master private constructor(context: Context) : PlayableManager {
         playbackInfoStore.remove(key)
       }
 
-    "Master#tryRestorePlaybackInfo: $cache, $playable".logInfo()
+    logInfo { "Master#tryRestorePlaybackInfo: $cache, $playable" }
     // Only restoring playback state if there is cached state, and the player is not ready yet.
     if (cache != null && playable.playerState <= Player.STATE_IDLE) {
       playable.playbackInfo = cache
@@ -309,14 +309,14 @@ class Master private constructor(context: Context) : PlayableManager {
 
   // [Draft] return false if this [Master] wants to handle this step by itself, true to release.
   internal fun releasePlaybackOnInActive(playback: Playback): Boolean {
-    "Master#releasePlaybackOnInActive: $playback".logDebug()
+    logDebug { "Master#releasePlaybackOnInActive: $playback" }
     if (!playback.config.releaseOnInActive) return false
     val playable: Playable? = manuallyStartedPlayable.get()
     return !(playable === playback.playable && playable?.isPlaying() == true)
   }
 
   internal fun onPlaybackDetached(playback: Playback) {
-    "Master#onPlaybackDetached: $playback".logDebug()
+    logDebug { "Master#onPlaybackDetached: $playback" }
     playbackInfoStore.remove(playback)
   }
 
@@ -425,13 +425,13 @@ class Master private constructor(context: Context) : PlayableManager {
     playable: Playable,
     loadSource: Boolean = false,
   ) {
-    "Master#preparePlayable playable=$playable, loadSource=$loadSource".logInfo()
+    logInfo { "Master#preparePlayable playable=$playable, loadSource=$loadSource" }
     dispatcher.removeMessages(MSG_RELEASE_PLAYABLE, playable)
     playable.onPrepare(loadSource)
   }
 
   internal fun releasePlayable(playable: Playable) {
-    "Master#releasePlayable playable=$playable".logInfo()
+    logInfo { "Master#releasePlayable playable=$playable" }
     dispatcher.removeMessages(MSG_RELEASE_PLAYABLE, playable)
     dispatcher.obtainMessage(MSG_RELEASE_PLAYABLE, playable)
       .sendToTarget()
@@ -747,11 +747,11 @@ class Master private constructor(context: Context) : PlayableManager {
           }
         }
       }
-      "Request bound: $tag, $container, $playable".logInfo()
+      logInfo { "Request bound: $tag, $container, $playable" }
     }
 
     internal fun onRemoved() {
-      "Request removed: $tag, $container, $playable".logWarn()
+      logWarn { "Request removed: $tag, $container, $playable" }
       options.controller = null
       options.artworkHintListener = null
       options.networkTypeChangeListener = null

@@ -7,7 +7,7 @@ Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm s�
 
 ## 1. Lỗi thật trong code
 
-### P0. `PlayerParameters` không được áp vào player mới
+### P0. `PlayerParameters` không được áp vào player mới (đã sửa)
 
 `kohii-exoplayer/.../PlayerViewBridge.kt`, hàm `ensurePlayer()`:
 
@@ -41,7 +41,7 @@ rất dễ thành lỗi khi có code giữ token cũ để so sánh.
 
 ## 2. Hiệu năng
 
-### P1. Log debug vẫn tốn chi phí ở bản release
+### P1. Log debug vẫn tốn chi phí ở bản release (đã sửa)
 
 Mọi lệnh log có dạng `"Playback#onRefresh $this".logDebug()`. Chuỗi được ghép **trước** khi vào
 hàm, rồi mới kiểm tra `BuildConfig.DEBUG`. Vì vậy ngay cả bản release vẫn gọi `toString()` và
@@ -155,8 +155,8 @@ không mute.
 
 ## 5. Thứ tự đề xuất
 
-1. Sửa lỗi `applyPlayerParameters` (một dòng).
+1. ~~Sửa lỗi `applyPlayerParameters`.~~ Đã xong.
 2. Sửa CI để có lại kiểm tra tự động, chạy `apiDump`.
-3. Log dạng lambda, bandwidth meter dùng chung, giảm kích thước pool.
+3. ~~Log dạng lambda.~~ Đã xong. Còn lại: bandwidth meter dùng chung, giảm kích thước pool.
 4. Nâng AGP/Kotlin, rồi nâng Media3 lên bản mới nhất.
 5. Dọn code chết, version catalog, quyết định số phận `kohii-ads`.

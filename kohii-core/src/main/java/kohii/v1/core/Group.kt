@@ -147,7 +147,7 @@ class Group(
   }
 
   private fun refresh() {
-    "Group#refresh, $this".logDebug()
+    logDebug { "Group#refresh, $this" }
     val playbacks = this.playbacks // save a cache to prevent re-mapping
     playbacks.forEach(Playback::onRefresh) // update token
 

@@ -45,7 +45,7 @@ internal class PlayableDispatcher(val master: Master) : Handler.Callback {
   }
 
   internal fun play(playable: Playable) {
-    "Dispatcher#play: $playable".logWarn()
+    logWarn { "Dispatcher#play: $playable" }
     val manuallyStartedPlayable = master.manuallyStartedPlayable.get()
     // Has manual controller
     if (manuallyStartedPlayable != null && // has Playable started by client
@@ -79,7 +79,7 @@ internal class PlayableDispatcher(val master: Master) : Handler.Callback {
   }
 
   internal fun pause(playable: Playable) {
-    "Dispatcher#pause: $playable".logWarn()
+    logWarn { "Dispatcher#pause: $playable" }
     val manuallyStartedPlayable = master.manuallyStartedPlayable.get()
     // Has manual controller
     if (manuallyStartedPlayable != null && // has Playable started by client

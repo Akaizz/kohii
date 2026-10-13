@@ -172,7 +172,7 @@ abstract class Playback(
       val oldPriority = field
       field = value
       val newPriority = field
-      "Playback#playbackPriority $oldPriority --> $newPriority, $this".logDebug()
+      logDebug { "Playback#playbackPriority $oldPriority --> $newPriority, $this" }
       if (oldPriority == newPriority) return
       playable?.onPlaybackPriorityChanged(this, oldPriority, newPriority)
     }
@@ -182,7 +182,7 @@ abstract class Playback(
       val from = field
       field = value
       val to = field
-      "Playback#volumeInfo $from --> $to, $this".logDebug()
+      logDebug { "Playback#volumeInfo $from --> $to, $this" }
       playable?.onVolumeInfoChanged(this, from, to)
     }
 
@@ -228,7 +228,7 @@ abstract class Playback(
   }
 
   protected open fun updateToken(): Token {
-    "Playback#updateToken $this".logDebug()
+    logDebug { "Playback#updateToken $this" }
     tmpRect.setEmpty()
     if (!lifecycleState.isAtLeast(manager.activeLifecycleState)) {
       return Token(config.threshold, -1F, tmpRect, container.width, container.height)
@@ -290,7 +290,7 @@ abstract class Playback(
    * Return `true` if this Playback successfully attaches the renderer, `false` otherwise.
    */
   internal fun attachRenderer(renderer: Any?): Boolean {
-    "Playback#attachRenderer $renderer $this".logDebug()
+    logDebug { "Playback#attachRenderer $renderer $this" }
     return onAttachRenderer(renderer)
   }
 
@@ -298,7 +298,7 @@ abstract class Playback(
    * Return `true` if this Playback successfully detaches the renderer, `false` otherwise.
    */
   internal fun detachRenderer(renderer: Any?): Boolean {
-    "Playback#detachRenderer $renderer $this".logDebug()
+    logDebug { "Playback#detachRenderer $renderer $this" }
     return onDetachRenderer(renderer)
   }
 
@@ -324,7 +324,7 @@ abstract class Playback(
   }
 
   internal fun onAdded() {
-    "Playback#onAdded $this".logDebug()
+    logDebug { "Playback#onAdded $this" }
     playbackState = STATE_ADDED
     callbacks.forEach { it.onAdded(this) }
     controller = config.controller
@@ -336,7 +336,7 @@ abstract class Playback(
   }
 
   internal fun onRemoved() {
-    "Playback#onRemoved $this".logDebug()
+    logDebug { "Playback#onRemoved $this" }
     playbackState = STATE_REMOVED
     controller = null
     tokenUpdateListener = null
@@ -348,20 +348,20 @@ abstract class Playback(
   }
 
   internal fun onAttached() {
-    "Playback#onAttached $this".logDebug()
+    logDebug { "Playback#onAttached $this" }
     playbackState = STATE_ATTACHED
     callbacks.forEach { it.onAttached(this) }
   }
 
   internal fun onDetached() {
-    "Playback#onDetached $this".logDebug()
+    logDebug { "Playback#onDetached $this" }
     playbackState = STATE_DETACHED
     callbacks.forEach { it.onDetached(this) }
   }
 
   @CallSuper
   internal open fun onActive() {
-    "Playback#onActive $this".logDebug()
+    logDebug { "Playback#onActive $this" }
     playbackState = STATE_ACTIVE
     callbacks.forEach { it.onActive(this) }
     artworkHintListener?.onArtworkHint(
@@ -374,7 +374,7 @@ abstract class Playback(
 
   @CallSuper
   internal open fun onInActive() {
-    "Playback#onInActive $this".logDebug()
+    logDebug { "Playback#onInActive $this" }
     playbackState = STATE_INACTIVE
     artworkHintListener?.onArtworkHint(this, true, playbackInfo.resumePosition, playerState)
     playable?.teardownRenderer(this)
@@ -383,7 +383,7 @@ abstract class Playback(
 
   @CallSuper
   internal open fun onPlay() {
-    "Playback#onPlay $this".logDebug()
+    logDebug { "Playback#onPlay $this" }
     container.keepScreenOn = true
     artworkHintListener?.onArtworkHint(
       this,
@@ -396,22 +396,22 @@ abstract class Playback(
   @CallSuper
   internal open fun onPause() {
     container.keepScreenOn = false
-    "Playback#onPause $this".logDebug()
+    logDebug { "Playback#onPause $this" }
     artworkHintListener?.onArtworkHint(this, true, playbackInfo.resumePosition, playerState)
   }
 
   internal fun onRefresh() {
-    "Playback#onRefresh $this".logDebug()
+    logDebug { "Playback#onRefresh $this" }
     playbackToken = updateToken()
     tokenUpdateListener?.onTokenUpdate(this, token)
-    "Playback#onRefresh token updated -> $this".logDebug()
+    logDebug { "Playback#onRefresh token updated -> $this" }
   }
 
   internal fun compareWith(
     other: Playback,
     orientation: Int,
   ): Int {
-    "Playback#compareWith $this $other, $this".logDebug()
+    logDebug { "Playback#compareWith $this $other, $this" }
     val thisToken = this.token
     val thatToken = other.token
 
@@ -444,27 +444,27 @@ abstract class Playback(
   }
 
   internal fun addCallback(callback: Callback) {
-    "Playback#addCallback $callback, $this".logDebug()
+    logDebug { "Playback#addCallback $callback, $this" }
     this.callbacks.push(callback)
   }
 
   internal fun removeCallback(callback: Callback?) {
-    "Playback#removeCallback $callback, $this".logDebug()
+    logDebug { "Playback#removeCallback $callback, $this" }
     this.callbacks.remove(callback)
   }
 
   fun addStateListener(listener: StateListener) {
-    "Playback#addStateListener $listener, $this".logDebug()
+    logDebug { "Playback#addStateListener $listener, $this" }
     this.listeners.add(listener)
   }
 
   fun removeStateListener(listener: StateListener?) {
-    "Playback#removeStateListener $listener, $this".logDebug()
+    logDebug { "Playback#removeStateListener $listener, $this" }
     this.listeners.remove(listener)
   }
 
   fun unbind() {
-    "Playback#unbind, $this".logDebug()
+    logDebug { "Playback#unbind, $this" }
     manager.master.dispatcher.post {
       playable?.onUnbind(this) ?: manager.removePlayback(this)
     }
@@ -505,7 +505,7 @@ abstract class Playback(
     if (playWhenReady == lastPlayWhenReady && playbackState == lastPlaybackState) return
     lastPlayWhenReady = playWhenReady
     lastPlaybackState = playbackState
-    "Playback#onPlayerStateChanged $playWhenReady - $playbackState, $this".logDebug()
+    logDebug { "Playback#onPlayerStateChanged $playWhenReady - $playbackState, $this" }
     when (playbackState) {
       Player.STATE_IDLE -> Unit
       Player.STATE_BUFFERING -> {
@@ -532,7 +532,7 @@ abstract class Playback(
   }
 
   override fun onVideoSizeChanged(videoSize: VideoSize) {
-    "Playback#onVideoSizeChanged ${videoSize.width} × ${videoSize.height}, $this".logDebug()
+    logDebug { "Playback#onVideoSizeChanged ${videoSize.width} × ${videoSize.height}, $this" }
     listeners.forEach {
       it.onVideoSizeChanged(
         playback = this,
@@ -545,14 +545,14 @@ abstract class Playback(
   }
 
   override fun onRenderedFirstFrame() {
-    "Playback#onRenderedFirstFrame, $this".logDebug()
+    logDebug { "Playback#onRenderedFirstFrame, $this" }
     listeners.forEach { it.onRendered(this) }
   }
 
   // ErrorListener
 
   override fun onError(error: Exception) {
-    "Playback#onError $error, $this".logDebug()
+    logDebug { "Playback#onError $error, $this" }
     listeners.forEach { it.onError(this, error) }
     if (BuildConfig.DEBUG) error.printStackTrace()
   }
