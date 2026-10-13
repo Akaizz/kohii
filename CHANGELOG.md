@@ -4,8 +4,18 @@
 
 ### Changed
 
-- Migrated from ExoPlayer 2 (`com.google.android.exoplayer2`) to AndroidX Media3 1.4.1
-  (`androidx.media3`). Compile SDK is 34 (required by Media3), target SDK is still 33.
+- Migrated from ExoPlayer 2 (`com.google.android.exoplayer2`) to AndroidX Media3 1.10.1
+  (`androidx.media3`).
+- Min SDK is 24 (Media3 1.10 requires 23), compile SDK is 36 (required by Media3 1.10), target SDK
+  of the sample apps is 35.
+- Build: Android Gradle Plugin 8.12.3, Gradle 8.13, Kotlin 2.0.21 (Media3 1.10 contains Kotlin 2
+  code that Kotlin 1.x cannot read).
+- Apps using Kohii must use the same Media3 version as Kohii (1.10.1). `KohiiExoPlayer` implements
+  `ExoPlayer`, so it only knows the methods of the Media3 version it was built with: with a newer
+  Media3, calling a method added later (for example `PlayerControlView` calls
+  `ExoPlayer.isScrubbingModeEnabled()` since Media3 1.8) crashes with `AbstractMethodError`.
+- (kohii-core): `NetworkTypeObserver` is registered with an explicit main thread `Executor`, as
+  `register(Listener)` is deprecated in Media3 1.10.
 - (kohii-core): `media3-common` is now an `api` dependency, so `Player`, `C`, ... are available to
   clients without extra dependencies.
 - (kohii-core): `PlayerEventListeners` and `Playback` no longer use deprecated `Player.Listener`

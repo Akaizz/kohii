@@ -18,11 +18,10 @@ apply plugin: 'kotlin-android'
 
 android {
   namespace 'kohii.v1.exoplayer'
-  compileSdkVersion libs.versions.android.compile.sdk.get().toInteger()
+  compileSdk libs.versions.android.compile.sdk.get().toInteger()
 
   defaultConfig {
-    minSdkVersion libs.versions.android.min.sdk.get()
-    targetSdkVersion libs.versions.android.target.sdk.get()
+    minSdk libs.versions.android.min.sdk.get().toInteger()
 
     buildConfigField("String", "LIB_NAME", "\"" + "Kohii for ExoPlayer, v" + libs.versions.release.name.get() + "\"")
 
@@ -46,6 +45,15 @@ android {
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  // Required by AGP 8+ to create the "release" software component used by gradle/release_maven.gradle.
+  publishing {
+    singleVariant('release')
   }
 }
 
@@ -75,5 +83,7 @@ dependencies {
   androidTestImplementation(libs.androidx.espresso.core)
 }
 
-project.archivesBaseName = "kohii-exoplayer"
+base {
+  archivesName = "kohii-exoplayer"
+}
 apply from: rootProject.file('gradle/release_maven.gradle')

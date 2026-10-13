@@ -20,11 +20,11 @@ apply plugin: 'kotlin-parcelize'
 
 android {
   namespace 'kohii.v1.sample.tiktok'
-  compileSdkVersion libs.versions.android.compile.sdk.get().toInteger()
+  compileSdk libs.versions.android.compile.sdk.get().toInteger()
 
   defaultConfig {
-    minSdkVersion libs.versions.android.min.sdk.get()
-    targetSdkVersion libs.versions.android.target.sdk.get()
+    minSdk libs.versions.android.min.sdk.get().toInteger()
+    targetSdk libs.versions.android.target.sdk.get().toInteger()
     versionCode libs.versions.release.code.get().toInteger()
     versionName libs.versions.release.name.get()
     applicationId "kohii.v1.sample.tiktok"
@@ -39,7 +39,7 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
-  packagingOptions {
+  packaging {
     resources {
       excludes +=
           ['META-INF/services/javax.annotation.processing.Processor', 'META-INF/DEPENDENCIES']
@@ -60,10 +60,6 @@ android {
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  kotlinOptions {
-    jvmTarget = "1.8"
   }
 }
 

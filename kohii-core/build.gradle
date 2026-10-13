@@ -15,17 +15,15 @@
  */
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 // apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
   namespace 'kohii.v1'
-  compileSdkVersion libs.versions.android.compile.sdk.get().toInteger()
+  compileSdk libs.versions.android.compile.sdk.get().toInteger()
 
   defaultConfig {
-    minSdkVersion libs.versions.android.min.sdk.get()
-    targetSdkVersion libs.versions.android.target.sdk.get()
+    minSdk libs.versions.android.min.sdk.get().toInteger()
 
     buildConfigField("String", "LIB_NAME", "\"" + "Kohii, v" + libs.versions.release.name.get() + "\"")
 
@@ -48,6 +46,15 @@ android {
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  // Required by AGP 8+ to create the "release" software component used by gradle/release_maven.gradle.
+  publishing {
+    singleVariant('release')
   }
 }
 
@@ -93,5 +100,7 @@ tasks.withType(Javadoc).all {
   enabled = false
 }
 
-project.archivesBaseName = "kohii-core"
+base {
+  archivesName = "kohii-core"
+}
 apply from: rootProject.file('gradle/release_maven.gradle')

@@ -45,6 +45,7 @@ allprojects {
 implementation "im.ene.kohii:kohii-core:1.4.0.2017001" // core library
 implementation "im.ene.kohii:kohii-exoplayer:1.4.0.2017001" // default support for ExoPlayer
 // Media3 ExoPlayer (androidx.media3:media3-exoplayer, media3-ui) is included transitively.
+// If your app also declares Media3 modules, use the same version as Kohii (1.10.1).
 ```
 
 Kohii uses Kotlin language with some Java 8 features so you will need to include the following
@@ -88,7 +89,7 @@ kohii.setUp(videoUrl).bind(playerView);
 
 ## Requirements
 
-**Kohii** works on Android 4.4+ (API level 19+) and on Java 8+. It is recommended to use Kohii using
+**Kohii** works on Android 7.0+ (API level 24+) and on Java 8+. It is recommended to use Kohii using
 Kotlin.
 
 The core library doesn't come with any actual playback logic. Actual implementation comes with

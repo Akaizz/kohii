@@ -29,7 +29,7 @@ if (file("google-services.json").exists()) {
 
 android {
   namespace 'kohii.v1.sample'
-  compileSdkVersion libs.versions.android.compile.sdk.get().toInteger()
+  compileSdk libs.versions.android.compile.sdk.get().toInteger()
 
   signingConfigs {
     release {
@@ -49,8 +49,8 @@ android {
 
   defaultConfig {
     applicationId "kohii.v1.sample"
-    minSdkVersion libs.versions.android.min.sdk.get()
-    targetSdkVersion libs.versions.android.target.sdk.get()
+    minSdk libs.versions.android.min.sdk.get().toInteger()
+    targetSdk libs.versions.android.target.sdk.get().toInteger()
     versionCode libs.versions.release.code.get().toInteger()
     versionName libs.versions.release.name.get()
 
@@ -76,7 +76,7 @@ android {
       shrinkResources false
     }
   }
-  packagingOptions {
+  packaging {
     resources {
       excludes +=
           ['META-INF/services/javax.annotation.processing.Processor', 'META-INF/DEPENDENCIES']
@@ -89,6 +89,7 @@ android {
   }
 
   buildFeatures {
+    buildConfig true
     viewBinding true
     dataBinding true
   }

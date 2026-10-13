@@ -30,6 +30,7 @@ import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.collection.arrayMapOf
 import androidx.collection.arraySetOf
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -158,7 +159,8 @@ class Master private constructor(context: Context) : PlayableManager {
     }
 
   init {
-    NetworkTypeObserver.getInstance(app).register(networkTypeChangedListener)
+    NetworkTypeObserver.getInstance(app)
+      .register(networkTypeChangedListener, ContextCompat.getMainExecutor(app))
     ProcessLifecycleOwner.get().lifecycle.addObserver(
       object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {

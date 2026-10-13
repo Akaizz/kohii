@@ -24,8 +24,6 @@ buildscript {
     google()
     mavenCentral()
     gradlePluginPortal()
-    maven { url 'https://maven.fabric.io/public' }
-    maven { url "https://plugins.gradle.org/m2/" }
   }
 
   dependencies {
@@ -83,11 +81,6 @@ allprojects {
   repositories {
     google()
     mavenCentral()
-    maven { url "https://jitpack.io" }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    /* flatDir {
-      dirs 'libs'
-    } */
   }
 
   apply plugin: "org.jlleitschuh.gradle.ktlint" // Version should be inherited from parent
@@ -99,18 +92,10 @@ allprojects {
   }
 
   //noinspection UnnecessaryQualifiedReference
-  tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile).configureEach { task ->
-    task.kotlinOptions {
-      jvmTarget = "1.8"
-    }
-  }
-
-  //noinspection UnnecessaryQualifiedReference
-  tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinCompile).configureEach { task ->
-    task.kotlinOptions {
-      freeCompilerArgs += [
-          '-Xjvm-default=all'
-      ]
+  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile).configureEach { task ->
+    task.compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+      freeCompilerArgs.add('-Xjvm-default=all')
     }
   }
 
@@ -133,7 +118,7 @@ allprojects {
 
   afterEvaluate { p ->
     if (p.hasProperty("android")) {
-      p.android.lintOptions {
+      p.android.lint {
         // FIXME(eneim): temporarily disable.
         disable "RestrictedApi", "VisibleForTests", "UnusedResources", "UnusedIds"
       }
