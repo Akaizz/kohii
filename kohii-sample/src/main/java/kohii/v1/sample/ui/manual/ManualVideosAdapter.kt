@@ -18,7 +18,6 @@ package kohii.v1.sample.ui.manual
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.media3.common.Player
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import kohii.v1.core.Manager
@@ -69,13 +68,13 @@ internal class ManualVideosAdapter(
             playback: Playback,
             renderer: Any?,
           ) {
-            holder.binding.controller.exoPlay.setOnClickListener {
+            holder.binding.controller.exoPlayPause.setOnClickListener {
               val playable = playback.playable ?: return@setOnClickListener
-              playback.manager.play(playable)
-            }
-            holder.binding.controller.exoPause.setOnClickListener {
-              val playable = playback.playable ?: return@setOnClickListener
-              playback.manager.pause(playable)
+              if (playable.isPlaying()) {
+                playback.manager.pause(playable)
+              } else {
+                playback.manager.play(playable)
+              }
             }
           }
 
@@ -83,16 +82,13 @@ internal class ManualVideosAdapter(
             playback: Playback,
             renderer: Any?,
           ) {
-            holder.binding.controller.exoPlay.setOnClickListener(null)
-            holder.binding.controller.exoPause.setOnClickListener(null)
+            holder.binding.controller.exoPlayPause.setOnClickListener(null)
           }
         }
     }
       .bind(holder.binding.playerView) {
         it.addStateListener(holder)
-        val playing = it.playable?.isPlaying() == true
-        holder.binding.controller.exoPause.isVisible = playing
-        holder.binding.controller.exoPlay.isVisible = !playing
+        holder.showPlaying(it.playable?.isPlaying() == true)
       }
   }
 }

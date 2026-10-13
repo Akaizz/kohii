@@ -17,27 +17,34 @@
 package kohii.v1.sample.ui.manual
 
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import kohii.v1.core.Playback
 import kohii.v1.sample.common.ViewBindingHolder
 import kohii.v1.sample.databinding.ManualVideoHolderBinding
+import androidx.media3.ui.R as Media3UiR
 
 internal class ManualVideoViewHolder(
   parent: ViewGroup,
 ) : ViewBindingHolder<ManualVideoHolderBinding>(parent, ManualVideoHolderBinding::inflate),
   Playback.StateListener {
   init {
-    binding.controller.exoPause.isVisible = false
-    binding.controller.exoPlay.isVisible = true
+    showPlaying(false)
   }
 
-  override fun onPlaying(playback: Playback) {
-    binding.controller.exoPause.isVisible = true
-    binding.controller.exoPlay.isVisible = false
+  // Media3 merged the play and pause buttons into a single exo_play_pause button.
+  fun showPlaying(playing: Boolean) {
+    val button = binding.controller.exoPlayPause
+    if (playing) {
+      button.setImageResource(Media3UiR.drawable.exo_legacy_controls_pause)
+      button.contentDescription =
+        button.context.getString(Media3UiR.string.exo_controls_pause_description)
+    } else {
+      button.setImageResource(Media3UiR.drawable.exo_legacy_controls_play)
+      button.contentDescription =
+        button.context.getString(Media3UiR.string.exo_controls_play_description)
+    }
   }
 
-  override fun onPaused(playback: Playback) {
-    binding.controller.exoPause.isVisible = false
-    binding.controller.exoPlay.isVisible = true
-  }
+  override fun onPlaying(playback: Playback) = showPlaying(true)
+
+  override fun onPaused(playback: Playback) = showPlaying(false)
 }
