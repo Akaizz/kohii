@@ -6,9 +6,11 @@
 
 Video playback for Android made easy.
 
-<!-- [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/https/oss.sonatype.org/im.ene.kohii/kohii-core.svg)](https://oss.sonatype.org/content/repositories/snapshots/im/ene/kohii/kohii-core/) -->
-![Maven Central](https://img.shields.io/maven-central/v/im.ene.kohii/kohii-core)
-[![](https://yourdonation.rocks/images/badge.svg)](https://github.com/sponsors/eneim)
+[![JitPack](https://jitpack.io/v/Akaizz/kohii.svg)](https://jitpack.io/#Akaizz/kohii)
+
+This is a fork of [eneim/kohii](https://github.com/eneim/kohii) migrated from ExoPlayer 2 to
+[AndroidX Media3](https://developer.android.com/media/media3) and published through JitPack. See
+[CHANGELOG.md](CHANGELOG.md) for what changed from the original library.
 
 **Kohii** is a powerful, easy to use and extensible Video playback library. **Kohii** provides
 powerful features out of the box, including
@@ -17,9 +19,9 @@ powerful features out of the box, including
 2. Automatic playback experience on RecyclerView, NestedScrollView, ViewPager2, etc.
 3. Configuration change handling works out of the box, including the transition from local playback
    to fullscreen playback and vice versa.
-4. Feature-rich sample app that covers either simple or advance use cases.
-5. Extension-based structure, including default implementations that support ExoPlayer, AndroidX
-   Media2, YouTube Player SDK.
+4. Feature-rich sample apps that cover either simple or advanced use cases.
+5. Extension-based structure: `kohii-core` holds the playback management logic, and
+   `kohii-exoplayer` plays the videos with Media3 ExoPlayer.
 
 ## Demo
 
@@ -29,9 +31,7 @@ powerful features out of the box, including
 
 ## Setup
 
-Add to your module's build.gradle dependencies
-
-This fork is distributed through [JitPack](https://jitpack.io/#Akaizz/kohii).
+Add the JitPack repository:
 
 ```groovy
 // settings.gradle (or top level build.gradle)
@@ -42,28 +42,21 @@ repositories {
 }
 ```
 
+Then add the dependency to your module's build.gradle:
+
 ```groovy
-// <version> is a git tag, a commit hash, or <branch>-SNAPSHOT (for example media3-SNAPSHOT).
+// <version> is a git tag (for example 2.0.2-media3), a commit hash, or <branch>-SNAPSHOT
+// (for example main-SNAPSHOT).
 implementation "com.github.Akaizz.kohii:kohii-exoplayer:<version>" // also brings kohii-core
-// Media3 ExoPlayer (androidx.media3:media3-exoplayer, media3-ui) is included transitively.
-// If your app also declares Media3 modules, use the same version as Kohii (1.10.1).
 ```
 
-Kohii uses Kotlin language with some Java 8 features so you will need to include the following
-options to your module's build.gradle:
+`kohii-exoplayer` brings Media3 ExoPlayer (`androidx.media3:media3-exoplayer`, `media3-ui`) and the
+DASH, HLS and SmoothStreaming modules transitively.
 
-```groovy
-android {
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-```
+If your app also declares Media3 modules, use **the same Media3 version as Kohii (1.10.1)** for all
+of them. `KohiiExoPlayer` implements `ExoPlayer`, so it only knows the methods of the Media3 version
+Kohii was built with: with a newer Media3, calling a method added later crashes with
+`AbstractMethodError`.
 
 ## Start a playback
 
@@ -90,8 +83,12 @@ kohii.setUp(videoUrl).bind(playerView);
 
 ## Requirements
 
-**Kohii** works on Android 7.0+ (API level 24+) and on Java 8+. It is recommended to use Kohii using
-Kotlin.
+- Android 7.0+ (min SDK 24), compile SDK 36 (required by Media3 1.10).
+- Kotlin 2.x: the library is built with Kotlin 2.1.0, and Media3 1.10 contains Kotlin 2 code that
+  Kotlin 1.x cannot read. Java callers are supported too.
+- Media3 1.10.1, if your app declares Media3 modules itself (see [Setup](#setup)).
 
-The core library doesn't come with any actual playback logic. Actual implementation comes with
-extension libraries: ``kohii-exoplayer`` uses ``androidx.media3`` (ExoPlayer) for playback.
+## License
+
+Apache License 2.0, see [LICENSE](LICENSE). Original work by
+[Nam Nguyen (eneim)](https://github.com/eneim).
