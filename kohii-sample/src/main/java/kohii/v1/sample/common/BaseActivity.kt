@@ -24,7 +24,6 @@ import androidx.appcompat.app.AppCompatActivity
  * @author eneim (2018/08/05).
  */
 abstract class BaseActivity : AppCompatActivity() {
-
   @Suppress("MemberVisibilityCanBePrivate")
   protected lateinit var logTag: String
 

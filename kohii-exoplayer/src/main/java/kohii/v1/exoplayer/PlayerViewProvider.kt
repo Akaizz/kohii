@@ -14,35 +14,38 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.Playback
 import kohii.v1.core.ViewRendererProvider
 import kohii.v1.media.Media
 
 class PlayerViewProvider : ViewRendererProvider() {
-
   override fun getRendererType(
     container: ViewGroup,
-    media: Media
+    media: Media,
   ): Int {
     // Note: we want to use SurfaceView on API 24 and above. But reusing SurfaceView doesn't seem to
     // be straight forward, as it is not trivial to clean the cache of old video ...
-    return if (media.mediaDrm != null /* || Build.VERSION.SDK_INT >= 24 */) {
+    return if (media.mediaDrm != null) {
       R.layout.kohii_player_surface_view
     } else {
-      R.layout.kohii_player_textureview
+      R.layout.kohii_player_texture_view
     }
   }
 
   override fun createRenderer(
     playback: Playback,
-    rendererType: Int
+    rendererType: Int,
   ): PlayerView {
     return LayoutInflater.from(playback.container.context)
-        .inflate(rendererType, playback.container, false) as PlayerView
+      .inflate(rendererType, playback.container, false) as PlayerView
   }
 }

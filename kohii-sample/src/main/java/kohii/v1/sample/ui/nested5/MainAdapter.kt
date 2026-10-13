@@ -31,21 +31,15 @@ import kohii.v1.sample.common.BaseViewHolder
 import kohii.v1.sample.common.inflateView
 import kohii.v1.sample.data.Item
 
+@Suppress("PrivatePropertyName")
 class MainAdapter(
   val kohii: Kohii,
   val manager: Manager,
-  private val items: List<Item>
+  private val items: List<Item>,
 ) : Adapter<BaseViewHolder>() {
-
-  companion object {
-    const val TYPE_NORMAL = R.layout.holder_nested_normal
-    const val TYPE_LIST = R.layout.holder_nested_recyclerview
-    const val STATE_KEY = "${BuildConfig.APPLICATION_ID}::nested::state"
-  }
-
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     val view = parent.inflateView(viewType)
     return if (viewType == TYPE_LIST) NestedRecyclerViewViewHolder(view) else MainViewHolder(view)
@@ -69,7 +63,7 @@ class MainAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(position)
     if (holder is NestedRecyclerViewViewHolder) {
@@ -109,5 +103,11 @@ class MainAdapter(
         holderStateCache.put(holder.adapterPosition, HolderStateEntry(firstChildPos, childLeft))
       }
     }
+  }
+
+  companion object {
+    const val STATE_KEY = "${BuildConfig.APPLICATION_ID}::nested::state"
+    private val TYPE_NORMAL = R.layout.holder_nested_normal
+    private val TYPE_LIST = R.layout.holder_nested_recyclerview
   }
 }

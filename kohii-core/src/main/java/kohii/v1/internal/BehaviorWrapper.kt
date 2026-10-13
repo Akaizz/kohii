@@ -33,9 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Suppress("DEPRECATION")
 internal class BehaviorWrapper<V : View>(
   internal val delegate: Behavior<in V>,
-  manager: Manager
+  manager: Manager,
 ) : Behavior<V>(null, null), Handler.Callback {
-
   companion object {
     private const val EVENT_IDLE = 1
     private const val EVENT_SCROLL = 2
@@ -47,13 +46,14 @@ internal class BehaviorWrapper<V : View>(
   private val handler = Handler(this)
   private val weakManager = WeakReference(manager)
 
-  override fun handleMessage(msg: Message?): Boolean {
-    when (msg?.what) {
+  override fun handleMessage(msg: Message): Boolean {
+    when (msg.what) {
       EVENT_SCROLL, EVENT_TOUCH -> {
         scrollConsumed.set(false)
         handler.removeMessages(EVENT_IDLE)
         handler.sendEmptyMessageDelayed(EVENT_IDLE, EVENT_DELAY)
       }
+
       EVENT_IDLE -> {
         // idle --> consume it.
         if (!scrollConsumed.getAndSet(true)) weakManager.get()?.refresh()
@@ -68,18 +68,22 @@ internal class BehaviorWrapper<V : View>(
 
   override fun blocksInteractionBelow(
     parent: CoordinatorLayout,
-    child: V
+    child: V,
   ): Boolean {
     return delegate.blocksInteractionBelow(parent, child)
   }
 
+  @Deprecated(
+    "Deprecated in Java",
+    ReplaceWith("delegate.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed)"),
+  )
   override fun onNestedPreScroll(
     coordinatorLayout: CoordinatorLayout,
     child: V,
     target: View,
     dx: Int,
     dy: Int,
-    consumed: IntArray
+    consumed: IntArray,
   ) {
     delegate.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed)
   }
@@ -91,25 +95,13 @@ internal class BehaviorWrapper<V : View>(
     dx: Int,
     dy: Int,
     consumed: IntArray,
-    type: Int
+    type: Int,
   ) {
     delegate.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
   }
 
-  override fun onNestedScroll(
-    coordinatorLayout: CoordinatorLayout,
-    child: V,
-    target: View,
-    dxConsumed: Int,
-    dyConsumed: Int,
-    dxUnconsumed: Int,
-    dyUnconsumed: Int
-  ) {
-    delegate.onNestedScroll(
-        coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed
-    )
-  }
-
+  @Suppress("DeprecatedCallableAddReplaceWith")
+  @Deprecated("Deprecated in Java")
   override fun onNestedScroll(
     coordinatorLayout: CoordinatorLayout,
     child: V,
@@ -118,10 +110,39 @@ internal class BehaviorWrapper<V : View>(
     dyConsumed: Int,
     dxUnconsumed: Int,
     dyUnconsumed: Int,
-    type: Int
   ) {
     delegate.onNestedScroll(
-        coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type
+      coordinatorLayout,
+      child,
+      target,
+      dxConsumed,
+      dyConsumed,
+      dxUnconsumed,
+      dyUnconsumed,
+    )
+  }
+
+  @Suppress("DeprecatedCallableAddReplaceWith")
+  @Deprecated("Deprecated in Java")
+  override fun onNestedScroll(
+    coordinatorLayout: CoordinatorLayout,
+    child: V,
+    target: View,
+    dxConsumed: Int,
+    dyConsumed: Int,
+    dxUnconsumed: Int,
+    dyUnconsumed: Int,
+    type: Int,
+  ) {
+    delegate.onNestedScroll(
+      coordinatorLayout,
+      child,
+      target,
+      dxConsumed,
+      dyConsumed,
+      dxUnconsumed,
+      dyUnconsumed,
+      type,
     )
   }
 
@@ -134,27 +155,29 @@ internal class BehaviorWrapper<V : View>(
     dxUnconsumed: Int,
     dyUnconsumed: Int,
     type: Int,
-    consumed: IntArray
+    consumed: IntArray,
   ) {
     delegate.onNestedScroll(
-        coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type,
-        consumed
+      coordinatorLayout, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type,
+      consumed,
     )
   }
 
   override fun onSaveInstanceState(
     parent: CoordinatorLayout,
-    child: V
+    child: V,
   ): Parcelable? {
     return delegate.onSaveInstanceState(parent, child)
   }
 
+  @Suppress("DeprecatedCallableAddReplaceWith")
+  @Deprecated("Deprecated in Java")
   override fun onNestedScrollAccepted(
     coordinatorLayout: CoordinatorLayout,
     child: V,
     directTargetChild: View,
     target: View,
-    axes: Int
+    axes: Int,
   ) {
     delegate.onNestedScrollAccepted(coordinatorLayout, child, directTargetChild, target, axes)
   }
@@ -165,14 +188,14 @@ internal class BehaviorWrapper<V : View>(
     directTargetChild: View,
     target: View,
     axes: Int,
-    type: Int
+    type: Int,
   ) {
     delegate.onNestedScrollAccepted(coordinatorLayout, child, directTargetChild, target, axes, type)
   }
 
   override fun getScrimColor(
     parent: CoordinatorLayout,
-    child: V
+    child: V,
   ): Int {
     return delegate.getScrimColor(parent, child)
   }
@@ -183,7 +206,7 @@ internal class BehaviorWrapper<V : View>(
     target: View,
     velocityX: Float,
     velocityY: Float,
-    consumed: Boolean
+    consumed: Boolean,
   ): Boolean {
     return delegate.onNestedFling(coordinatorLayout, child, target, velocityX, velocityY, consumed)
   }
@@ -191,7 +214,7 @@ internal class BehaviorWrapper<V : View>(
   override fun onLayoutChild(
     parent: CoordinatorLayout,
     child: V,
-    layoutDirection: Int
+    layoutDirection: Int,
   ): Boolean {
     return delegate.onLayoutChild(parent, child, layoutDirection)
   }
@@ -201,7 +224,7 @@ internal class BehaviorWrapper<V : View>(
     child: V,
     target: View,
     velocityX: Float,
-    velocityY: Float
+    velocityY: Float,
   ): Boolean {
     return delegate.onNestedPreFling(coordinatorLayout, child, target, velocityX, velocityY)
   }
@@ -209,7 +232,7 @@ internal class BehaviorWrapper<V : View>(
   override fun getInsetDodgeRect(
     parent: CoordinatorLayout,
     child: V,
-    rect: Rect
+    rect: Rect,
   ): Boolean {
     return delegate.getInsetDodgeRect(parent, child, rect)
   }
@@ -222,7 +245,7 @@ internal class BehaviorWrapper<V : View>(
   override fun onRestoreInstanceState(
     parent: CoordinatorLayout,
     child: V,
-    state: Parcelable
+    state: Parcelable,
   ) {
     delegate.onRestoreInstanceState(parent, child, state)
   }
@@ -230,7 +253,7 @@ internal class BehaviorWrapper<V : View>(
   override fun onInterceptTouchEvent(
     parent: CoordinatorLayout,
     child: V,
-    ev: MotionEvent
+    ev: MotionEvent,
   ): Boolean {
     handler.removeCallbacksAndMessages(null)
     handler.sendEmptyMessage(EVENT_TOUCH)
@@ -240,15 +263,17 @@ internal class BehaviorWrapper<V : View>(
   override fun onDependentViewRemoved(
     parent: CoordinatorLayout,
     child: V,
-    dependency: View
+    dependency: View,
   ) {
     delegate.onDependentViewRemoved(parent, child, dependency)
   }
 
+  @Suppress("DeprecatedCallableAddReplaceWith")
+  @Deprecated("Deprecated in Java")
   override fun onStopNestedScroll(
     coordinatorLayout: CoordinatorLayout,
     child: V,
-    target: View
+    target: View,
   ) {
     delegate.onStopNestedScroll(coordinatorLayout, child, target)
   }
@@ -257,7 +282,7 @@ internal class BehaviorWrapper<V : View>(
     coordinatorLayout: CoordinatorLayout,
     child: V,
     target: View,
-    type: Int
+    type: Int,
   ) {
     delegate.onStopNestedScroll(coordinatorLayout, child, target, type)
   }
@@ -265,7 +290,7 @@ internal class BehaviorWrapper<V : View>(
   override fun layoutDependsOn(
     parent: CoordinatorLayout,
     child: V,
-    dependency: View
+    dependency: View,
   ): Boolean {
     return delegate.layoutDependsOn(parent, child, dependency)
   }
@@ -274,7 +299,7 @@ internal class BehaviorWrapper<V : View>(
     coordinatorLayout: CoordinatorLayout,
     child: V,
     rectangle: Rect,
-    immediate: Boolean
+    immediate: Boolean,
   ): Boolean {
     return delegate.onRequestChildRectangleOnScreen(coordinatorLayout, child, rectangle, immediate)
   }
@@ -282,14 +307,14 @@ internal class BehaviorWrapper<V : View>(
   override fun onDependentViewChanged(
     parent: CoordinatorLayout,
     child: V,
-    dependency: View
+    dependency: View,
   ): Boolean {
     return delegate.onDependentViewChanged(parent, child, dependency)
   }
 
   override fun getScrimOpacity(
     parent: CoordinatorLayout,
-    child: V
+    child: V,
   ): Float {
     return delegate.getScrimOpacity(parent, child)
   }
@@ -297,7 +322,7 @@ internal class BehaviorWrapper<V : View>(
   override fun onApplyWindowInsets(
     coordinatorLayout: CoordinatorLayout,
     child: V,
-    insets: WindowInsetsCompat
+    insets: WindowInsetsCompat,
   ): WindowInsetsCompat {
     return delegate.onApplyWindowInsets(coordinatorLayout, child, insets)
   }
@@ -305,7 +330,7 @@ internal class BehaviorWrapper<V : View>(
   override fun onTouchEvent(
     parent: CoordinatorLayout,
     child: V,
-    ev: MotionEvent
+    ev: MotionEvent,
   ): Boolean {
     handler.removeCallbacksAndMessages(null)
     handler.sendEmptyMessage(EVENT_TOUCH)
@@ -316,12 +341,13 @@ internal class BehaviorWrapper<V : View>(
     delegate.onAttachedToLayoutParams(params)
   }
 
+  @Deprecated("Deprecated in Java")
   override fun onStartNestedScroll(
     coordinatorLayout: CoordinatorLayout,
     child: V,
     directTargetChild: View,
     target: View,
-    axes: Int
+    axes: Int,
   ): Boolean {
     handler.removeCallbacksAndMessages(null)
     handler.sendEmptyMessage(EVENT_SCROLL)
@@ -334,12 +360,17 @@ internal class BehaviorWrapper<V : View>(
     directTargetChild: View,
     target: View,
     axes: Int,
-    type: Int
+    type: Int,
   ): Boolean {
     handler.removeCallbacksAndMessages(null)
     handler.sendEmptyMessage(EVENT_SCROLL)
     return delegate.onStartNestedScroll(
-        coordinatorLayout, child, directTargetChild, target, axes, type
+      coordinatorLayout,
+      child,
+      directTargetChild,
+      target,
+      axes,
+      type,
     )
   }
 
@@ -349,10 +380,15 @@ internal class BehaviorWrapper<V : View>(
     parentWidthMeasureSpec: Int,
     widthUsed: Int,
     parentHeightMeasureSpec: Int,
-    heightUsed: Int
+    heightUsed: Int,
   ): Boolean {
     return delegate.onMeasureChild(
-        parent, child, parentWidthMeasureSpec, widthUsed, parentHeightMeasureSpec, heightUsed
+      parent,
+      child,
+      parentWidthMeasureSpec,
+      widthUsed,
+      parentHeightMeasureSpec,
+      heightUsed,
     )
   }
 }

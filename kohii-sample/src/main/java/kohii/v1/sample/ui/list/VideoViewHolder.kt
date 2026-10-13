@@ -19,9 +19,9 @@ package kohii.v1.sample.ui.list
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.ui.PlayerView
-import kohii.v1.core.Common
+import androidx.media3.common.Player
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.Playback
 import kohii.v1.core.Rebinder
 import kohii.v1.exoplayer.Kohii
@@ -35,10 +35,10 @@ import kohii.v1.sample.ui.list.data.Item
 class VideoViewHolder(
   parent: ViewGroup,
   private val kohii: Kohii,
-  private val listener: OnClickListener
+  private val listener: OnClickListener,
 ) : BaseViewHolder(parent, R.layout.holder_player_view),
-    View.OnClickListener, Playback.Callback {
-
+  View.OnClickListener,
+  Playback.Callback {
   init {
     itemView.setOnClickListener(this)
   }
@@ -53,18 +53,19 @@ class VideoViewHolder(
 
   override fun bind(item: Item?) {
     if (item != null) {
-      val itemTag = "${javaClass.canonicalName}::${item.content}::$adapterPosition"
+      val itemTag = "${javaClass.canonicalName}::${item.content}::$absoluteAdapterPosition"
       payload = InitData(tag = itemTag, aspectRatio = item.width / item.height.toFloat())
       playerContainer.setAspectRatio(payload!!.aspectRatio)
-      rebinder = kohii.setUp(item.content) {
-        tag = itemTag
-        preload = true
-        repeatMode = Common.REPEAT_MODE_ONE
-        callbacks += this@VideoViewHolder
-      }
+      rebinder =
+        kohii.setUp(item.content) {
+          tag = itemTag
+          preload = true
+          repeatMode = Player.REPEAT_MODE_ONE
+          callbacks += this@VideoViewHolder
+        }
           .bind(playerView) {
             playback = it
-            listener.onItemLoaded(itemView, adapterPosition)
+            listener.onItemLoaded(itemView, absoluteAdapterPosition)
           }
 
       ViewCompat.setTransitionName(transView, itemTag)
@@ -74,7 +75,10 @@ class VideoViewHolder(
   override fun onClick(v: View?) {
     if (v != null && payload != null && rebinder != null) {
       listener.onItemClick(
-          v, transView, adapterPosition, Pair(rebinder!!, payload!!)
+        v,
+        transView,
+        absoluteAdapterPosition,
+        Pair(rebinder!!, payload!!),
       )
     }
   }

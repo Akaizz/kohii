@@ -28,5 +28,5 @@ data class Item(
   val background: String = "#FFF",
   val width: Int = -1,
   val height: Int = -1,
-  val icon: ItemIcon? = null
+  val icon: ItemIcon? = null,
 )

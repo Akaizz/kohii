@@ -21,8 +21,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.setPadding
+import androidx.media3.common.Player
 import androidx.viewpager.widget.PagerAdapter
-import kohii.v1.core.Common
 import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
@@ -31,26 +31,23 @@ import kohii.v1.sample.common.getApp
 import kohii.v1.sample.common.getDisplayPoint
 import kohii.v1.sample.common.inflateView
 import kohii.v1.sample.data.Video
+import kohii.v1.sample.databinding.FragmentPagerBinding
 import kohii.v1.sample.ui.main.DemoItem
-import kotlinx.android.synthetic.main.fragment_pager.viewPager
-import kotlinx.android.synthetic.main.widget_video_container.view.videoFrame
 import kotlin.math.abs
 
 // ViewPager whose pages are Views
 class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = ViewPager1WithViewsFragment()
   }
 
   class PagerPagesAdapter(
     val kohii: Kohii,
-    private val videos: List<Video>
+    private val videos: List<Video>,
   ) : PagerAdapter() {
-
     override fun isViewFromObject(
       view: View,
-      `object`: Any
+      `object`: Any,
     ): Boolean {
       return view === `object`
     }
@@ -59,29 +56,30 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
 
     override fun instantiateItem(
       container: ViewGroup,
-      position: Int
+      position: Int,
     ): Any {
       // Normal creation
       val view = container.inflateView(R.layout.widget_video_container)
       container.addView(view)
       // Now bind the content
-      val video = videos[position % videos.size].playlist.first()
+      val video =
+        videos[position % videos.size].playlist.first()
           .sources.first()
       val itemTag = "$javaClass::$position::${video.file}"
       kohii.setUp(video.file) {
         tag = itemTag
         delay = 500
         preload = true
-        repeatMode = Common.REPEAT_MODE_ONE
+        repeatMode = Player.REPEAT_MODE_ONE
       }
-          .bind(view.videoFrame)
+        .bind(view.findViewById(R.id.videoFrame) as ViewGroup)
       return view
     }
 
     override fun destroyItem(
       container: ViewGroup,
       position: Int,
-      `object`: Any
+      `object`: Any,
     ) {
       if (`object` is View) {
         container.removeView(`object`)
@@ -89,26 +87,29 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
     }
   }
 
+  lateinit var binding: FragmentPagerBinding
   override val demoItem: DemoItem? get() = arguments?.getParcelable(KEY_DEMO_ITEM)
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    return inflater.inflate(R.layout.fragment_pager, container, false)
+    savedInstanceState: Bundle?,
+  ): View {
+    val binding: FragmentPagerBinding = FragmentPagerBinding.inflate(inflater, container, false)
+    this.binding = binding
+    return binding.root
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     val kohii = Kohii[this]
     kohii.register(this)
-        .addBucket(viewPager)
+      .addBucket(binding.viewPager)
 
-    viewPager.apply {
+    binding.viewPager.apply {
       adapter = PagerPagesAdapter(kohii, getApp().videos)
       setPadding(0)
     }
@@ -116,7 +117,7 @@ class ViewPager1WithViewsFragment : BaseFragment(), DemoContainer {
 
   override fun onViewStateRestored(savedInstanceState: Bundle?) {
     super.onViewStateRestored(savedInstanceState)
-    viewPager.apply {
+    binding.viewPager.apply {
       val clientWidth = (requireActivity().getDisplayPoint().x - paddingStart - paddingEnd)
       val offset = paddingStart / clientWidth.toFloat()
       setPageTransformer(false) { page, position ->

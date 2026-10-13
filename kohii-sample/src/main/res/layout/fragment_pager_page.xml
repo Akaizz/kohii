@@ -33,7 +33,7 @@
       tools:context=".ui.sview.ScrollViewFragment"
       >
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+    <androidx.media3.ui.AspectRatioFrameLayout
         android:id="@+id/playerContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -44,7 +44,7 @@
         app:resize_mode="fixed_width"
         >
 
-      <com.google.android.exoplayer2.ui.PlayerView
+      <androidx.media3.ui.PlayerView
           android:id="@+id/playerView"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
@@ -55,7 +55,7 @@
           app:surface_type="texture_view"
           app:use_controller="true"
           />
-    </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+    </androidx.media3.ui.AspectRatioFrameLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/dummyContent"

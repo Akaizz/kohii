@@ -37,38 +37,36 @@ import kohii.v1.internal.ViewGroupBucket
 import kohii.v1.internal.ViewGroupV23Bucket
 import kohii.v1.internal.ViewPager2Bucket
 import kohii.v1.internal.ViewPagerBucket
-import kohii.v1.logDebug
+import kohii.v1.logInfo
 import kohii.v1.media.VolumeInfo
 import kotlin.LazyThreadSafetyMode.NONE
-
-typealias Selector = (Collection<Playback>) -> Collection<Playback>
 
 abstract class Bucket constructor(
   val manager: Manager,
   open val root: View,
   strategy: Strategy,
-  internal val selector: Selector
-) : OnAttachStateChangeListener, OnLayoutChangeListener {
-
+  internal val selector: Selector,
+) : OnLayoutChangeListener {
   companion object {
     const val VERTICAL = RecyclerView.VERTICAL
     const val HORIZONTAL = RecyclerView.HORIZONTAL
     const val BOTH_AXIS = -1
     const val NONE_AXIS = -2
 
-    private val playbackComparators = mapOf(
+    private val playbackComparators =
+      mapOf(
         HORIZONTAL to Playback.HORIZONTAL_COMPARATOR,
         VERTICAL to Playback.VERTICAL_COMPARATOR,
         BOTH_AXIS to Playback.BOTH_AXIS_COMPARATOR,
-        NONE_AXIS to Playback.BOTH_AXIS_COMPARATOR
-    )
+        NONE_AXIS to Playback.BOTH_AXIS_COMPARATOR,
+      )
 
     @JvmStatic
     internal operator fun get(
       manager: Manager,
       root: View,
       strategy: Strategy,
-      selector: Selector
+      selector: Selector,
     ): Bucket {
       return when (root) {
         is RecyclerView -> RecyclerViewBucket(manager, root, strategy, selector)
@@ -76,140 +74,67 @@ abstract class Bucket constructor(
         is ViewPager2 -> ViewPager2Bucket(manager, root, strategy, selector)
         is ViewPager -> ViewPagerBucket(manager, root, strategy, selector)
         is ViewGroup -> {
-          if (VERSION.SDK_INT >= 23)
+          if (VERSION.SDK_INT >= 23) {
             ViewGroupV23Bucket(manager, root, strategy, selector)
-          else
+          } else {
             ViewGroupBucket(manager, root, strategy, selector)
+          }
         }
+
         else -> throw IllegalArgumentException("Unsupported: $root")
       }
     }
   }
 
-  internal var lock: Boolean = manager.lock
-    get() = field || manager.lock
-    set(value) {
-      field = value
-      manager.playbacks.filter { it.value.bucket === this }
-          .forEach { it.value.lock = value }
-      manager.refresh()
+  private val containerAttachStateChangeListener =
+    object : OnAttachStateChangeListener {
+      override fun onViewAttachedToWindow(v: View) {
+        logInfo { "Bucket# container is attached: $v, $this" }
+        manager.onContainerAttachedToWindow(v)
+      }
+
+      override fun onViewDetachedFromWindow(v: View) {
+        logInfo { "Bucket# container is detached: $v, $this" }
+        manager.onContainerDetachedFromWindow(v)
+      }
+    }
+
+  private val rootAttachStateChangeListener =
+    object : OnAttachStateChangeListener {
+      override fun onViewAttachedToWindow(v: View) {
+        onAttached()
+      }
+
+      override fun onViewDetachedFromWindow(v: View) {
+        onDetached()
+      }
     }
 
   private val containers = mutableSetOf<Any>()
 
-  private val behaviorHolder = lazy(NONE) {
-    val container = manager.group.activity.window.peekDecorView()
-        ?.findCoordinatorLayoutDirectChildContainer(root)
-    val params = container?.layoutParams
-    return@lazy if (params is CoordinatorLayout.LayoutParams) params else null
-  }
+  private val behaviorHolder =
+    lazy(NONE) {
+      val container =
+        manager.group.activity.window.peekDecorView()
+          ?.findCoordinatorLayoutDirectChildContainer(root)
+      val params = container?.layoutParams
+      return@lazy if (params is CoordinatorLayout.LayoutParams) params else null
+    }
 
-  abstract fun accepts(container: ViewGroup): Boolean
-
-  open fun allowToPlay(playback: Playback): Boolean {
-    // Default judgement.
-    return playback.token
-        .shouldPlay()
-  }
-
-  abstract fun selectToPlay(candidates: Collection<Playback>): Collection<Playback>
-
-  @CallSuper
-  open fun addContainer(container: ViewGroup) {
-    if (containers.add(container)) {
-      if (container.isAttachedToWindow) {
-        this.onViewAttachedToWindow(container)
+  private val volumeConstraint: VolumeInfo
+    get() =
+      when (strategy) {
+        MULTI_PLAYER -> VolumeInfo.DEFAULT_INACTIVE
+        else -> VolumeInfo.DEFAULT_ACTIVE
       }
-      container.addOnAttachStateChangeListener(this)
-    }
-  }
-
-  @CallSuper
-  open fun removeContainer(container: ViewGroup) {
-    if (containers.remove(container)) {
-      container.removeOnAttachStateChangeListener(this)
-      container.removeOnLayoutChangeListener(this)
-    }
-  }
-
-  @CallSuper
-  override fun onViewAttachedToWindow(v: View?) {
-    "Bucket#onViewAttachedToWindow: $v".logDebug()
-    manager.onContainerAttachedToWindow(v)
-  }
-
-  @CallSuper
-  override fun onViewDetachedFromWindow(v: View?) {
-    "Bucket#onViewDetachedFromWindow: $v".logDebug()
-    manager.onContainerDetachedFromWindow(v)
-  }
-
-  @CallSuper
-  override fun onLayoutChange(
-    v: View?,
-    left: Int,
-    top: Int,
-    right: Int,
-    bottom: Int,
-    oldLeft: Int,
-    oldTop: Int,
-    oldRight: Int,
-    oldBottom: Int
-  ) {
-    if (v != null && (left != oldLeft || right != oldRight || top != oldTop || bottom != oldBottom)) {
-      manager.onContainerLayoutChanged(v)
-    }
-  }
-
-  @CallSuper
-  open fun onAdded() {
-  }
-
-  @CallSuper
-  open fun onAttached() {
-    behaviorHolder.value?.let {
-      val behavior = it.behavior
-      if (behavior != null) {
-        val behaviorWrapper = BehaviorWrapper(behavior, manager)
-        it.behavior = behaviorWrapper
-      }
-    }
-  }
-
-  @CallSuper
-  open fun onDetached() {
-    if (behaviorHolder.isInitialized()) {
-      behaviorHolder.value?.let {
-        val behavior = it.behavior
-        if (behavior is BehaviorWrapper) {
-          behavior.onDetach()
-          it.behavior = behavior.delegate
-        }
-      }
-    }
-  }
-
-  @CallSuper
-  open fun onRemoved() {
-    mutableListOf(containers).onEach {
-      manager.onRemoveContainer(it)
-    }
-        .clear()
-  }
 
   internal val volumeInfo: VolumeInfo
     get() = bucketVolumeInfo
 
-  internal var bucketVolumeInfo: VolumeInfo = VolumeInfo()
+  internal var bucketVolumeInfo: VolumeInfo = VolumeInfo.DEFAULT_ACTIVE
     set(value) {
       field = value
       manager.onBucketVolumeInfoUpdated(this, effectiveVolumeInfo(this.volumeInfo))
-    }
-
-  private val volumeConstraint: VolumeInfo
-    get() = when (strategy) {
-      MULTI_PLAYER -> VolumeInfo(false, 0F)
-      else -> VolumeInfo()
     }
 
   internal var strategy: Strategy = strategy
@@ -223,8 +148,108 @@ abstract class Bucket constructor(
       }
     }
 
+  internal var lock: Boolean = manager.lock
+    get() = field || manager.lock
+    set(value) {
+      field = value
+      manager.playbacks
+        .filter { it.value.bucket === this }
+        .forEach { it.value.lock = value }
+      manager.refresh()
+    }
+
   init {
     bucketVolumeInfo = manager.volumeInfo
+  }
+
+  abstract fun accepts(container: ViewGroup): Boolean
+
+  open fun allowToPlay(playback: Playback): Boolean = playback.token.shouldPlay()
+
+  abstract fun selectToPlay(candidates: Collection<Playback>): Collection<Playback>
+
+  @CallSuper
+  open fun addContainer(container: ViewGroup) {
+    if (containers.add(container)) {
+      if (container.isAttachedToWindow) {
+        containerAttachStateChangeListener.onViewAttachedToWindow(container)
+      }
+      container.addOnAttachStateChangeListener(
+        containerAttachStateChangeListener,
+      )
+    }
+  }
+
+  @CallSuper
+  open fun removeContainer(container: ViewGroup) {
+    if (containers.remove(container)) {
+      container.removeOnAttachStateChangeListener(
+        containerAttachStateChangeListener,
+      )
+      container.removeOnLayoutChangeListener(this)
+    }
+  }
+
+  @CallSuper
+  override fun onLayoutChange(
+    v: View?,
+    left: Int,
+    top: Int,
+    right: Int,
+    bottom: Int,
+    oldLeft: Int,
+    oldTop: Int,
+    oldRight: Int,
+    oldBottom: Int,
+  ) {
+    if (v != null && (left != oldLeft || right != oldRight || top != oldTop || bottom != oldBottom)) {
+      manager.onContainerLayoutChanged(v)
+    }
+  }
+
+  @CallSuper
+  open fun onAdded() {
+    logInfo { "Bucket is added: $this" }
+    if (root.isAttachedToWindow) {
+      rootAttachStateChangeListener.onViewAttachedToWindow(root)
+    }
+    root.addOnAttachStateChangeListener(rootAttachStateChangeListener)
+  }
+
+  @CallSuper
+  open fun onAttached() {
+    logInfo { "Bucket is attached: $this" }
+    behaviorHolder.value?.let {
+      val behavior = it.behavior
+      if (behavior != null) {
+        val behaviorWrapper = BehaviorWrapper(behavior, manager)
+        it.behavior = behaviorWrapper
+      }
+    }
+  }
+
+  @CallSuper
+  open fun onDetached() {
+    logInfo { "Bucket is detached: $this" }
+    if (behaviorHolder.isInitialized()) {
+      behaviorHolder.value?.let {
+        val behavior = it.behavior
+        if (behavior is BehaviorWrapper) {
+          behavior.onDetach()
+          it.behavior = behavior.delegate
+        }
+      }
+    }
+  }
+
+  @CallSuper
+  open fun onRemoved() {
+    logInfo { "Bucket is removed: $this" }
+    root.removeOnAttachStateChangeListener(rootAttachStateChangeListener)
+    // Iterate a copy: removing a Playback also removes its container from 'containers'.
+    containers.toMutableList()
+      .onEach(manager::onRemoveContainer)
+      .clear()
   }
 
   internal fun effectiveVolumeInfo(origin: VolumeInfo): VolumeInfo {
@@ -237,25 +262,49 @@ abstract class Bucket constructor(
   // This operation should be considered heavy/expensive.
   protected fun selectByOrientation(
     candidates: Collection<Playback>,
-    orientation: Int
+    orientation: Int,
   ): Collection<Playback> {
     if (lock) return emptyList()
     if (strategy == NO_PLAYER) return emptyList()
 
-    val playbackComparator = playbackComparators.getValue(orientation)
-    val manualToAutoPlaybackGroups = candidates.sortedWith(playbackComparator)
+    // Logic before 1.2.0
+    // - Sort the candidates using the proper Comparator for the orientation.
+    // - Split the candidates into 2 groups: one with manual Controller (A) and one without (B).
+    // - If the group A has a Playback that is manually started, send that one to the Selector.
+    // - Else, if group A is not empty, send it to the Selector.
+    // - Else, send group B to the Selector.
+
+    // Logic from 1.2.0
+    // - Sort the candidates using the proper Comparator for the orientation.
+    // - If there is a Playback among the candidates that is manually started, send it to the
+    // Selector.
+    // - Else, send all the candidates to the Selector.
+    val manuallyStartedPlayable =
+      candidates.find {
+        manager.master.manuallyStartedPlayable.get() === it.playable
+      }
+
+    // Comment out the code of 1.1.x
+
+    /* val manualToAutoPlaybackGroups = candidates
+        .sortedWith(playbackComparator)
         .groupBy { it.tag != Master.NO_TAG && it.config.controller != null }
         .withDefault { emptyList() }
 
-    val manualCandidate = with(manualToAutoPlaybackGroups.getValue(true)) {
+    val manualCandidates: Collection<Playback> = with(manualToAutoPlaybackGroups.getValue(true)) {
       val started = find { manager.master.manuallyStartedPlayable.get() === it.playable }
-      return@with listOfNotNull(started ?: this@with.firstOrNull())
-    }
+      return@with if (started == null) {
+        this
+      } else {
+        listOf(started)
+      }
+    } */
 
-    return if (manualCandidate.isNotEmpty()) {
-      manualCandidate
+    return if (manuallyStartedPlayable != null) {
+      selector(listOf(manuallyStartedPlayable))
     } else {
-      selector(manualToAutoPlaybackGroups.getValue(false))
+      val playbackComparator = playbackComparators.getValue(orientation)
+      selector(candidates.sortedWith(playbackComparator))
     }
   }
 

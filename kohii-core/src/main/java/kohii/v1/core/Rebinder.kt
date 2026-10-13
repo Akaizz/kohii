@@ -18,19 +18,19 @@ package kohii.v1.core
 
 import android.os.Parcelable
 import android.view.ViewGroup
+import androidx.media3.common.Player
 import kohii.v1.core.Master.Companion.NO_TAG
 import kohii.v1.core.Playback.ArtworkHintListener
 import kohii.v1.core.Playback.Callback
 import kohii.v1.core.Playback.Controller
 import kohii.v1.core.Playback.NetworkTypeChangeListener
 import kohii.v1.core.Playback.TokenUpdateListener
-import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @Parcelize
 data class Rebinder(val tag: @RawValue Any) : Parcelable {
-
   init {
     require(tag != NO_TAG) { "Rebinder requires unique tag." }
   }
@@ -38,7 +38,7 @@ data class Rebinder(val tag: @RawValue Any) : Parcelable {
   class Options {
     var threshold: Float = 0.65F
     var preload: Boolean = false
-    var repeatMode: Int = Common.REPEAT_MODE_OFF
+    var repeatMode: Int = Player.REPEAT_MODE_OFF
     var controller: Controller? = null
     var artworkHintListener: ArtworkHintListener? = null
     var tokenUpdateListener: TokenUpdateListener? = null
@@ -59,7 +59,7 @@ data class Rebinder(val tag: @RawValue Any) : Parcelable {
   fun bind(
     engine: Engine<*>,
     container: ViewGroup,
-    callback: ((Playback) -> Unit)? = null
+    callback: ((Playback) -> Unit)? = null,
   ) {
     this.bind(engine.master, container, callback)
   }
@@ -67,26 +67,30 @@ data class Rebinder(val tag: @RawValue Any) : Parcelable {
   private fun bind(
     master: Master,
     container: ViewGroup,
-    callback: ((Playback) -> Unit)? = null
+    callback: ((Playback) -> Unit)? = null,
   ) {
-    val playable = master.playables.asSequence()
-        .firstOrNull { it.value == tag /* equals */ }
+    val playable =
+      master.playables.asSequence()
+        .firstOrNull {
+          it.value == tag // equals
+        }
         ?.key
     master.bind(
-        requireNotNull(playable) { "Playable is null for tag $tag" },
-        tag,
-        container,
-        Binder.Options().also {
-          it.tag = tag
-          it.threshold = options.threshold
-          it.preload = options.preload
-          it.repeatMode = options.repeatMode
-          it.controller = options.controller
-          it.artworkHintListener = options.artworkHintListener
-          it.tokenUpdateListener = options.tokenUpdateListener
-          it.networkTypeChangeListener = options.networkTypeChangeListener
-          it.callbacks += options.callbacks
-        }, callback
+      requireNotNull(playable) { "Playable is null for tag $tag" },
+      tag,
+      container,
+      Binder.Options().also {
+        it.tag = tag
+        it.threshold = options.threshold
+        it.preload = options.preload
+        it.repeatMode = options.repeatMode
+        it.controller = options.controller
+        it.artworkHintListener = options.artworkHintListener
+        it.tokenUpdateListener = options.tokenUpdateListener
+        it.networkTypeChangeListener = options.networkTypeChangeListener
+        it.callbacks += options.callbacks
+      },
+      callback,
     )
     options = Options() // reset.
   }

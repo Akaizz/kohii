@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.PlaybackParameters
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException
-import com.google.android.exoplayer2.mediacodec.MediaCodecUtil
-import com.google.android.exoplayer2.source.BehindLiveWindowException
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.annotation.OptIn
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.Player
+import androidx.media3.common.Tracks
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.AbstractBridge
-import kohii.v1.core.Common
-import kohii.v1.core.DefaultTrackSelectorHolder
-import kohii.v1.core.PlayerEventListener
 import kohii.v1.core.PlayerParameters
+import kohii.v1.core.PlayerPool
 import kohii.v1.core.VolumeInfoController
-import kohii.v1.exoplayer.internal.addEventListener
 import kohii.v1.exoplayer.internal.getVolumeInfo
-import kohii.v1.exoplayer.internal.removeEventListener
 import kohii.v1.exoplayer.internal.setVolumeInfo
+import kohii.v1.logError
 import kohii.v1.logInfo
 import kohii.v1.media.Media
 import kohii.v1.media.PlaybackInfo
@@ -50,47 +48,46 @@ import kohii.v1.media.VolumeInfo
 import kotlin.math.max
 
 /**
+ * A [kohii.v1.core.Bridge] that uses the Media3 [PlayerView] as the renderer.
+ *
  * @author eneim (2018/06/24).
  */
-class PlayerViewBridge(
+@Suppress("MemberVisibilityCanBePrivate")
+open class PlayerViewBridge(
   context: Context,
-  private val media: Media,
-  private val playerProvider: ExoPlayerProvider,
-  mediaSourceFactoryProvider: MediaSourceFactoryProvider
-) : AbstractBridge<PlayerView>(), PlayerEventListener {
-
-  companion object {
-    internal fun isBehindLiveWindow(error: ExoPlaybackException?): Boolean {
-      if (error?.type != ExoPlaybackException.TYPE_SOURCE) return false
-      var cause: Throwable? = error.sourceException
-      while (cause != null) {
-        if (cause is BehindLiveWindowException) return true
-        cause = cause.cause
-      }
-      return false
-    }
-  }
+  protected val media: Media,
+  protected val playerPool: PlayerPool<Player>,
+  private val mediaSourceFactory: MediaSource.Factory,
+) : AbstractBridge<PlayerView>(), Player.Listener {
+  protected open val mediaItem: MediaItem = MediaItem.fromUri(media.uri)
 
   private val context = context.applicationContext
-  private val mediaSourceFactory = mediaSourceFactoryProvider.provideMediaSourceFactory(media)
 
   private var listenerApplied = false
   private var sourcePrepared = false
 
   private var _playbackInfo = PlaybackInfo() // Backing field for PlaybackInfo set/get
-  private var _repeatMode = Common.REPEAT_MODE_OFF // Backing field
-  private var _playbackParams = PlaybackParameters.DEFAULT // Backing field
+  private var _repeatMode = Player.REPEAT_MODE_OFF // Backing field
+  private var playbackParams = PlaybackParameters.DEFAULT // Backing field
   private var mediaSource: MediaSource? = null
 
-  private var lastSeenTrackGroupArray: TrackGroupArray? = null
+  private var lastSeenTracks: Tracks = Tracks.EMPTY
   private var inErrorState = false
 
-  internal var player: Player? = null
+  protected var player: Player? = null
 
   override val playerState: Int
-    get() = player?.playbackState ?: Common.STATE_IDLE
+    get() = player?.playbackState ?: Player.STATE_IDLE
+
+  override var repeatMode: Int
+    get() = _repeatMode
+    set(value) {
+      _repeatMode = value
+      player?.also { it.repeatMode = value }
+    }
 
   override fun prepare(loadSource: Boolean) {
+    logInfo { "Bridge#prepare loadSource=$loadSource, $this" }
     super.addEventListener(this)
 
     if (player == null) {
@@ -103,14 +100,15 @@ class PlayerViewBridge(
       ensurePlayerView()
     }
 
-    this.lastSeenTrackGroupArray = null
+    this.lastSeenTracks = Tracks.EMPTY
     this.inErrorState = false
   }
 
   override var renderer: PlayerView? = null
     set(value) {
       if (field === value) return // same reference
-      this.lastSeenTrackGroupArray = null
+      logInfo { "Bridge#renderer $field -> $value, $this" }
+      this.lastSeenTracks = Tracks.EMPTY
       this.inErrorState = false
       if (value == null) {
         requireNotNull(field).also {
@@ -128,6 +126,7 @@ class PlayerViewBridge(
     }
 
   override fun ready() {
+    logInfo { "Bridge#ready, $this" }
     prepareMediaSource()
     requireNotNull(player) { "Player must be available." }
     ensurePlayerView()
@@ -146,51 +145,58 @@ class PlayerViewBridge(
   }
 
   override fun reset(resetPlayer: Boolean) {
-    if (resetPlayer) _playbackInfo = PlaybackInfo()
-    else updatePlaybackInfo()
+    logInfo { "Bridge#reset resetPlayer=$resetPlayer, $this" }
+    if (resetPlayer) {
+      _playbackInfo = PlaybackInfo()
+    } else {
+      updatePlaybackInfo()
+    }
     player?.also {
-      it.setVolumeInfo(VolumeInfo(false, 1.0F))
-      it.stop(resetPlayer)
+      it.setVolumeInfo(VolumeInfo.DEFAULT_ACTIVE)
+      it.stop()
+      if (resetPlayer) it.clearMediaItems()
     }
     this.mediaSource = null // So it will be re-prepared later.
     this.sourcePrepared = false
-    this.lastSeenTrackGroupArray = null
+    this.lastSeenTracks = Tracks.EMPTY
     this.inErrorState = false
   }
 
   override fun release() {
+    logInfo { "Bridge#release, $this" }
     this.removeEventListener(this)
     // this.playerView = null // Bridge's owner must do this.
     this.renderer?.player = null
     _playbackInfo = PlaybackInfo()
     player?.also {
       if (listenerApplied) {
-        it.removeEventListener(eventListeners)
+        it.removeListener(eventListeners)
         listenerApplied = false
       }
       (it as? VolumeInfoController)?.removeVolumeChangedListener(volumeListeners)
-      it.stop(true)
-      playerProvider.releasePlayer(this.media, it)
+      it.stop()
+      it.clearMediaItems()
+      playerPool.putPlayer(this.media, it)
     }
 
     this.player = null
     this.mediaSource = null
     this.sourcePrepared = false
-    this.lastSeenTrackGroupArray = null
+    this.lastSeenTracks = Tracks.EMPTY
     this.inErrorState = false
   }
 
   override fun isPlaying(): Boolean {
     return player?.run {
       playWhenReady &&
-          playbackState in Player.STATE_BUFFERING..Player.STATE_READY &&
-          playbackSuppressionReason == Player.PLAYBACK_SUPPRESSION_REASON_NONE
+        playbackState in Player.STATE_BUFFERING..Player.STATE_READY &&
+        playbackSuppressionReason == Player.PLAYBACK_SUPPRESSION_REASON_NONE
     } ?: false
   }
 
-  override var volumeInfo: VolumeInfo = player?.getVolumeInfo() ?: VolumeInfo()
+  override var volumeInfo: VolumeInfo = player?.getVolumeInfo() ?: VolumeInfo.DEFAULT_ACTIVE
     set(value) {
-      "Bridge#volumeInfo: $field -> $value, $this".logInfo()
+      logInfo { "Bridge#volumeInfo $field -> $value, $this" }
       if (field == value) return
       field = value
       player?.setVolumeInfo(value)
@@ -199,7 +205,7 @@ class PlayerViewBridge(
   override fun seekTo(positionMs: Long) {
     val playbackInfo = this.playbackInfo
     playbackInfo.resumePosition = positionMs
-    playbackInfo.resumeWindow = player?.currentWindowIndex ?: playbackInfo.resumeWindow
+    playbackInfo.resumeWindow = player?.currentMediaItemIndex ?: playbackInfo.resumeWindow
     this.playbackInfo = playbackInfo
   }
 
@@ -219,19 +225,18 @@ class PlayerViewBridge(
     }
 
   private fun applyPlayerParameters(parameters: PlayerParameters) {
-    val player = this.player
-    if (player is DefaultTrackSelectorHolder) {
-      player.trackSelector.parameters = player.trackSelector.parameters.buildUpon()
-          .setMaxVideoSize(parameters.maxVideoWidth, parameters.maxVideoHeight)
-          .setMaxVideoBitrate(parameters.maxVideoBitrate)
-          .setMaxAudioBitrate(parameters.maxAudioBitrate)
-          .build()
-    }
+    val player = this.player ?: return // Applied again in ensurePlayer() once a player is set.
+    player.trackSelectionParameters =
+      player.trackSelectionParameters.buildUpon()
+        .setMaxVideoSize(parameters.maxVideoWidth, parameters.maxVideoHeight)
+        .setMaxVideoBitrate(parameters.maxVideoBitrate)
+        .setMaxAudioBitrate(parameters.maxAudioBitrate)
+        .build()
   }
 
   private fun setPlaybackInfo(
     playbackInfo: PlaybackInfo,
-    volumeOnly: Boolean
+    volumeOnly: Boolean,
   ) {
     _playbackInfo = playbackInfo
 
@@ -245,20 +250,14 @@ class PlayerViewBridge(
     }
   }
 
-  override var repeatMode: Int
-    get() = _repeatMode
-    set(value) {
-      _repeatMode = value
-      this.player?.also { it.repeatMode = value }
-    }
-
   private fun updatePlaybackInfo() {
     player?.also {
-      if (it.playbackState == Common.STATE_IDLE) return
-      _playbackInfo = PlaybackInfo(
-          it.currentWindowIndex,
-          max(0, it.currentPosition)
-      )
+      if (it.playbackState == Player.STATE_IDLE) return
+      _playbackInfo =
+        PlaybackInfo(
+          it.currentMediaItemIndex,
+          max(0, it.currentPosition),
+        )
     }
   }
 
@@ -267,20 +266,22 @@ class PlayerViewBridge(
   }
 
   private fun prepareMediaSource() {
-    val mediaSource: MediaSource = this.mediaSource ?: run {
-      sourcePrepared = false
-      mediaSourceFactory.createMediaSource(this.media.uri).also { this.mediaSource = it }
-    }
+    val mediaSource: MediaSource =
+      this.mediaSource ?: run {
+        sourcePrepared = false
+        mediaSourceFactory.createMediaSource(mediaItem).also { this.mediaSource = it }
+      }
 
     // Player was reset, need to prepare again.
-    if (player?.playbackState == Common.STATE_IDLE) {
+    if (player?.playbackState == Player.STATE_IDLE) {
       sourcePrepared = false
     }
 
     if (!sourcePrepared) {
       ensurePlayer()
       (player as? ExoPlayer)?.also {
-        it.prepare(mediaSource, playbackInfo.resumeWindow == INDEX_UNSET, false)
+        it.setMediaSource(mediaSource, playbackInfo.resumeWindow == INDEX_UNSET)
+        it.prepare()
         sourcePrepared = true
       }
     }
@@ -290,19 +291,19 @@ class PlayerViewBridge(
     if (player == null) {
       sourcePrepared = false
       listenerApplied = false
-      val player = playerProvider.acquirePlayer(this.media)
+      this.player = playerPool.getPlayer(this.media)
+      // Must be called after the player is set, otherwise the parameters are not applied.
       applyPlayerParameters(playerParameters)
-      this.player = player
     }
 
     requireNotNull(player).also {
       if (!listenerApplied) {
         (player as? VolumeInfoController)?.addVolumeChangedListener(volumeListeners)
-        it.addEventListener(eventListeners)
+        it.addListener(eventListeners)
         listenerApplied = true
       }
 
-      it.setPlaybackParameters(_playbackParams)
+      it.playbackParameters = playbackParams
       val hasResumePosition = _playbackInfo.resumeWindow != INDEX_UNSET
       if (hasResumePosition) {
         it.seekTo(_playbackInfo.resumeWindow, _playbackInfo.resumePosition)
@@ -314,7 +315,7 @@ class PlayerViewBridge(
 
   private fun onErrorMessage(
     message: String,
-    cause: Throwable?
+    cause: Throwable?,
   ) {
     // Sub class can have custom reaction about the error here, including not to show this toast
     // (by not calling super.onErrorMessage(message)).
@@ -322,39 +323,39 @@ class PlayerViewBridge(
       this.errorListeners.onError(RuntimeException(message, cause))
     } else {
       Toast.makeText(context, message, Toast.LENGTH_SHORT)
-          .show()
+        .show()
     }
   }
 
-  // DefaultEventListener ⬇︎
-
-  override fun onPlayerError(error: ExoPlaybackException) {
-    Log.e("Kohii::Bridge", "Error: ${error.cause}")
+  //region Player.Listener implementation
+  override fun onPlayerError(error: PlaybackException) {
+    logError { "Bridge#onPlayerError error=${error.cause}, message=${error.cause?.message}, $this" }
     if (renderer == null) {
       var errorString: String? = null
-      if (error.type == ExoPlaybackException.TYPE_RENDERER) {
-        val exception = error.rendererException
-        if (exception is DecoderInitializationException) {
-          // Special case for decoder initialization failures.
-          errorString = if (exception.codecInfo == null) {
+      val exception = error.cause
+      if (exception is DecoderInitializationException) {
+        // Special case for decoder initialization failures.
+        errorString =
+          if (exception.codecInfo == null) {
             when {
               exception.cause is MediaCodecUtil.DecoderQueryException ->
                 context.getString(R.string.error_querying_decoders)
+
               exception.secureDecoderRequired ->
                 context.getString(R.string.error_no_secure_decoder, exception.mimeType)
+
               else -> context.getString(R.string.error_no_decoder, exception.mimeType)
             }
           } else {
             context.getString(R.string.error_instantiating_decoder, exception.codecInfo?.name ?: "")
           }
-        }
       }
 
       if (errorString != null) onErrorMessage(errorString, error)
     }
 
     inErrorState = true
-    if (isBehindLiveWindow(error)) {
+    if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
       reset()
     } else {
       updatePlaybackInfo()
@@ -362,7 +363,11 @@ class PlayerViewBridge(
     this.errorListeners.onError(error)
   }
 
-  override fun onPositionDiscontinuity(reason: Int) {
+  override fun onPositionDiscontinuity(
+    oldPosition: Player.PositionInfo,
+    newPosition: Player.PositionInfo,
+    reason: Int,
+  ) {
     if (inErrorState) {
       // Adapt from ExoPlayer demo.
       // "This will only occur if the user has performed a seek whilst in the error state. Update
@@ -372,22 +377,22 @@ class PlayerViewBridge(
     }
   }
 
-  override fun onTracksChanged(
-    trackGroups: TrackGroupArray,
-    trackSelections: TrackSelectionArray
-  ) {
-    if (trackGroups == lastSeenTrackGroupArray) return
-    lastSeenTrackGroupArray = trackGroups
-    val player = this.player as? KohiiExoPlayer ?: return
-    val trackInfo = player.trackSelector.currentMappedTrackInfo
-    if (trackInfo != null) {
-      if (trackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-        onErrorMessage(context.getString(R.string.error_unsupported_video), player.playbackError)
+  override fun onTracksChanged(tracks: Tracks) {
+    if (tracks != lastSeenTracks) {
+      val context = renderer?.context ?: context
+      if (tracks.containsType(C.TRACK_TYPE_VIDEO) &&
+        !tracks.isTypeSupported(C.TRACK_TYPE_VIDEO, true)
+      ) {
+        Toast.makeText(context, R.string.error_unsupported_video, Toast.LENGTH_LONG).show()
       }
-
-      if (trackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-        onErrorMessage(context.getString(R.string.error_unsupported_audio), player.playbackError)
+      if (tracks.containsType(C.TRACK_TYPE_AUDIO) &&
+        !tracks.isTypeSupported(C.TRACK_TYPE_AUDIO, true)
+      ) {
+        Toast.makeText(context, R.string.error_unsupported_audio, Toast.LENGTH_LONG).show()
       }
+      lastSeenTracks = tracks
     }
   }
+
+  //endregion
 }

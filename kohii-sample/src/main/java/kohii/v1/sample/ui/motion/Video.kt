@@ -23,5 +23,5 @@ data class Video(
   val url: String,
   val thumb: String?,
   val width: Float,
-  val height: Float
+  val height: Float,
 )

@@ -25,24 +25,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.DemoContainer
 import kohii.v1.sample.common.getDisplayPoint
+import kohii.v1.sample.databinding.FragmentPagerBinding
 import kohii.v1.sample.ui.main.DemoItem
-import kotlinx.android.synthetic.main.fragment_pager.viewPager
 import kotlin.math.abs
 
 // ViewPager (1) whose pages are Fragments
 class ViewPager1WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = ViewPager1WithRecyclerViewFragmentsFragment()
   }
 
   internal class VideoPagerAdapter(fm: FragmentManager) :
-      FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-
+    FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     override fun getItem(position: Int): Fragment {
       return GridContentFragment.newInstance(position)
     }
@@ -50,24 +47,27 @@ class ViewPager1WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContaine
     override fun getCount() = Int.MAX_VALUE / 2
   }
 
+  private lateinit var binding: FragmentPagerBinding
   override val demoItem: DemoItem? get() = arguments?.getParcelable(KEY_DEMO_ITEM)
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    return inflater.inflate(R.layout.fragment_pager, container, false)
+    savedInstanceState: Bundle?,
+  ): View {
+    val binding: FragmentPagerBinding = FragmentPagerBinding.inflate(inflater, container, false)
+    this.binding = binding
+    return binding.root
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     Kohii[this].register(this)
-        .addBucket(viewPager)
-    viewPager.apply {
+      .addBucket(binding.viewPager)
+    binding.viewPager.apply {
       adapter = VideoPagerAdapter(childFragmentManager)
       setPadding(0)
     }
@@ -75,7 +75,7 @@ class ViewPager1WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContaine
 
   override fun onViewStateRestored(savedInstanceState: Bundle?) {
     super.onViewStateRestored(savedInstanceState)
-    viewPager.apply {
+    binding.viewPager.apply {
       val clientWidth = (requireActivity().getDisplayPoint().x - paddingStart - paddingEnd)
       val offset = paddingStart / clientWidth.toFloat()
       setPageTransformer(false) { page, position ->

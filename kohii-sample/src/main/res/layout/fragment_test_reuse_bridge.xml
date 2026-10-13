@@ -29,7 +29,7 @@
       android:orientation="vertical"
       >
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         app:use_controller="false"
         />
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+    <androidx.media3.ui.AspectRatioFrameLayout
         android:id="@+id/playerViewContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

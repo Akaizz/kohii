@@ -37,9 +37,8 @@ import kotlin.properties.Delegates
 @Suppress("MemberVisibilityCanBePrivate")
 class VideoItemHolder(
   parent: ViewGroup,
-  private val kohii: Kohii
+  private val kohii: Kohii,
 ) : BaseViewHolder(parent, R.layout.holder_video_text_overlay), ArtworkHintListener {
-
   val videoTitle = itemView.findViewById(R.id.videoTitle) as TextView
   val videoInfo = itemView.findViewById(R.id.videoInfo) as TextView
   val videoImage = itemView.findViewById(R.id.videoImage) as ImageView
@@ -56,12 +55,13 @@ class VideoItemHolder(
   private var videoData by Delegates.observable<Video?>(null) { _, _, newVal ->
     if (newVal != null) {
       val playlist = newVal.playlist.first()
-      this.videoItem = VideoItem(
+      this.videoItem =
+        VideoItem(
           newVal.title,
           newVal.description,
           playlist.image,
-          playlist.sources.first().file
-      )
+          playlist.sources.first().file,
+        )
     } else {
       this.videoItem = null
     }
@@ -73,17 +73,17 @@ class VideoItemHolder(
       videoTitle.text = newVal.title
       videoInfo.text = newVal.description
       GlideApp.with(itemView)
-          .load(newVal.imageUrl)
-          .into(videoImage)
+        .load(newVal.imageUrl)
+        .into(videoImage)
 
       kohii.setUp(newVal.file) {
         tag = requireNotNull(videoTag)
         artworkHintListener = this@VideoItemHolder
       }
-          .bind(playerViewContainer) { playback ->
-            this@VideoItemHolder.playback = playback
-            volumeInfo?.let { kohii.applyVolumeInfo(it, playback, Scope.PLAYBACK) }
-          }
+        .bind(playerViewContainer) { playback ->
+          this@VideoItemHolder.playback = playback
+          volumeInfo?.let { kohii.applyVolumeInfo(it, playback, Scope.PLAYBACK) }
+        }
     } else {
       this.playback = null
     }
@@ -99,7 +99,7 @@ class VideoItemHolder(
   }
 
   private val videoTag: String?
-    get() = this.videoItem?.let { "${it.file}::$adapterPosition" }
+    get() = this.videoItem?.let { "${it.file}::$absoluteAdapterPosition" }
 
   internal fun applyVideoData(video: Video?) {
     this.videoData = video
@@ -118,7 +118,7 @@ class VideoItemHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     videoImage.isVisible = shouldShow
   }

@@ -19,10 +19,10 @@ package kohii.v1.sample.ui.nested5
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
-import kohii.v1.core.Common
+import androidx.media3.common.Player
 import kohii.v1.core.Playback
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 import kohii.v1.sample.data.Item
@@ -33,9 +33,8 @@ import kohii.v1.sample.data.Item
 @Suppress("MemberVisibilityCanBePrivate")
 class VideoViewHolder(
   parent: ViewGroup,
-  val kohii: Kohii
+  val kohii: Kohii,
 ) : BaseViewHolder(parent, R.layout.holder_player_view_horizontal), Playback.Callback {
-
   val mediaName: TextView = itemView.findViewById(R.id.videoTitle)
   val playerContainer: FrameLayout = itemView.findViewById(R.id.playerContainer)
 
@@ -46,16 +45,16 @@ class VideoViewHolder(
       val (parentPosition, videoItem) = item
       if (videoItem is Item) {
         // val mediaItem = MediaItem(Uri.parse(item.uri), item.extension, drmItem)
-        itemTag = "NEST::$parentPosition::${videoItem.uri}::$adapterPosition"
+        itemTag = "NEST::$parentPosition::${videoItem.uri}::$absoluteAdapterPosition"
         mediaName.text = videoItem.name
 
-        kohii.setUp(assetVideoUri) {
+        kohii.setUp(VIDEO_URI_ASSET) {
           tag = requireNotNull(itemTag)
           preload = false
-          repeatMode = Common.REPEAT_MODE_ONE
+          repeatMode = Player.REPEAT_MODE_ONE
           callbacks += this@VideoViewHolder
         }
-            .bind(playerContainer)
+          .bind(playerContainer)
       }
     }
   }

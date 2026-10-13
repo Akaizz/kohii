@@ -20,9 +20,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.exoplayer2.ControlDispatcher
-import com.google.android.exoplayer2.ui.PlayerView
-import kohii.v1.core.Common
+import androidx.media3.common.Player
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.Manager
 import kohii.v1.core.Manager.OnSelectionListener
 import kohii.v1.core.Playback
@@ -33,7 +32,6 @@ import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.databinding.ActivityDevScrollviewBinding
 
 class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
-
   lateinit var binding: ActivityDevScrollviewBinding
 
   lateinit var kohii: Kohii
@@ -42,73 +40,92 @@ class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
+    savedInstanceState: Bundle?,
+  ): View {
     binding = ActivityDevScrollviewBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     kohii = Kohii[this]
-    manager = kohii.register(this)
+    manager =
+      kohii.register(this)
         .addBucket(binding.scrollView)
 
-    kohii.setUp(DemoApp.assetVideoUri) {
+    kohii.setUp(DemoApp.VIDEO_URI_ASSET) {
       tag = "player::0"
-      repeatMode = Common.REPEAT_MODE_ONE
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
+      repeatMode = Player.REPEAT_MODE_ONE
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
 
-        override fun kohiiCanPause(): Boolean = true
+          override fun kohiiCanPause(): Boolean = true
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            val controller = kohii.createControlDispatcher(playback)
-            renderer.setControlDispatcher(controller)
-            renderer.useController = true
-            renderer.tag = controller
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val controller = kohii.createControlDispatcher(playback)
+              // renderer.setControlDispatcher(controller)
+              renderer.useController = true
+              renderer.tag = controller
+            }
+          }
+
+          override fun teardownRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val tag = renderer.tag
+              // if (tag is ControlDispatcher) renderer.tag = null
+            }
           }
         }
-
-        override fun teardownRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            val tag = renderer.tag
-            if (tag is ControlDispatcher) renderer.tag = null
-          }
-        }
-      }
     }
-        .bind(binding.playerView1)
+      .bind(binding.playerView1)
 
     kohii.setUp("https://content.jwplatform.com/manifests/Cl6EVHgQ.m3u8") {
       tag = "player::1"
-      controller = object : Controller {
-        override fun kohiiCanStart(): Boolean = true
+      controller =
+        object : Controller {
+          override fun kohiiCanStart(): Boolean = true
 
-        override fun kohiiCanPause(): Boolean = true
+          override fun kohiiCanPause(): Boolean = true
 
-        override fun setupRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            val controller = kohii.createControlDispatcher(playback)
-            renderer.setControlDispatcher(controller)
-            renderer.useController = true
-            renderer.tag = controller
+          override fun setupRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val controller = kohii.createControlDispatcher(playback)
+              // renderer.setControlDispatcher(controller)
+              // renderer.useController = true
+              // renderer.tag = controller
+            }
+          }
+
+          override fun teardownRenderer(
+            playback: Playback,
+            renderer: Any?,
+          ) {
+            if (renderer is PlayerView) {
+              // TODO: replace with custom ForwardingPlayer.
+              // val tag = renderer.tag
+              // if (tag is ControlDispatcher) renderer.tag = null
+            }
           }
         }
-
-        override fun teardownRenderer(playback: Playback, renderer: Any?) {
-          if (renderer is PlayerView) {
-            val tag = renderer.tag
-            if (tag is ControlDispatcher) renderer.tag = null
-          }
-        }
-      }
     }
-        .bind(binding.playerView2)
+      .bind(binding.playerView2)
   }
 
   override fun onSelection(selection: Collection<Playback>) {
@@ -120,13 +137,16 @@ class DevScrollViewFragment : BaseFragment(), OnSelectionListener {
       if (container is PlayerView) {
         container.useController = false // if you want to only use the global controller.
         binding.controlView.player = container.player
-        val controller = container.tag
+        // TODO: replace with custom ForwardingPlayer.
+
+        /* val controller = container.tag
         if (controller is ControlDispatcher) {
           binding.controlView.setControlDispatcher(controller)
-        }
+        } */
       }
     } else {
-      binding.controlView.setControlDispatcher(null)
+      // TODO: replace with custom ForwardingPlayer.
+      // binding.controlView.setControlDispatcher(DefaultControlDispatcher())
       binding.controlView.player = null
       binding.controlView.hide()
     }

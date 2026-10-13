@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.content.Context
 import android.os.Looper
-import androidx.annotation.CallSuper
-import com.google.android.exoplayer2.DefaultLoadControl
-import com.google.android.exoplayer2.DefaultRenderersFactory
-import com.google.android.exoplayer2.LoadControl
-import com.google.android.exoplayer2.RenderersFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.analytics.AnalyticsCollector
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.BandwidthMeter
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
-import com.google.android.exoplayer2.util.Clock
-import com.google.android.exoplayer2.util.Util
-import kohii.v1.core.DefaultTrackSelectorHolder
+import androidx.annotation.OptIn
+import androidx.media3.common.util.Clock
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.util.Util
+import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.LoadControl
+import androidx.media3.exoplayer.RenderersFactory
+import androidx.media3.exoplayer.analytics.AnalyticsCollector
+import androidx.media3.exoplayer.analytics.DefaultAnalyticsCollector
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.upstream.BandwidthMeter
+import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import kohii.v1.core.VolumeChangedListener
 import kohii.v1.core.VolumeChangedListeners
 import kohii.v1.core.VolumeInfoController
@@ -38,52 +42,68 @@ import kohii.v1.media.VolumeInfo
 import kotlin.LazyThreadSafetyMode.NONE
 
 /**
- * Extend the [SimpleExoPlayer] to have custom configuration.
+ * Extend the [ExoPlayer] to have custom configuration.
  *
  * @author eneim (2018/06/25).
  */
 open class KohiiExoPlayer(
-  context: Context,
-  clock: Clock = Clock.DEFAULT,
-  renderersFactory: RenderersFactory = DefaultRenderersFactory(context.applicationContext),
+  private val player: ExoPlayer,
+) : ExoPlayer by player,
+  VolumeInfoController {
+  constructor(builder: ExoPlayer.Builder) : this(builder.build())
+
+  constructor(
+    context: Context,
+    clock: Clock = Clock.DEFAULT,
+    renderersFactory: RenderersFactory = DefaultRenderersFactory(context.applicationContext),
     // TrackSelector is initialized at the same time a new Player instance is created.
     // This process will set the BandwidthMeter to the TrackSelector. Therefore we need to have
     // unique TrackSelector per Player instance.
-  override val trackSelector: DefaultTrackSelector =
-    DefaultTrackSelector(context.applicationContext),
-  loadControl: LoadControl = DefaultLoadControl.Builder().createDefaultLoadControl(),
-  bandwidthMeter: BandwidthMeter =
-    DefaultBandwidthMeter.Builder(context.applicationContext).build(),
-  looper: Looper = Util.getLooper()
-) : SimpleExoPlayer(
-    context,
-    renderersFactory,
-    trackSelector,
-    loadControl,
-    bandwidthMeter,
-    AnalyticsCollector(clock),
-    clock,
-    looper
-), VolumeInfoController, DefaultTrackSelectorHolder {
+    trackSelector: DefaultTrackSelector = DefaultTrackSelector(context.applicationContext),
+    loadControl: LoadControl = DefaultLoadControl.Builder().build(),
+    bandwidthMeter: BandwidthMeter =
+      DefaultBandwidthMeter.getSingletonInstance(context.applicationContext),
+    mediaSourceFactory: MediaSource.Factory,
+    analyticsCollector: AnalyticsCollector = DefaultAnalyticsCollector(clock),
+    looper: Looper = Util.getCurrentOrMainLooper(),
+  ) : this(
+    ExoPlayer.Builder(
+      context.applicationContext,
+      renderersFactory,
+      mediaSourceFactory,
+      trackSelector,
+      loadControl,
+      bandwidthMeter,
+      analyticsCollector,
+    )
+      .setUseLazyPreparation(true)
+      .setClock(clock)
+      .setLooper(looper),
+  )
+
+  // Media3 declares this as a Java default method of Player (returning AUDIO_SESSION_ID_UNSET),
+  // and Kotlin's interface delegation does not forward default methods.
+  override fun getAudioSessionId(): Int = player.audioSessionId
 
   private val volumeChangedListeners by lazy(NONE) { VolumeChangedListeners() }
-  private var playerVolumeInfo = VolumeInfo(false, 1.0F) // backing field.
+  private var playerVolumeInfo = VolumeInfo.DEFAULT_ACTIVE // backing field.
 
   override val volumeInfo
     get() = playerVolumeInfo
 
-  @CallSuper
-  override fun setVolume(audioVolume: Float) {
+  final override fun setVolume(audioVolume: Float) {
     this.setVolumeInfo(VolumeInfo(audioVolume == 0f, audioVolume))
   }
 
+  final override fun getVolume(): Float = player.volume
+
   override fun setVolumeInfo(volumeInfo: VolumeInfo): Boolean {
+    val muted = volumeInfo.mute || volumeInfo.volume == 0F
+    player.setAudioAttributes(player.audioAttributes, !muted)
     val changed = this.playerVolumeInfo != volumeInfo // Compare equality, not reference.
     if (changed) {
       this.playerVolumeInfo = volumeInfo
-      super.setVolume(if (volumeInfo.mute) 0F else volumeInfo.volume)
-      val mute = volumeInfo.mute || volumeInfo.volume == 0F
-      super.setAudioAttributes(super.getAudioAttributes(), !mute)
+      player.volume = if (volumeInfo.mute) 0F else volumeInfo.volume
       this.volumeChangedListeners.onVolumeChanged(volumeInfo)
     }
     return changed

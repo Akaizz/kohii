@@ -50,7 +50,7 @@
           android:focusable="true"
           android:onClick="@{(view) -> presenter.onVideoClick(view, motion.video0)}"
           >
-        <com.google.android.exoplayer2.ui.PlayerView
+        <androidx.media3.ui.PlayerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="120dp"
@@ -107,7 +107,7 @@
           android:focusable="true"
           android:onClick="@{(view) -> presenter.onVideoClick(view, motion.video0)}"
           >
-        <com.google.android.exoplayer2.ui.PlayerView
+        <androidx.media3.ui.PlayerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="120dp"
@@ -136,7 +136,7 @@
           android:focusable="true"
           android:onClick="@{(view) -> presenter.onVideoClick(view, motion.video0)}"
           >
-        <com.google.android.exoplayer2.ui.PlayerView
+        <androidx.media3.ui.PlayerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="120dp"
@@ -165,7 +165,7 @@
           android:focusable="true"
           android:onClick="@{(view) -> presenter.onVideoClick(view, motion.video0)}"
           >
-        <com.google.android.exoplayer2.ui.PlayerView
+        <androidx.media3.ui.PlayerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="120dp"
@@ -194,7 +194,7 @@
           android:focusable="true"
           android:onClick="@{(view) -> presenter.onVideoClick(view, motion.video0)}"
           >
-        <com.google.android.exoplayer2.ui.PlayerView
+        <androidx.media3.ui.PlayerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="120dp"

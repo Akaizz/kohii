@@ -1,0 +1,96 @@
+apply plugin: 'maven-publish'
+
+// Published through JitPack (https://jitpack.io) as com.github.Akaizz.kohii:<module>:<version>.
+// On JitPack, use the GROUP (com.github.<User>), ARTIFACT (repository) and VERSION (tag, commit or
+// branch-SNAPSHOT) it provides, so the group and version written in the .pom and .module files match
+// the path JitPack serves them from. Gradle rejects artifacts whose metadata does not match.
+def onJitPack = System.getenv("JITPACK") == "true"
+group = onJitPack ? "${System.getenv("GROUP")}.${System.getenv("ARTIFACT")}" : GROUP
+version = onJitPack ? System.getenv("VERSION") : VERSION_NAME
+
+def configurePom(pom) {
+  pom.name = POM_NAME
+  pom.packaging = POM_PACKAGING
+  pom.description = POM_DESCRIPTION
+  pom.url = POM_URL
+
+  pom.scm {
+    url = POM_SCM_URL
+    connection = POM_SCM_CONNECTION
+    developerConnection = POM_SCM_DEV_CONNECTION
+  }
+
+  pom.licenses {
+    license {
+      name = POM_LICENCE_NAME
+      url = POM_LICENCE_URL
+      distribution = POM_LICENCE_DIST
+    }
+  }
+
+  pom.developers {
+    developer {
+      id = POM_DEVELOPER_ID
+      name = POM_DEVELOPER_NAME
+      email = POM_DEVELOPER_MAIL
+    }
+  }
+}
+
+afterEvaluate { project ->
+  if (project.getPlugins().hasPlugin('com.android.application') ||
+      project.getPlugins().hasPlugin('com.android.library')) {
+
+    task androidJavadocs(type: Javadoc) {
+      source = android.sourceSets.main.java.source
+      classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+      excludes = ['**/*.kt']
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+      archiveClassifier = 'javadoc'
+      from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+      archiveClassifier = 'sources'
+      from android.sourceSets.main.java.source
+    }
+  }
+
+  if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+      tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+      }
+    }
+  }
+
+  if (JavaVersion.current().isJava9Compatible()) {
+    allprojects {
+      tasks.withType(Javadoc) {
+        options.addBooleanOption('html5', true)
+      }
+    }
+  }
+
+  android.libraryVariants.all { variant ->
+    tasks.androidJavadocs.doFirst {
+      classpath += files(variant.javaCompileProvider.get().classpath.files.join(File.pathSeparator))
+    }
+  }
+
+  publishing {
+    publications {
+      release(MavenPublication) {
+        from components.release
+        groupId = project.group
+        version = project.version
+        artifactId = POM_ARTIFACT_ID
+        artifact androidSourcesJar
+        artifact androidJavadocsJar
+        configurePom(pom)
+      }
+    }
+  }
+}

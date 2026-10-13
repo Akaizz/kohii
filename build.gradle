@@ -1,3 +1,6 @@
+import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
+
 /*
  * Copyright (c) 2018 Nam Nguyen, nam@ene.im
  *
@@ -15,64 +18,60 @@
  */
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-import kohii.Libs
 
 buildscript {
   repositories {
     google()
     mavenCentral()
-    maven { url "http://dl.bintray.com/kotlin/kotlin-eap" }
-    maven { url 'https://maven.fabric.io/public' }
-    maven { url "https://plugins.gradle.org/m2/" }
-    jcenter()
+    gradlePluginPortal()
   }
 
   dependencies {
     //noinspection GradleDependency
-    classpath Libs.Common.androidGradlePlugin
-    classpath Libs.Kotlin.gradlePlugin
-    classpath Libs.Common.dexcountGradlePlugin
-    classpath Libs.Google.fabricPlugin
-    classpath Libs.Google.gmsGoogleServices
-    classpath Libs.Common.ktLintPlugin
-    classpath Libs.Common.bintrayPlugin
-    classpath Libs.Common.dokkaPlugin
+    classpath(libs.gradle)
+    classpath(libs.kotlin.gradle.plugin)
+    classpath(libs.google.services)
+    classpath(libs.firebase.crashlytics.gradle)
+    classpath(libs.ktlint.gradle)
+    classpath(libs.dokka.gradle.plugin)
+    classpath(libs.binary.compatibility.validator)
   }
+}
+
+def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok")]
+
+apply plugin: 'binary-compatibility-validator'
+apiValidation {
+  sampleProjects.forEach {
+    ignoredProjects += it.name
+  }
+}
+
+apply plugin: "org.jetbrains.dokka"
+tasks.withType(DokkaMultiModuleTask).configureEach {
+  outputDirectory.set(file("$rootDir/docs/api"))
+  removeChildTasks(sampleProjects)
 }
 
 allprojects {
   repositories {
     google()
     mavenCentral()
-    maven { url "http://dl.bintray.com/kotlin/kotlin-eap" }
-    jcenter()
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    flatDir {
-      dirs 'libs'
-    }
   }
 
   apply plugin: "org.jlleitschuh.gradle.ktlint" // Version should be inherited from parent
-  apply plugin: 'org.jetbrains.dokka-android'
+  apply plugin: "org.jetbrains.dokka"
 
   tasks.withType(JavaCompile).configureEach { task ->
     task.sourceCompatibility = JavaVersion.VERSION_1_8
     task.targetCompatibility = JavaVersion.VERSION_1_8
   }
 
-  tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile).configureEach { task ->
-    task.kotlinOptions {
-      jvmTarget = "1.8"
-    }
-  }
-
-  tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinCompile).configureEach { task ->
-    task.kotlinOptions {
-      freeCompilerArgs += [
-          '-XXLanguage:+InlineClasses',
-          '-Xjvm-default=enable'
-      ]
+  //noinspection UnnecessaryQualifiedReference
+  tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile).configureEach { task ->
+    task.compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+      freeCompilerArgs.add('-Xjvm-default=all')
     }
   }
 
@@ -82,21 +81,29 @@ allprojects {
     }
   }
 
-  afterEvaluate { p ->
-    p.tasks.dokka {
-      jdkVersion = 8
-      reportUndocumented = false
-      skipDeprecated = true
-      skipEmptyPackages = true
+  tasks.withType(DokkaTaskPartial).configureEach {
+    dokkaSourceSets.configureEach {
+      jdkVersion.set(8)
+      skipDeprecated.set(true)
 
       externalDocumentationLink {
-        url = new URL("https://developer.android.com/reference/")
-        packageListUrl = new URL("https://developer.android.com/reference/androidx/package-list")
+        url.set("https://developer.android.com/reference/".toURL())
       }
+    }
+  }
 
-      externalDocumentationLink {
-        url = new URL("https://exoplayer.dev/doc/reference/")
-        packageListUrl = new URL("https://exoplayer.dev/doc/reference/package-list")
+  afterEvaluate { p ->
+    if (p.hasProperty("android")) {
+      p.android.lint {
+        // FIXME(eneim): temporarily disable.
+        disable "RestrictedApi", "VisibleForTests", "UnusedResources", "UnusedIds"
+      }
+    }
+
+    if (p.hasProperty("android") && p.hasProperty("dependencies")) {
+      p.dependencies {
+        // dokkaHtmlPartialPlugin("org.jetbrains.dokka:android-documentation-plugin:1.8.10")
+        dokkaPlugin(libs.android.documentation.plugin)
       }
     }
   }
@@ -108,13 +115,6 @@ task clean(type: Delete) {
 
 tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
-}
-
-ext {
-  // query git for the SHA, Tag and commit count. Use these to automate versioning.
-  gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
-  gitCommitCount =
-      Integer.parseInt('git rev-list --count HEAD'.execute([], project.rootDir).text.trim())
 }
 
 // copy from https://github.com/chrisbanes/tivi

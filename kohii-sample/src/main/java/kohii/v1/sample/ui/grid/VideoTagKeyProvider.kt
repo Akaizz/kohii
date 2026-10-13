@@ -21,33 +21,33 @@ import android.view.View
 import androidx.recyclerview.selection.ItemKeyProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener
-import kohii.v1.core.Rebinder
 
 internal class VideoTagKeyProvider(
-  val recyclerView: RecyclerView
-) : ItemKeyProvider<Rebinder>(SCOPE_CACHED) {
-
-  private val posToKey = SparseArray<Rebinder>()
-  private val keyToPos = HashMap<Rebinder, Int>()
+  val recyclerView: RecyclerView,
+) : ItemKeyProvider<SelectionKey>(SCOPE_CACHED) {
+  private val posToKey = SparseArray<SelectionKey>()
+  private val keyToPos = HashMap<SelectionKey, Int>()
 
   init {
     require(recyclerView.adapter?.hasStableIds() == true)
-    recyclerView.addOnChildAttachStateChangeListener(object : OnChildAttachStateChangeListener {
-      override fun onChildViewDetachedFromWindow(view: View) {
-        onDetached(view)
-      }
+    recyclerView.addOnChildAttachStateChangeListener(
+      object : OnChildAttachStateChangeListener {
+        override fun onChildViewDetachedFromWindow(view: View) {
+          onDetached(view)
+        }
 
-      override fun onChildViewAttachedToWindow(view: View) {
-        onAttached(view)
-      }
-    })
+        override fun onChildViewAttachedToWindow(view: View) {
+          onAttached(view)
+        }
+      },
+    )
   }
 
-  override fun getKey(position: Int): Rebinder? {
+  override fun getKey(position: Int): SelectionKey? {
     return posToKey[position]
   }
 
-  override fun getPosition(key: Rebinder): Int {
+  override fun getPosition(key: SelectionKey): Int {
     return keyToPos[key] ?: RecyclerView.NO_POSITION
   }
 
@@ -56,10 +56,11 @@ internal class VideoTagKeyProvider(
     val id = holder.itemId
     if (id != RecyclerView.NO_ID) {
       val position = holder.adapterPosition
-      val key = holder.rebinder
-      if (position != RecyclerView.NO_POSITION && key != null) {
-        posToKey.put(position, key)
-        keyToPos[key] = position
+      val rebinder = holder.rebinder
+      if (position != RecyclerView.NO_POSITION && rebinder != null) {
+        val selectionKey = SelectionKey(position, rebinder)
+        posToKey.put(position, selectionKey)
+        keyToPos[selectionKey] = position
       }
     }
   }
@@ -74,7 +75,7 @@ internal class VideoTagKeyProvider(
       val key = holder.rebinder
       if (position != RecyclerView.NO_POSITION && key != null) {
         posToKey.remove(position)
-        keyToPos.remove(key)
+        keyToPos.remove(SelectionKey(position, key))
       }
     }
   }

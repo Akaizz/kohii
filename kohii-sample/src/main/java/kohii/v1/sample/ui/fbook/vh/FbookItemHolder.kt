@@ -22,14 +22,12 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 internal abstract class FbookItemHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_fbook_item) {
-
   interface OnClick {
-
     fun onClick(
       receiver: View,
-      holder: FbookItemHolder
+      holder: FbookItemHolder,
     )
   }
 

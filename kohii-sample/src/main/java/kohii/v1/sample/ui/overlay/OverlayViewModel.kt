@@ -22,7 +22,6 @@ import kohii.v1.core.Rebinder
 import kohii.v1.media.VolumeInfo
 
 class OverlayViewModel : ViewModel() {
-
   val recyclerViewVolume = MutableLiveData(VolumeInfo(true, 1F))
   val overlayVolume = MutableLiveData(VolumeInfo(false, 1F))
 

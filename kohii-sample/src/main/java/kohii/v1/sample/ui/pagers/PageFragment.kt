@@ -21,8 +21,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.doOnLayout
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import kohii.v1.core.Common
+import androidx.media3.common.Player
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.Playback
 import kohii.v1.core.Prioritized
 import kohii.v1.exoplayer.Kohii
@@ -31,36 +32,36 @@ import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.isLandscape
 import kohii.v1.sample.data.Sources
 import kohii.v1.sample.data.Video
-import kotlinx.android.synthetic.main.fragment_pager_page.content
-import kotlinx.android.synthetic.main.fragment_pager_page.playerContainer
-import kotlinx.android.synthetic.main.fragment_scroll_view.playerView
+import kohii.v1.sample.databinding.FragmentPagerPageBinding
 
 class PageFragment : BaseFragment(), Prioritized {
-
   companion object {
-    private const val pageVideoKey = "kohii:demo:pager:video"
-    private const val pageTagKey = "kohii:demo:pager:tag"
+    private const val KEY_PAGE_VIDEO = "kohii:demo:pager:video"
+    private const val KEY_PAGE_TAG = "kohii:demo:pager:tag"
 
-    fun newInstance() = PageFragment().also {
-      it.arguments = Bundle()
-    }
+    fun newInstance() =
+      PageFragment().also {
+        it.arguments = Bundle()
+      }
 
     fun newInstance(
       position: Int,
-      video: Video
+      video: Video,
     ) = newInstance().also {
       it.arguments?.run {
-        putParcelable(pageVideoKey, video)
-        putInt(pageTagKey, position)
+        putParcelable(KEY_PAGE_VIDEO, video)
+        putInt(KEY_PAGE_TAG, position)
       }
     }
   }
 
   val video: Sources by lazy {
-    val video = arguments?.getParcelable<Video>(
-        pageVideoKey
-    )!!
-    val item = video.playlist.first()
+    val video =
+      arguments?.getParcelable<Video>(
+        KEY_PAGE_VIDEO,
+      )!!
+    val item =
+      video.playlist.first()
         .sources.first()
     item
   }
@@ -71,34 +72,38 @@ class PageFragment : BaseFragment(), Prioritized {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_pager_page, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
+    val binding: FragmentPagerPageBinding = FragmentPagerPageBinding.bind(view)
     val kohii = Kohii[this]
     kohii.register(this)
-        .addBucket(content)
+      .addBucket(binding.content)
 
     landscape = requireActivity().isLandscape()
-    val pagePos = requireArguments().getInt(
-        pageTagKey
-    )
+    val pagePos =
+      requireArguments().getInt(
+        KEY_PAGE_TAG,
+      )
     val videoTag = "PAGE::$pagePos::${video.file}"
+    val playerView: PlayerView = view.findViewById(R.id.playerView)
     kohii.setUp(video.file) {
       tag = videoTag
       delay = 500
-      repeatMode = Common.REPEAT_MODE_ONE
+      repeatMode = Player.REPEAT_MODE_ONE
       preload = true
     }
-        .bind(playerView) { playback = it }
+      .bind(playerView) { playback = it }
 
     view.doOnLayout {
+      val playerContainer: AspectRatioFrameLayout = it.findViewById(R.id.playerContainer)
       // [1] Update resize mode based on Window size.
       playerContainer.also { ctn ->
         if (it.width * 9 >= it.height * 16) {

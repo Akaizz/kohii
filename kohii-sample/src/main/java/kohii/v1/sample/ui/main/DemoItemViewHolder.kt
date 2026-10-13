@@ -24,16 +24,19 @@ import kohii.v1.sample.common.BaseViewHolder
 import kohii.v1.sample.common.splitCases
 
 class DemoItemViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_main_demo_item) {
-
   private val demoTitle: TextView = itemView.findViewById(R.id.demoTitle)
   private val demoSubtitle: TextView = itemView.findViewById(R.id.demoSubtitle)
 
   override fun bind(item: Any?) {
     (item as? DemoItem)?.also {
-      if (it.title != 0) demoTitle.setText(it.title) else demoTitle.text =
-        it.fragmentClass.simpleName.splitCases()
+      if (it.title != 0) {
+        demoTitle.setText(it.title)
+      } else {
+        demoTitle.text =
+          it.fragmentClass.simpleName.splitCases()
+      }
       if (it.subTitle != 0) {
         demoSubtitle.isVisible = true
         demoSubtitle.setText(it.subTitle)

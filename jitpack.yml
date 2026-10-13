@@ -1,0 +1,9 @@
+# Build configuration for https://jitpack.io
+# Artifacts: com.github.Akaizz.kohii:kohii-core:<version> and
+#            com.github.Akaizz.kohii:kohii-exoplayer:<version>
+# <version> is a git tag, a commit hash, or <branch>-SNAPSHOT (for example media3-SNAPSHOT).
+jdk:
+  - openjdk17
+install:
+  # Only the libraries are published; the sample apps are not built.
+  - ./gradlew :kohii-core:publishReleasePublicationToMavenLocal :kohii-exoplayer:publishReleasePublicationToMavenLocal -x test --stacktrace

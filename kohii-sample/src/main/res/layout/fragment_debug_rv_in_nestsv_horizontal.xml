@@ -37,7 +37,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         />
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+    <androidx.media3.ui.AspectRatioFrameLayout
         android:id="@+id/recyclerViewContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
           android:layout_gravity="center"
           app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
           />
-    </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+    </androidx.media3.ui.AspectRatioFrameLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:layout_width="match_parent"

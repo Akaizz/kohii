@@ -18,8 +18,8 @@ package kohii.v1.sample.ui.combo
 
 import android.net.Uri
 import android.view.ViewGroup
+import androidx.media3.common.Player
 import androidx.recyclerview.widget.RecyclerView.Adapter
-import kohii.v1.core.Common
 import kohii.v1.core.Playback
 import kohii.v1.core.Playback.Callback
 import kohii.v1.exoplayer.Kohii
@@ -31,17 +31,16 @@ class ExoVideosAdapter(
   val kohii: Kohii,
   private val items: List<Item>,
   private val onClick: ((ExoVideoHolder, Int) -> Unit)? = null,
-  private val onLoad: ((ExoVideoHolder, Int) -> Unit)? = null
+  private val onLoad: ((ExoVideoHolder, Int) -> Unit)? = null,
 ) : Adapter<ExoVideoHolder>() {
-
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): ExoVideoHolder {
     val holder = ExoVideoHolder(parent)
     holder.container.setOnClickListener {
-      if (holder.adapterPosition >= 0) {
-        onClick?.invoke(holder, holder.adapterPosition)
+      if (holder.absoluteAdapterPosition >= 0) {
+        onClick?.invoke(holder, holder.absoluteAdapterPosition)
       }
     }
     return holder
@@ -51,7 +50,7 @@ class ExoVideosAdapter(
 
   override fun onBindViewHolder(
     holder: ExoVideoHolder,
-    position: Int
+    position: Int,
   ) {
     val item = items[position % items.size]
     holder.videoTitle.text = item.name
@@ -59,19 +58,21 @@ class ExoVideosAdapter(
     val drmItem = item.drmScheme?.let { DrmItem(item) }
     val mediaItem =
       MediaItem(Uri.parse(item.uri), item.extension, drmItem)
-    val itemTag = "${javaClass.canonicalName}::${item.uri}::${holder.adapterPosition}"
+    val itemTag = "${javaClass.canonicalName}::${item.uri}::${holder.absoluteAdapterPosition}"
 
-    holder.rebinder = kohii.setUp(mediaItem) {
-      tag = itemTag
-      // preLoad = false
-      repeatMode = Common.REPEAT_MODE_ONE
-      callbacks += object : Callback {
-        override fun onRemoved(playback: Playback) {
-          playback.removeStateListener(holder)
-        }
+    holder.rebinder =
+      kohii.setUp(mediaItem) {
+        tag = itemTag
+        // preLoad = false
+        repeatMode = Player.REPEAT_MODE_ONE
+        callbacks +=
+          object : Callback {
+            override fun onRemoved(playback: Playback) {
+              playback.removeStateListener(holder)
+            }
+          }
+        artworkHintListener = holder
       }
-      artworkHintListener = holder
-    }
         .bind(holder.container) {
           onLoad?.invoke(holder, position)
           it.addStateListener(holder)

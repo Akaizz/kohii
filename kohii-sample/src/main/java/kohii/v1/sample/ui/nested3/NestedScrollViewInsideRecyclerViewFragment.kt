@@ -28,11 +28,10 @@ import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.DemoContainer
+import kohii.v1.sample.databinding.FragmentDebugNestsvInRvBinding
 import kohii.v1.sample.ui.main.DemoItem
-import kotlinx.android.synthetic.main.fragment_debug_nestsv_in_rv.recyclerView
 
 class NestedScrollViewInsideRecyclerViewFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = NestedScrollViewInsideRecyclerViewFragment()
   }
@@ -42,36 +41,39 @@ class NestedScrollViewInsideRecyclerViewFragment : BaseFragment(), DemoContainer
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_debug_nestsv_in_rv, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
+    val binding: FragmentDebugNestsvInRvBinding = FragmentDebugNestsvInRvBinding.bind(view)
     val kohii = Kohii[this]
-    val manager = kohii.register(this, MemoryMode.BALANCED)
-        .addBucket(recyclerView)
+    val manager =
+      kohii.register(this, MemoryMode.BALANCED)
+        .addBucket(binding.recyclerView)
 
-    recyclerView.adapter = NestedItemsAdapter(kohii, manager)
+    binding.recyclerView.adapter = NestedItemsAdapter(kohii, manager)
 
     // To allow NestedScrollView to scroll inside RecyclerView.
     // This implementation is really simple and should not be used as-is in production code.
-    recyclerView.addOnItemTouchListener(object : SimpleOnItemTouchListener() {
-
-      override fun onInterceptTouchEvent(
-        rv: RecyclerView,
-        e: MotionEvent
-      ): Boolean {
-        val child = rv.findChildViewUnder(e.x, e.y) ?: return false
-        val holder = rv.findContainingViewHolder(child) ?: return false
-        if (holder !is NestedScrollViewHolder) return false
-        child.parent.requestDisallowInterceptTouchEvent(true)
-        return false
-      }
-    })
+    binding.recyclerView.addOnItemTouchListener(
+      object : SimpleOnItemTouchListener() {
+        override fun onInterceptTouchEvent(
+          rv: RecyclerView,
+          e: MotionEvent,
+        ): Boolean {
+          val child = rv.findChildViewUnder(e.x, e.y) ?: return false
+          val holder = rv.findContainingViewHolder(child) ?: return false
+          if (holder !is NestedScrollViewHolder) return false
+          child.parent.requestDisallowInterceptTouchEvent(true)
+          return false
+        }
+      },
+    )
   }
 }

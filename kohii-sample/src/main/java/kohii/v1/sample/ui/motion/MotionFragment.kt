@@ -31,14 +31,12 @@ import kohii.v1.sample.common.DemoContainer
 import kohii.v1.sample.common.InitData
 import kohii.v1.sample.databinding.FragmentMotionBinding
 import kohii.v1.sample.ui.main.DemoItem
-import kotlinx.android.synthetic.main.fragment_motion.scrollView
 
 /**
  * @author eneim (2018/07/15).
  */
 @Keep
 class MotionFragment : BaseFragment(), Presenter, DemoContainer {
-
   companion object {
     fun newInstance() = MotionFragment()
   }
@@ -50,24 +48,25 @@ class MotionFragment : BaseFragment(), Presenter, DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    binding = DataBindingUtil.inflate(
+    savedInstanceState: Bundle?,
+  ): View {
+    binding =
+      DataBindingUtil.inflate(
         inflater,
         R.layout.fragment_motion,
         container,
-        false
-    ) as FragmentMotionBinding
+        false,
+      ) as FragmentMotionBinding
     return binding.root
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     Kohii[this].register(this)
-        .addBucket(scrollView)
+      .addBucket(binding.scrollView)
     binding.motion = Motion()
     binding.lifecycleOwner = viewLifecycleOwner
   }
@@ -84,20 +83,20 @@ class MotionFragment : BaseFragment(), Presenter, DemoContainer {
 
   override fun onVideoClick(
     container: View,
-    video: Video
+    video: Video,
   ) {
     val playerView = (container as ViewGroup)[0]
     val rebinder = playerView.getTag(R.id.motion_view_tag) as Rebinder?
     if (rebinder != null) {
       startActivity(
-          PlayerActivity.createIntent(
-              requireContext(),
-              InitData(
-                  tag = rebinder.tag.toString(),
-                  aspectRatio = video.width / video.height
-              ),
-              rebinder
-          )
+        PlayerActivity.createIntent(
+          requireContext(),
+          InitData(
+            tag = rebinder.tag.toString(),
+            aspectRatio = video.width / video.height,
+          ),
+          rebinder,
+        ),
       )
     }
   }

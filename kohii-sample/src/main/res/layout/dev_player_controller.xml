@@ -43,21 +43,12 @@
       />
 
   <ImageButton
-      android:id="@+id/exo_play"
+      android:id="@+id/exo_play_pause"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintStart_toEndOf="@id/barrier_0"
       app:layout_constraintTop_toTopOf="parent"
       tools:ignore="ContentDescription"
       style="@style/ExoMediaButton.Play"
-      />
-
-  <ImageButton
-      android:id="@+id/exo_pause"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintStart_toEndOf="@id/barrier_0"
-      app:layout_constraintTop_toTopOf="parent"
-      tools:ignore="ContentDescription"
-      style="@style/ExoMediaButton.Pause"
       />
 
   <androidx.constraintlayout.widget.Barrier

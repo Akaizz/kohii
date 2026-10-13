@@ -29,18 +29,17 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.getApp
 import kohii.v1.sample.common.getDisplayPoint
-import kotlinx.android.synthetic.main.fragment_pager.viewPager
+import kohii.v1.sample.databinding.FragmentPagerBinding
 import kotlin.math.abs
 
 class MainPagerFragment : BaseFragment() {
-
   companion object {
     fun newInstance() = MainPagerFragment()
   }
 
   class PagerAdapter(
     fm: FragmentManager,
-    val items: List<DemoItem>
+    val items: List<DemoItem>,
   ) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     override fun getItem(position: Int): Fragment {
       return items[position].fragmentClass.newInstance()
@@ -54,20 +53,21 @@ class MainPagerFragment : BaseFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_pager, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
+    val binding: FragmentPagerBinding = FragmentPagerBinding.bind(view)
     Kohii[this].register(this, LOW)
-        .addBucket(viewPager)
+      .addBucket(binding.viewPager)
 
-    this.viewPager.also {
+    binding.viewPager.also {
       it.adapter = PagerAdapter(childFragmentManager, getApp().demoItems)
       it.pageMargin = -resources.getDimensionPixelSize(R.dimen.pager_horizontal_space_base)
       val clientWidth =

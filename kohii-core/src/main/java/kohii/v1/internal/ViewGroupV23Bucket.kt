@@ -30,15 +30,14 @@ internal class ViewGroupV23Bucket(
   manager: Manager,
   root: ViewGroup,
   strategy: Strategy,
-  selector: Selector
+  selector: Selector,
 ) : ViewGroupBucket(manager, root, strategy, selector), OnScrollChangeListener {
-
   override fun onScrollChange(
     v: View?,
     scrollX: Int,
     scrollY: Int,
     oldScrollX: Int,
-    oldScrollY: Int
+    oldScrollY: Int,
   ) {
     manager.refresh()
   }

@@ -26,10 +26,9 @@ import kohii.v1.exoplayer.Kohii
  * @author eneim (2018/08/13).
  */
 interface Presenter {
-
   fun onVideoClick(
     container: View,
-    video: Video
+    video: Video,
   )
 
   fun requireProvider(): Kohii

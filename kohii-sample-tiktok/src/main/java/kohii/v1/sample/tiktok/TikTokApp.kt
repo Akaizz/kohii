@@ -27,8 +27,8 @@ import okio.source
 import kotlin.LazyThreadSafetyMode.NONE
 
 class TikTokApp : Application() {
-
-  private val moshi: Moshi = Moshi.Builder()
+  private val moshi: Moshi =
+    Moshi.Builder()
       .build()
 
   val videos by lazy(NONE) {

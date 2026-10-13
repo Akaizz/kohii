@@ -14,52 +14,40 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer.internal
 
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Player.AudioComponent
-import kohii.v1.core.PlayerEventListener
+import androidx.annotation.OptIn
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import kohii.v1.core.VolumeInfoController
 import kohii.v1.media.VolumeInfo
 
 fun Player.getVolumeInfo(): VolumeInfo {
   return when (this) {
     is VolumeInfoController -> VolumeInfo(this.volumeInfo)
-    is AudioComponent -> { // will match SimpleExoPlayer
+    else -> {
       val volume = this.volume
       VolumeInfo(volume == 0f, volume)
     }
-    else -> throw UnsupportedOperationException(javaClass.name + " doesn't support this.")
   }
 }
 
 fun Player.setVolumeInfo(volume: VolumeInfo) {
   when (this) {
     is VolumeInfoController -> this.setVolumeInfo(volume)
-    is AudioComponent -> { // will match SimpleExoPlayer
+    else -> {
       if (volume.mute) {
         this.volume = 0f
       } else {
         this.volume = volume.volume
       }
-      this.setAudioAttributes(this.audioAttributes, !volume.mute)
+      if (this is ExoPlayer) {
+        val audioAttributes = this.audioAttributes
+        this.setAudioAttributes(audioAttributes, !volume.mute)
+      }
     }
-    else -> throw UnsupportedOperationException(javaClass.name + " doesn't support this.")
   }
-}
-
-fun Player.addEventListener(listener: PlayerEventListener) {
-  this.addListener(listener)
-  this.videoComponent?.addVideoListener(listener)
-  this.audioComponent?.addAudioListener(listener)
-  this.textComponent?.addTextOutput(listener)
-  this.metadataComponent?.addMetadataOutput(listener)
-}
-
-fun Player.removeEventListener(listener: PlayerEventListener) {
-  this.removeListener(listener)
-  this.videoComponent?.removeVideoListener(listener)
-  this.audioComponent?.removeAudioListener(listener)
-  this.textComponent?.removeTextOutput(listener)
-  this.metadataComponent?.removeMetadataOutput(listener)
 }

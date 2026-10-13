@@ -19,8 +19,8 @@ package kohii.v1.sample.ui.overlay
 import android.view.LayoutInflater.from
 import android.view.View
 import android.view.ViewGroup
+import androidx.media3.common.Player
 import androidx.recyclerview.widget.RecyclerView.Adapter
-import kohii.v1.core.Common
 import kohii.v1.core.Rebinder
 import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.data.Video
@@ -30,9 +30,8 @@ internal class VideoItemsAdapter(
   private val videos: List<Video>,
   private val kohii: Kohii,
   val shouldBindVideo: (Rebinder?) -> Boolean,
-  val onVideoClick: (Int, Rebinder) -> Unit
+  val onVideoClick: (Int, Rebinder) -> Unit,
 ) : Adapter<BaseViewHolder>(), BaseViewHolder.OnClickListener {
-
   init {
     setHasStableIds(true)
   }
@@ -42,19 +41,20 @@ internal class VideoItemsAdapter(
     transView: View?,
     adapterPos: Int,
     itemId: Long,
-    payload: Any?
+    payload: Any?,
   ) {
     onVideoClick(adapterPos, payload as Rebinder)
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
-  ): BaseViewHolder = VideoItemHolder(
+    viewType: Int,
+  ): BaseViewHolder =
+    VideoItemHolder(
       from(parent.context),
       parent,
-      this
-  )
+      this,
+    )
 
   override fun getItemId(position: Int): Long {
     return position.toLong()
@@ -66,7 +66,7 @@ internal class VideoItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     val item = videos[position % videos.size]
     if (holder is VideoItemHolder) {
@@ -75,16 +75,16 @@ internal class VideoItemsAdapter(
       holder.videoInfo.text = item.description
 
       GlideApp.with(holder.itemView)
-          .load(requireNotNull(holder.videoImage))
-          .into(holder.thumbnail)
+        .load(requireNotNull(holder.videoImage))
+        .into(holder.thumbnail)
 
       if (shouldBindVideo(holder.rebinder)) {
         kohii.setUp(requireNotNull(holder.videoFile)) {
           tag = requireNotNull(holder.videoTag)
-          repeatMode = Common.REPEAT_MODE_ONE
+          repeatMode = Player.REPEAT_MODE_ONE
           artworkHintListener = holder
         }
-            .bind(holder.playerViewContainer)
+          .bind(holder.playerViewContainer)
       }
     }
   }
@@ -104,14 +104,11 @@ internal class VideoItemsAdapter(
     if (holder is VideoItemHolder) {
       kohii.cancel(holder.playerViewContainer)
     }
-    holder.onRecycled(true)
+    holder.onRecycled()
   }
 
   override fun onFailedToRecycleView(holder: BaseViewHolder): Boolean {
-    holder.onRecycled(false)
-    if (holder is VideoItemHolder) {
-      kohii.cancel(holder.playerViewContainer)
-    }
+    holder.clearTransientStates()
     return true
   }
 }

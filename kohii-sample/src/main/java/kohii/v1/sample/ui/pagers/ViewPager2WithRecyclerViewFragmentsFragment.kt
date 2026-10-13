@@ -29,20 +29,17 @@ import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.DemoContainer
 import kohii.v1.sample.common.getDisplayPoint
+import kohii.v1.sample.databinding.FragmentPager2HorizontalBinding
 import kohii.v1.sample.ui.main.DemoItem
-import kotlinx.android.synthetic.main.fragment_pager_2_horizontal.viewPager
 import kotlin.math.abs
 
 // ViewPager2 whose pages are Fragments
 class ViewPager2WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContainer {
-
   companion object {
-    fun newInstance() =
-      ViewPager2WithRecyclerViewFragmentsFragment()
+    fun newInstance() = ViewPager2WithRecyclerViewFragmentsFragment()
   }
 
   class VideoPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-
     override fun getItemCount() = Int.MAX_VALUE / 2
 
     override fun createFragment(position: Int): Fragment {
@@ -55,20 +52,21 @@ class ViewPager2WithRecyclerViewFragmentsFragment : BaseFragment(), DemoContaine
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_pager_2_horizontal, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
+    val binding: FragmentPager2HorizontalBinding = FragmentPager2HorizontalBinding.bind(view)
     Kohii[this].register(this)
-        .addBucket(viewPager)
+      .addBucket(binding.viewPager)
 
-    viewPager.apply {
+    binding.viewPager.apply {
       adapter = VideoPagerAdapter(this@ViewPager2WithRecyclerViewFragmentsFragment)
       val pageMargin = resources.getDimensionPixelSize(R.dimen.pager_horizontal_space_base)
       val pageTransformer = CompositePageTransformer()

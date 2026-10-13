@@ -18,7 +18,7 @@ package kohii.v1.media
 
 import android.net.Uri
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * @author eneim (2018/10/19).
@@ -27,13 +27,12 @@ import kotlinx.android.parcel.Parcelize
 open class MediaItem(
   override val uri: Uri,
   override val type: String? = null,
-  override val mediaDrm: MediaDrm? = null
+  override val mediaDrm: MediaDrm? = null,
 ) : Media, Parcelable {
-
   constructor(
     url: String,
     type: String? = null,
-    mediaDrm: MediaDrm? = null
+    mediaDrm: MediaDrm? = null,
   ) : this(Uri.parse(url), type, mediaDrm)
 
   override fun equals(other: Any?): Boolean {

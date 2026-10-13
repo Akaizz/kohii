@@ -15,8 +15,7 @@
   ~ limitations under the License.
   -->
 
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content"
     android:layout_width="match_parent"
@@ -25,14 +24,14 @@
     app:cardPreventCornerOverlap="true"
     >
 
-  <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+  <androidx.media3.ui.AspectRatioFrameLayout
       android:id="@id/playerContainer"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       app:resize_mode="fixed_width"
       >
-    <com.google.android.exoplayer2.ui.PlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@id/playerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,5 +43,5 @@
         app:surface_type="texture_view"
         app:use_controller="false"
         />
-  </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+  </androidx.media3.ui.AspectRatioFrameLayout>
 </com.google.android.material.card.MaterialCardView>

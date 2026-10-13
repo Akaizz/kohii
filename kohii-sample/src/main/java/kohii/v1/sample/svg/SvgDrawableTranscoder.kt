@@ -29,10 +29,9 @@ import com.caverock.androidsvg.SVG
  * ([Picture]).
  */
 class SvgDrawableTranscoder : ResourceTranscoder<SVG, PictureDrawable> {
-
   override fun transcode(
     target: Resource<SVG>,
-    options: Options
+    options: Options,
   ): Resource<PictureDrawable>? {
     val svg = target.get()
     val picture = svg.renderToPicture()

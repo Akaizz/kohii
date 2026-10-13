@@ -17,6 +17,7 @@
 package kohii.v1.core
 
 import android.view.ViewGroup
+import androidx.media3.common.Player
 import kohii.v1.core.Master.Companion.NO_TAG
 import kohii.v1.core.Playable.Config
 import kohii.v1.core.Playback.ArtworkHintListener
@@ -29,9 +30,8 @@ import kohii.v1.media.PlaybackInfo
 
 class Binder(
   private val engine: Engine<*>,
-  internal val media: Media
+  internal val media: Media,
 ) {
-
   /**
    * @property initialPlaybackInfo expected initial [PlaybackInfo] for a [Playable] to start when
    * a new [Playback] is bound to it. If null, it will follow the default behavior: an existing
@@ -43,7 +43,7 @@ class Binder(
     var threshold: Float = 0.65F
     var delay: Int = 0
     var preload: Boolean = false
-    var repeatMode: Int = Common.REPEAT_MODE_OFF
+    var repeatMode: Int = Player.REPEAT_MODE_OFF
     var controller: Controller? = null
     var initialPlaybackInfo: PlaybackInfo? = null
     var artworkHintListener: ArtworkHintListener? = null
@@ -59,13 +59,15 @@ class Binder(
   @JvmOverloads
   fun bind(
     container: ViewGroup,
-    callback: ((Playback) -> Unit)? = null
+    callback: ((Playback) -> Unit)? = null,
   ): Rebinder? {
     val tag = options.tag
-    val playable = providePlayable(
-        media, tag,
-        Config(tag = tag, rendererType = engine.playableCreator.rendererType)
-    )
+    val playable =
+      providePlayable(
+        media,
+        tag,
+        Config(tag = tag, rendererType = engine.playableCreator.rendererType),
+      )
     engine.master.bind(playable, tag, container, options, callback)
     return if (tag != NO_TAG) Rebinder(tag) else null
   }
@@ -73,17 +75,20 @@ class Binder(
   private fun providePlayable(
     media: Media,
     tag: Any,
-    config: Config
+    config: Config,
   ): Playable {
-    var cache = engine.master.playables.asSequence()
+    var cache =
+      engine.master.playables.asSequence()
         .filterNot { it.value == NO_TAG } // only care about tagged Playables
-        .filter { it.value == tag /* equals */ }
+        .filter {
+          it.value == tag // equals
+        }
         .firstOrNull()
         ?.key
 
     if (cache != null) {
       require(cache.media == media) // Playable of same tag must have the same Media data.
-      if (cache.config != config /* equals */) {
+      if (cache.config != config) {
         // Scenario: client bind a Video of same tag/media but different Renderer type or Config.
         cache.playback = null // will also set Manager to null
         engine.master.tearDown(cache, true)

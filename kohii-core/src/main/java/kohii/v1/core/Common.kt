@@ -14,43 +14,118 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.core
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.OptIn
 import androidx.annotation.RestrictTo
-import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP
-import com.google.android.exoplayer2.ExoPlayerLibraryInfo
+import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX
+import androidx.media3.common.MediaLibraryInfo
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 
 object Common {
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.REPEAT_MODE_OFF",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val REPEAT_MODE_OFF = Player.REPEAT_MODE_OFF
 
-  const val REPEAT_MODE_OFF = 0 // Player.REPEAT_MODE_OFF
-  const val REPEAT_MODE_ONE = 1 // Player.REPEAT_MODE_ONE
-  const val REPEAT_MODE_ALL = 2 // Player.REPEAT_MODE_ALL
-  const val REPEAT_MODE_GROUP = 3
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.REPEAT_MODE_ONE",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val REPEAT_MODE_ONE = Player.REPEAT_MODE_ONE
 
-  const val STATE_IDLE = 1 // Player.STATE_IDLE
-  const val STATE_BUFFERING = 2 // Player.STATE_BUFFERING
-  const val STATE_READY = 3 // Player.STATE_READY
-  const val STATE_ENDED = 4 // Player.STATE_ENDED
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.REPEAT_MODE_ALL",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val REPEAT_MODE_ALL = Player.REPEAT_MODE_ALL
 
-  internal val PLAY = PlaybackAction(true)
-  internal val PAUSE = PlaybackAction(false)
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.REPEAT_MODE_ALL",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val REPEAT_MODE_GROUP = Player.REPEAT_MODE_ALL
+
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.STATE_IDLE",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val STATE_IDLE = Player.STATE_IDLE
+
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.STATE_BUFFERING",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val STATE_BUFFERING = Player.STATE_BUFFERING
+
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.STATE_READY",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val STATE_READY = Player.STATE_READY
+
+  @Deprecated(
+    message = "Use constant from Player class directly instead.",
+    replaceWith =
+      ReplaceWith(
+        expression = "Player.STATE_ENDED",
+        imports = ["androidx.media3.common.Player"],
+      ),
+  )
+  const val STATE_ENDED = Player.STATE_ENDED
+
+  internal const val PLAY = true
+  internal const val PAUSE = false
 
   // ExoPlayer's doesn't catch a RuntimeException and crash if Device has too many App installed.
-  @RestrictTo(LIBRARY_GROUP)
+  @RestrictTo(LIBRARY_GROUP_PREFIX)
   fun getUserAgent(
     context: Context,
-    appName: String
+    appName: String,
   ): String {
-    val versionName = try {
-      val packageName = context.packageName
-      val info = context.packageManager.getPackageInfo(packageName, 0)
-      info.versionName
-    } catch (e: Exception) {
-      "?"
-    }
+    val versionName =
+      try {
+        val packageName = context.packageName
+        val info = context.packageManager.getPackageInfo(packageName, 0)
+        info.versionName
+      } catch (e: Exception) {
+        "?"
+      }
 
-    return "$appName/$versionName (Linux;Android ${Build.VERSION.RELEASE}) ${ExoPlayerLibraryInfo.VERSION_SLASHY}"
+    return "$appName/$versionName (Linux;Android ${Build.VERSION.RELEASE}) ${MediaLibraryInfo.VERSION_SLASHY}"
   }
 }

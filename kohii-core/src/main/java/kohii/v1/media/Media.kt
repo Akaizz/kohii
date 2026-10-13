@@ -19,7 +19,6 @@ package kohii.v1.media
 import android.net.Uri
 
 interface Media {
-
   val uri: Uri
 
   val type: String?

@@ -20,20 +20,17 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Point
 import android.os.Bundle
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import androidx.media3.ui.AspectRatioFrameLayout
 import kohii.v1.core.Rebinder
 import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseActivity
 import kohii.v1.sample.common.InitData
-import kotlinx.android.synthetic.main.activity_player.playerContainer
-import kotlinx.android.synthetic.main.activity_player.playerView
+import kohii.v1.sample.databinding.ActivityPlayerBinding
 
 /**
  * @author eneim (2018/08/08).
  */
 class PlayerActivity : BaseActivity() {
-
   companion object {
     private const val EXTRA_INIT_DATA = "kohii::player::init_data"
     private const val EXTRA_REBINDER = "kohii::player::rebinder"
@@ -41,12 +38,13 @@ class PlayerActivity : BaseActivity() {
     fun createIntent(
       context: Context,
       initData: InitData,
-      rebinder: Rebinder
+      rebinder: Rebinder,
     ): Intent {
-      val extras = Bundle().also {
-        it.putParcelable(EXTRA_INIT_DATA, initData)
-        it.putParcelable(EXTRA_REBINDER, rebinder)
-      }
+      val extras =
+        Bundle().also {
+          it.putParcelable(EXTRA_INIT_DATA, initData)
+          it.putParcelable(EXTRA_REBINDER, rebinder)
+        }
       return Intent(context, PlayerActivity::class.java).also {
         it.putExtras(extras)
       }
@@ -55,27 +53,31 @@ class PlayerActivity : BaseActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_player)
+    val binding: ActivityPlayerBinding = ActivityPlayerBinding.inflate(layoutInflater)
+    setContentView(binding.root)
 
     val extras = intent?.extras
     val initData = extras?.getParcelable<InitData>(EXTRA_INIT_DATA)
     val rebinder = extras?.getParcelable<Rebinder>(EXTRA_REBINDER)
 
     if (rebinder != null && initData != null) {
-      val displaySize = Point().apply {
-        this@PlayerActivity.windowManager.defaultDisplay.getSize(this)
-      }
+      val displaySize =
+        Point().apply {
+          this@PlayerActivity.windowManager.defaultDisplay.getSize(this)
+        }
 
       if (displaySize.y * initData.aspectRatio >= displaySize.x) {
-        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+        binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
       } else {
-        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
+        binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
       }
 
       val kohii = Kohii[this]
       kohii.register(this)
-          .addBucket(playerContainer)
-      rebinder.bind(kohii, this.playerView)
-    } else finish()
+        .addBucket(binding.playerContainer)
+      rebinder.bind(kohii, binding.playerView)
+    } else {
+      finish()
+    }
   }
 }

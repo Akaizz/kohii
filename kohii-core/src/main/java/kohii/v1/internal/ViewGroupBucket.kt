@@ -29,9 +29,8 @@ internal open class ViewGroupBucket(
   manager: Manager,
   override val root: ViewGroup,
   strategy: Strategy,
-  selector: Selector
+  selector: Selector,
 ) : Bucket(manager, root, strategy, selector) {
-
   private val globalScrollChangeListener = OnScrollChangedListener { manager.refresh() }
 
   override fun onAdded() {

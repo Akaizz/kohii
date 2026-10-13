@@ -29,17 +29,16 @@ import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.DemoContainer
+import kohii.v1.sample.databinding.FragmentMasterDetailBinding
 import kohii.v1.sample.ui.main.DemoItem
 import kohii.v1.sample.ui.pagers.GridContentFragment
 import kohii.v1.sample.ui.pagers.ViewPager1WithFragmentsFragment
-import kotlinx.android.synthetic.main.fragment_master_detail.container
 
 /**
  * @author eneim (2018/07/13).
  */
 @Keep
 class MasterDetailFragment : BaseFragment(), DemoContainer {
-
   companion object {
     fun newInstance() = MasterDetailFragment()
   }
@@ -51,19 +50,20 @@ class MasterDetailFragment : BaseFragment(), DemoContainer {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View {
     return inflater.inflate(R.layout.fragment_master_detail, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
+    val binding: FragmentMasterDetailBinding = FragmentMasterDetailBinding.bind(view)
     kohii = Kohii[this]
     kohii.register(this)
-        .addBucket(container)
+      .addBucket(binding.container)
 
     if (savedInstanceState == null) {
       childFragmentManager.commit {
@@ -72,26 +72,29 @@ class MasterDetailFragment : BaseFragment(), DemoContainer {
       }
     }
 
-    childFragmentManager.registerFragmentLifecycleCallbacks(object : FragmentLifecycleCallbacks() {
-      override fun onFragmentViewCreated(
-        fm: FragmentManager,
-        f: Fragment,
-        v: View,
-        savedInstanceState: Bundle?
-      ) {
-        if (f.id == R.id.topContainer) {
-          kohii.stick(f.viewLifecycleOwner)
+    childFragmentManager.registerFragmentLifecycleCallbacks(
+      object : FragmentLifecycleCallbacks() {
+        override fun onFragmentViewCreated(
+          fm: FragmentManager,
+          f: Fragment,
+          v: View,
+          savedInstanceState: Bundle?,
+        ) {
+          if (f.id == R.id.topContainer) {
+            kohii.stick(f.viewLifecycleOwner)
+          }
         }
-      }
 
-      override fun onFragmentViewDestroyed(
-        fm: FragmentManager,
-        f: Fragment
-      ) {
-        if (f.id == R.id.topContainer) {
-          kohii.unstick(f.viewLifecycleOwner)
+        override fun onFragmentViewDestroyed(
+          fm: FragmentManager,
+          f: Fragment,
+        ) {
+          if (f.id == R.id.topContainer) {
+            kohii.unstick(f.viewLifecycleOwner)
+          }
         }
-      }
-    }, false)
+      },
+      false,
+    )
   }
 }

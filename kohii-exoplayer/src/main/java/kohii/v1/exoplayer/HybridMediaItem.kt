@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
-import com.google.android.exoplayer2.source.MediaSource
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.source.MediaSource
 import kohii.v1.media.Media
 
 class HybridMediaItem(
   val media: Media,
-  val mediaSource: MediaSource
+  val mediaSource: MediaSource,
 ) : Media by media, MediaSource by mediaSource

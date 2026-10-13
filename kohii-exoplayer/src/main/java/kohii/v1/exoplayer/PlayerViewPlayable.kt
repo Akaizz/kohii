@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
-import com.google.android.exoplayer2.ControlDispatcher
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.AbstractPlayable
 import kohii.v1.core.Bridge
 import kohii.v1.core.Master
@@ -28,9 +31,8 @@ class PlayerViewPlayable(
   master: Master,
   media: Media,
   config: Config,
-  bridge: Bridge<PlayerView>
+  bridge: Bridge<PlayerView>,
 ) : AbstractPlayable<PlayerView>(master, media, config, bridge) {
-
   override var renderer: Any?
     get() = bridge.renderer
     set(value) {
@@ -38,30 +40,40 @@ class PlayerViewPlayable(
       bridge.renderer = value
     }
 
-  override fun onRendererAttached(playback: Playback, renderer: Any?) {
+  override fun onRendererAttached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     val controller = playback.config.controller
-    if (renderer is PlayerView) {
+    // TODO: replace with custom ForwardingPlayer.
+
+    /* if (renderer is PlayerView) {
       if (controller is ControlDispatcher) {
         renderer.setControlDispatcher(controller)
         renderer.useController = true
       } else {
-        renderer.setControlDispatcher(null)
+        renderer.setControlDispatcher(defaultControlDispatcher)
         renderer.useController = false
       }
-    }
+    } */
     super.onRendererAttached(playback, renderer)
     if (renderer is PlayerView && renderer.useController && controller == null) {
       throw IllegalStateException(
-          "To enable `useController`, Playback $playback must have a non-null Playback.Controller."
+        "To enable `useController`, Playback $playback must have a non-null Playback.Controller.",
       )
     }
   }
 
-  override fun onRendererDetached(playback: Playback, renderer: Any?) {
-    if (renderer is PlayerView) {
-      renderer.setControlDispatcher(null)
+  override fun onRendererDetached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
+    // TODO: replace with custom ForwardingPlayer.
+
+    /* if (renderer is PlayerView) {
+      renderer.setControlDispatcher(defaultControlDispatcher)
       renderer.useController = false
-    }
+    } */
     super.onRendererDetached(playback, renderer)
   }
 }

@@ -14,32 +14,38 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.content.Context
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.annotation.OptIn
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.ui.PlayerView
 import kohii.v1.core.Bridge
 import kohii.v1.core.BridgeCreator
+import kohii.v1.core.PlayerPool
 import kohii.v1.media.Media
 
 class PlayerViewBridgeCreator(
-  private val playerProvider: ExoPlayerProvider,
-  private val mediaSourceFactoryProvider: MediaSourceFactoryProvider
+  private val playerPool: PlayerPool<Player>,
+  private val mediaSourceFactory: MediaSource.Factory,
 ) : BridgeCreator<PlayerView> {
-
   override fun createBridge(
     context: Context,
-    media: Media
+    media: Media,
   ): Bridge<PlayerView> {
     return PlayerViewBridge(
-        context,
-        media,
-        playerProvider,
-        mediaSourceFactoryProvider
+      context,
+      media,
+      playerPool,
+      mediaSourceFactory,
     )
   }
 
   override fun cleanUp() {
-    playerProvider.cleanUp()
+    playerPool.clear()
   }
 }

@@ -30,7 +30,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentActivity
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.media3.ui.PlayerView
 import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.R
 import java.util.concurrent.atomic.AtomicBoolean
@@ -38,30 +38,34 @@ import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.math.abs
 
 internal class FloatPlayerManager(val activity: FragmentActivity) {
-
   internal val kohii = Kohii[activity]
   internal val windowManager = activity.getSystemService(WINDOW_SERVICE) as WindowManager
 
   @SuppressLint("InflateParams")
-  internal val floatView: View = LayoutInflater.from(activity)
+  internal val floatView: View =
+    LayoutInflater.from(activity)
       .inflate(R.layout.widget_float_player, null)
 
   internal val floatParams by lazy {
     val params = WindowManager.LayoutParams()
     @Suppress("DEPRECATION")
-    params.type = if (VERSION.SDK_INT >= VERSION_CODES.O)
-      WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-    else
-      WindowManager.LayoutParams.TYPE_PHONE
+    params.type =
+      if (VERSION.SDK_INT >= VERSION_CODES.O) {
+        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+      } else {
+        WindowManager.LayoutParams.TYPE_PHONE
+      }
 
     params.format = PixelFormat.TRANSLUCENT
-    params.flags = params.flags or (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+    params.flags = params.flags or (
+      WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+        or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+    )
 
-    params.gravity = GravityCompat.END or Gravity.BOTTOM
+    params.gravity = Gravity.END or Gravity.BOTTOM
     params.width = WindowManager.LayoutParams.WRAP_CONTENT
     params.height = WindowManager.LayoutParams.WRAP_CONTENT
     return@lazy params
@@ -77,51 +81,58 @@ internal class FloatPlayerManager(val activity: FragmentActivity) {
   private var floatViewFirstY: Int = 0
 
   @SuppressLint("ClickableViewAccessibility")
-  val floatViewOnTouchListener = View.OnTouchListener { _, event ->
-    val params = floatParams
-    val totalDeltaX = floatViewLastX - floatViewFirstX
-    val totalDeltaY = floatViewLastY - floatViewFirstY
+  val floatViewOnTouchListener =
+    View.OnTouchListener { _, event ->
+      val params = floatParams
+      val totalDeltaX = floatViewLastX - floatViewFirstX
+      val totalDeltaY = floatViewLastY - floatViewFirstY
 
-    when (event.actionMasked) {
-      MotionEvent.ACTION_DOWN -> {
-        floatViewLastX = event.rawX.toInt()
-        floatViewLastY = event.rawY.toInt()
-        floatViewFirstX = floatViewLastX
-        floatViewFirstY = floatViewLastY
-      }
-      MotionEvent.ACTION_UP -> {
-        // Snap to one side
-        val display = floatView.display
-        if (display != null) {
-          display.getRectSize(displayRect)
-          GravityCompat.applyDisplay(
-              params.gravity, displayRect, windowRect, floatView.layoutDirection
-          )
+      when (event.actionMasked) {
+        MotionEvent.ACTION_DOWN -> {
+          floatViewLastX = event.rawX.toInt()
+          floatViewLastY = event.rawY.toInt()
+          floatViewFirstX = floatViewLastX
+          floatViewFirstY = floatViewLastY
         }
-      }
-      MotionEvent.ACTION_MOVE -> {
-        val deltaX = event.rawX.toInt() - floatViewLastX
-        val deltaY = event.rawY.toInt() - floatViewLastY
-        floatViewLastX = event.rawX.toInt()
-        floatViewLastY = event.rawY.toInt()
-        if (abs(totalDeltaX) >= 5 || abs(totalDeltaY) >= 5) {
-          if (event.pointerCount == 1) {
-            params.x -= deltaX
-            params.y -= deltaY
-            viewTouchConsumedByMove = true
-            windowManager.updateViewLayout(floatView, params)
+
+        MotionEvent.ACTION_UP -> {
+          // Snap to one side
+          val display = floatView.display
+          if (display != null) {
+            display.getRectSize(displayRect)
+            GravityCompat.applyDisplay(
+              params.gravity,
+              displayRect,
+              windowRect,
+              floatView.layoutDirection,
+            )
+          }
+        }
+
+        MotionEvent.ACTION_MOVE -> {
+          val deltaX = event.rawX.toInt() - floatViewLastX
+          val deltaY = event.rawY.toInt() - floatViewLastY
+          floatViewLastX = event.rawX.toInt()
+          floatViewLastY = event.rawY.toInt()
+          if (abs(totalDeltaX) >= 5 || abs(totalDeltaY) >= 5) {
+            if (event.pointerCount == 1) {
+              params.x -= deltaX
+              params.y -= deltaY
+              viewTouchConsumedByMove = true
+              windowManager.updateViewLayout(floatView, params)
+            } else {
+              viewTouchConsumedByMove = false
+            }
           } else {
             viewTouchConsumedByMove = false
           }
-        } else {
-          viewTouchConsumedByMove = false
+        }
+
+        else -> {
         }
       }
-      else -> {
-      }
+      viewTouchConsumedByMove
     }
-    viewTouchConsumedByMove
-  }
 
   val container by lazy(NONE) { floatView.findViewById(R.id.playerContainer) as ViewGroup }
   val playerView by lazy(NONE) { floatView.findViewById(R.id.playerView) as PlayerView }
@@ -135,7 +146,7 @@ internal class FloatPlayerManager(val activity: FragmentActivity) {
           floatView.setOnTouchListener(floatViewOnTouchListener)
           windowManager.addView(floatView, floatParams)
           kohii.register(activity)
-              .addBucket(container)
+            .addBucket(container)
           callback(playerView)
         }
       }
@@ -148,10 +159,10 @@ internal class FloatPlayerManager(val activity: FragmentActivity) {
         floatView.setOnTouchListener(null)
         callback()
         floatView.animate()
-            .alpha(0F)
-            .setDuration(150)
-            .withEndAction { windowManager.removeView(floatView) }
-            .start()
+          .alpha(0F)
+          .setDuration(150)
+          .withEndAction { windowManager.removeView(floatView) }
+          .start()
       }
     }
   }

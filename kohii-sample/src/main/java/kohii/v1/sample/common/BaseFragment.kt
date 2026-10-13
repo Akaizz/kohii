@@ -22,17 +22,22 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import kohii.v1.sample.DemoApp
-import timber.log.Timber
 
 /**
  * @author eneim (2018/07/27).
  */
-open class BaseFragment : Fragment() {
+open class BaseFragment : Fragment {
+  constructor() : super()
+
+  constructor(
+    @LayoutRes layoutId: Int,
+  ) : super(layoutId)
 
   companion object {
-    const val videoUrl = "https://content.jwplatform.com/manifests/146UwF4L.m3u8"
+    const val VIDEO_URL = "https://content.jwplatform.com/manifests/146UwF4L.m3u8"
     const val KEY_DEMO_ITEM = "kohii::container::demo::item"
   }
 
@@ -51,7 +56,7 @@ open class BaseFragment : Fragment() {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     Log.d(logTag, "onViewCreated() called")
     super.onViewCreated(view, savedInstanceState)

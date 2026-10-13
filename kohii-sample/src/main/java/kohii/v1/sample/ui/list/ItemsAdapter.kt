@@ -37,22 +37,25 @@ class ItemsAdapter(
   private val kohii: Kohii,
   private val fragment: VerticalListRecyclerViewFragment,
   private val items: List<Item>,
-  private val dp2Px: (Int) -> Int
+  private val dp2Px: (Int) -> Int,
 ) : Adapter<BaseViewHolder>() {
-
   init {
     setHasStableIds(true)
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return when (viewType) {
       R.layout.holder_text_view -> TextViewHolder(parent, this.dp2Px)
-      R.layout.holder_player_view -> VideoViewHolder(
-          parent, kohii, VideoClickImpl(fragment)
-      )
+      R.layout.holder_player_view ->
+        VideoViewHolder(
+          parent,
+          kohii,
+          VideoClickImpl(fragment),
+        )
+
       else -> throw RuntimeException("Unknown type: $viewType")
     }
   }
@@ -62,7 +65,7 @@ class ItemsAdapter(
   override fun getItemId(position: Int): Long {
     val item = items[position]
     return item.hashCode()
-        .toLong()
+      .toLong()
   }
 
   override fun getItemViewType(position: Int): Int {
@@ -76,7 +79,7 @@ class ItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(items[position % items.size])
   }
@@ -98,10 +101,11 @@ class ItemsAdapter(
       itemView: View,
       transView: View?,
       adapterPos: Int,
-      payload: Any
+      payload: Any,
     ) {
       if (transView == null) return
       val transName = ViewCompat.getTransitionName(transView) ?: return
+
       @Suppress("UNCHECKED_CAST")
       val data = payload as? Pair<Rebinder, InitData> ?: return
       val initData = data.second
@@ -111,18 +115,20 @@ class ItemsAdapter(
       // instead of fading out with the rest to prevent an overlapping animation of fade and move).
       (fragment.exitTransition as TransitionSet).excludeTarget(itemView, true)
       fragment.parentFragmentManager.beginTransaction()
-          .setReorderingAllowed(true) // Optimize for shared element transition
-          .addSharedElement(transView, transName)
-          .replace(
-              R.id.fragmentContainer, PlayerFragment.newInstance(data.first, initData), initData.tag
-          )
-          .addToBackStack(null)
-          .commit()
+        .setReorderingAllowed(true) // Optimize for shared element transition
+        .addSharedElement(transView, transName)
+        .replace(
+          R.id.fragmentContainer,
+          PlayerFragment.newInstance(data.first, initData),
+          initData.tag,
+        )
+        .addToBackStack(null)
+        .commit()
     }
 
     override fun onItemLoaded(
       itemView: View,
-      adapterPos: Int
+      adapterPos: Int,
     ) {
       val playerInfo = fragment.fetchPlayerInfo()
       if (playerInfo != null && adapterPos != playerInfo.adapterPos) return
@@ -133,7 +139,7 @@ class ItemsAdapter(
 
     override fun onItemLoadFailed(
       adapterPos: Int,
-      error: Exception
+      error: Exception,
     ) {
       if (enterTransitionStarted.getAndSet(true)) return
       fragment.recordPlayerInfo(null)

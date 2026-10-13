@@ -17,7 +17,7 @@ package kohii.v1.sample.data
 
 import android.os.Parcelable
 import com.squareup.moshi.JsonClass
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Suppress("unused")
 @JsonClass(generateAdapter = true)
@@ -25,5 +25,5 @@ import kotlinx.android.parcel.Parcelize
 class Sources(
   val type: String,
   val mediaTypes: List<String>?,
-  val file: String
+  val file: String,
 ) : Parcelable

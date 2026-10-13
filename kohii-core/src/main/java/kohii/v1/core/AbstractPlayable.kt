@@ -33,9 +33,8 @@ abstract class AbstractPlayable<RENDERER : Any>(
   protected val master: Master,
   media: Media,
   config: Config,
-  protected val bridge: Bridge<RENDERER>
+  protected val bridge: Bridge<RENDERER>,
 ) : Playable(media, config), Playback.Callback, PlayerParametersChangeListener {
-
   override val tag: Any = config.tag
 
   private var playRequested: Boolean = false
@@ -46,27 +45,27 @@ abstract class AbstractPlayable<RENDERER : Any>(
 
   // Ensure the preparation for the playback
   override fun onReady() {
-    "Playable#onReady $this".logInfo()
+    logInfo { "Playable#onReady $this" }
     bridge.ready()
   }
 
   override fun onReset() {
-    "Playable#onReset $this".logInfo()
+    logInfo { "Playable#onReset $this" }
     bridge.reset(true)
   }
 
   override fun onConfigChange(): Boolean {
-    "Playable#onConfigChange $this".logInfo()
+    logInfo { "Playable#onConfigChange $this" }
     return true
   }
 
   override fun onPrepare(loadSource: Boolean) {
-    "Playable#onPrepare $loadSource $this".logInfo()
+    logInfo { "Playable#onPrepare $loadSource $this" }
     bridge.prepare(loadSource)
   }
 
   override fun onPlay() {
-    "Playable#onPlay $this".logWarn()
+    logWarn { "Playable#onPlay $this" }
     playback?.onPlay()
     if (!playRequested || !bridge.isPlaying()) {
       playRequested = true
@@ -75,7 +74,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
   }
 
   override fun onPause() {
-    "Playable#onPause $this".logWarn()
+    logWarn { "Playable#onPause $this" }
     if (playRequested || bridge.isPlaying()) {
       playRequested = false
       bridge.pause()
@@ -84,7 +83,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
   }
 
   override fun onRelease() {
-    "Playable#onRelease $this".logInfo()
+    logInfo { "Playable#onRelease $this" }
     bridge.release()
   }
 
@@ -101,12 +100,12 @@ abstract class AbstractPlayable<RENDERER : Any>(
       field = value
       val newManager = field
       if (oldManager === newManager) return
-      "Playable#manager $oldManager --> $newManager, $this".logInfo()
+      logInfo { "Playable#manager $oldManager --> $newManager, $this" }
       if (newManager == null) {
         master.trySavePlaybackInfo(this)
         master.tearDown(
-            playable = this,
-            clearState = if (oldManager is Manager) !oldManager.isChangingConfigurations() else true
+          playable = this,
+          clearState = if (oldManager is Manager) !oldManager.isChangingConfigurations() else true,
         )
       } else if (oldManager === null) {
         master.tryRestorePlaybackInfo(this)
@@ -119,7 +118,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
       field = value
       val newPlayback = field
       if (oldPlayback === newPlayback) return
-      "Playable#playback $oldPlayback --> $newPlayback, $this".logInfo()
+      logInfo { "Playable#playback $oldPlayback --> $newPlayback, $this" }
       if (oldPlayback != null) {
         bridge.removeErrorListener(oldPlayback)
         bridge.removeEventListener(oldPlayback)
@@ -130,24 +129,27 @@ abstract class AbstractPlayable<RENDERER : Any>(
         }
       }
 
-      this.manager = if (newPlayback != null) {
-        newPlayback.manager
-      } else {
-        val changingConfiguration = oldPlayback?.manager?.isChangingConfigurations() == true
-        if (changingConfiguration) {
-          if (!onConfigChange()) {
-            // On config change, if the Playable doesn't support, we need to pause the Video.
-            onPause()
-            null
-          } else {
-            master // to prevent the Playable from being destroyed when Manager is null.
-          }
+      this.manager =
+        if (newPlayback != null) {
+          newPlayback.manager
         } else {
-          // TODO need a better implementation.
-          if (master.manuallyStartedPlayable.get() === this && isPlaying()) master
-          else null
+          val changingConfiguration = oldPlayback?.manager?.isChangingConfigurations() == true
+          if (changingConfiguration) {
+            if (!onConfigChange()) {
+              // On config change, if the Playable doesn't support, we need to pause the Video.
+              onPause()
+              null
+            } else {
+              master // to prevent the Playable from being destroyed when Manager is null.
+            }
+          } else {
+            // TODO(eneim): rethink this to support off-screen manual playback/kohiiCanPause().
+
+            /* if (master.manuallyStartedPlayable.get() === this && isPlaying()) master
+            else null */
+            null
+          }
         }
-      }
 
       if (newPlayback != null) {
         newPlayback.playable = this
@@ -176,7 +178,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
   // Playback.Callback
 
   override fun onActive(playback: Playback) {
-    "Playable#onActive $playback, $this".logInfo()
+    logInfo { "Playable#onActive $playback, $this" }
     require(playback === this.playback)
     master.tryRestorePlaybackInfo(this)
     master.preparePlayable(this, playback.config.preload)
@@ -184,7 +186,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
   }
 
   override fun onInActive(playback: Playback) {
-    "Playable#onInActive $playback, $this".logInfo()
+    logInfo { "Playable#onInActive $playback, $this" }
     require(playback === this.playback)
     val configChange = playback.manager.isChangingConfigurations()
     if (!configChange && master.releasePlaybackOnInActive(playback)) {
@@ -194,19 +196,19 @@ abstract class AbstractPlayable<RENDERER : Any>(
   }
 
   override fun onAdded(playback: Playback) {
-    "Playable#onAdded $playback, $this".logInfo()
+    logInfo { "Playable#onAdded $playback, $this" }
     bridge.repeatMode = playback.config.repeatMode
     bridge.volumeInfo = playback.volumeInfo
   }
 
   override fun onRemoved(playback: Playback) {
-    "Playable#onRemoved $playback, $this".logInfo()
+    logInfo { "Playable#onRemoved $playback, $this" }
     require(playback === this.playback)
     this.playback = null // Will also clear current Manager.
   }
 
   override fun onDetached(playback: Playback) {
-    "Playable#onDetached $playback, $this".logInfo()
+    logInfo { "Playable#onDetached $playback, $this" }
     require(playback === this.playback)
     val configChange = playback.manager.isChangingConfigurations()
     if (!configChange && !master.releasePlaybackOnInActive(playback)) {
@@ -217,7 +219,7 @@ abstract class AbstractPlayable<RENDERER : Any>(
   }
 
   override fun setupRenderer(playback: Playback) {
-    "Playable#setupRenderer $playback, $this".logInfo()
+    logInfo { "Playable#setupRenderer $playback, $this" }
     require(playback === this.playback)
     if (this.renderer == null || manager !== playback.manager) {
       // Only request for Renderer if we do not have one.
@@ -229,12 +231,15 @@ abstract class AbstractPlayable<RENDERER : Any>(
     }
   }
 
-  protected open fun onRendererAttached(playback: Playback, renderer: Any?) {
+  protected open fun onRendererAttached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     playback.onRendererAttached(renderer)
   }
 
   override fun teardownRenderer(playback: Playback) {
-    "Playable#teardownRenderer $playback, $this".logInfo()
+    logInfo { "Playable#teardownRenderer $playback, $this" }
     require(this.playback == null || this.playback === playback)
     val renderer = this.renderer
     if (renderer != null) {
@@ -247,28 +252,32 @@ abstract class AbstractPlayable<RENDERER : Any>(
     }
   }
 
-  protected open fun onRendererDetached(playback: Playback, renderer: Any?) {
+  protected open fun onRendererDetached(
+    playback: Playback,
+    renderer: Any?,
+  ) {
     playback.onRendererDetached(renderer)
   }
 
   override fun onPlaybackPriorityChanged(
     playback: Playback,
     oldPriority: Int,
-    newPriority: Int
+    newPriority: Int,
   ) {
-    "Playable#onPlaybackPriorityChanged $playback, $oldPriority --> $newPriority, $this".logInfo()
+    logInfo { "Playable#onPlaybackPriorityChanged $playback, $oldPriority --> $newPriority, $this" }
     if (newPriority == 0) {
       master.tryRestorePlaybackInfo(this)
       master.preparePlayable(this, playback.config.preload)
     } else {
       val memoryMode = master.preferredMemoryMode(this.memoryMode)
-      val priorityToRelease = when (memoryMode) {
-        AUTO, LOW -> 1
-        NORMAL -> 2
-        BALANCED -> 2 // Same as 'NORMAL', but will keep the 'relative' Playback alive.
-        HIGH -> 8
-        INFINITE -> Int.MAX_VALUE
-      }
+      val priorityToRelease =
+        when (memoryMode) {
+          AUTO, LOW -> 1
+          NORMAL -> 2
+          BALANCED -> 2 // Same as 'NORMAL', but will keep the 'relative' Playback alive.
+          HIGH -> 8
+          INFINITE -> Int.MAX_VALUE
+        }
       if (newPriority >= priorityToRelease) {
         master.trySavePlaybackInfo(this)
         master.releasePlayable(this)
@@ -285,21 +294,21 @@ abstract class AbstractPlayable<RENDERER : Any>(
   override fun onVolumeInfoChanged(
     playback: Playback,
     from: VolumeInfo,
-    to: VolumeInfo
+    to: VolumeInfo,
   ) {
-    "Playable#onVolumeInfoChanged $playback, $from --> $to, $this".logInfo()
+    logInfo { "Playable#onVolumeInfoChanged $playback, $from --> $to, $this" }
     if (from != to) bridge.volumeInfo = to
   }
 
   override var playbackInfo: PlaybackInfo
     get() = bridge.playbackInfo
     set(value) {
-      "Playable#playbackInfo setter $value, $this".logInfo()
+      logInfo { "Playable#playbackInfo setter $value, $this" }
       bridge.playbackInfo = value
     }
 
   override fun onUnbind(playback: Playback) {
-    "Playable#onUnbind $playback, $this".logInfo()
+    logInfo { "Playable#onUnbind $playback, $this" }
     if (this.playback === playback) {
       playback.manager.removePlayback(playback)
     }
@@ -307,14 +316,14 @@ abstract class AbstractPlayable<RENDERER : Any>(
 
   override fun onNetworkTypeChanged(
     from: NetworkType,
-    to: NetworkType
+    to: NetworkType,
   ) {
-    "Playable#onNetworkTypeChanged $playback, $this".logInfo()
+    logInfo { "Playable#onNetworkTypeChanged $playback, $this" }
     playback?.onNetworkTypeChanged(to)
   }
 
   override fun onPlayerParametersChanged(parameters: PlayerParameters) {
-    "Playable#onPlayerParametersChanged $parameters, $this".logInfo()
+    logInfo { "Playable#onPlayerParametersChanged $parameters, $this" }
     bridge.playerParameters = parameters
   }
 }

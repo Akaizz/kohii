@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.content.Context
-import com.google.android.exoplayer2.upstream.BandwidthMeter
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.upstream.BandwidthMeter
 
 interface BandwidthMeterFactory {
-
+  /**
+   * Returns the [BandwidthMeter] for a new player. It is called once for each player, so returning
+   * the same instance every time is recommended: the players then share one bandwidth estimate and
+   * adaptive streams (HLS, DASH) start at the right quality.
+   */
   fun createBandwidthMeter(context: Context): BandwidthMeter
 }

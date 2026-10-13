@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<com.google.android.exoplayer2.ui.AspectRatioFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.media3.ui.AspectRatioFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/playerContainer"
     android:layout_width="match_parent"
@@ -31,7 +31,7 @@
       app:cardPreventCornerOverlap="true"
       >
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@id/playerView"
         android:layout_width="192dp"
         android:layout_height="108dp"
@@ -43,4 +43,4 @@
         />
   </androidx.cardview.widget.CardView>
 
-</com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+</androidx.media3.ui.AspectRatioFrameLayout>

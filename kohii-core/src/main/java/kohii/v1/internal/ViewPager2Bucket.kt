@@ -29,9 +29,8 @@ internal class ViewPager2Bucket(
   manager: Manager,
   override val root: ViewPager2,
   strategy: Strategy,
-  selector: Selector
+  selector: Selector,
 ) : Bucket(manager, root, strategy, selector) {
-
   private class SimplePageChangeCallback(val manager: Manager) : ViewPager2.OnPageChangeCallback() {
     override fun onPageScrollStateChanged(state: Int) {
       manager.refresh()

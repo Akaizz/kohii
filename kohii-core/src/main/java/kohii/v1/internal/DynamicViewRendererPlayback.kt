@@ -29,9 +29,8 @@ internal class DynamicViewRendererPlayback(
   manager: Manager,
   bucket: Bucket,
   container: ViewGroup,
-  config: Config
+  config: Config,
 ) : Playback(manager, bucket, container, config) {
-
   override fun onPlay() {
     playable?.setupRenderer(this)
     super.onPlay()

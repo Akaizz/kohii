@@ -22,7 +22,6 @@ import androidx.core.view.isVisible
 import kohii.v1.sample.R
 
 internal class TextViewHolder(parent: ViewGroup) : FbookItemHolder(parent) {
-
   init {
     textContainer.isVisible = true
   }

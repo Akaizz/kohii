@@ -24,9 +24,8 @@ import kohii.v1.sample.common.BaseViewHolder
 
 internal class NestedItemsAdapter(
   val kohii: Kohii,
-  val manager: Manager
+  val manager: Manager,
 ) : Adapter<BaseViewHolder>() {
-
   companion object {
     const val TYPE_SCROLL = 1
     const val TYPE_TEXT = 2
@@ -34,12 +33,18 @@ internal class NestedItemsAdapter(
   }
 
   override fun getItemViewType(position: Int): Int {
-    return if (position == 5) TYPE_SCROLL else if (position % 3 == 1) TYPE_VIDEO else TYPE_TEXT
+    return if (position == 5) {
+      TYPE_SCROLL
+    } else if (position % 3 == 1) {
+      TYPE_VIDEO
+    } else {
+      TYPE_TEXT
+    }
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return when (viewType) {
       TYPE_SCROLL -> NestedScrollViewHolder(kohii, manager, parent)
@@ -55,7 +60,7 @@ internal class NestedItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(position)
   }

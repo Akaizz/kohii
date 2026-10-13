@@ -21,15 +21,13 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.annotation.FloatRange
 import androidx.lifecycle.Lifecycle.State
-import androidx.lifecycle.Lifecycle.State.STARTED
-import com.google.android.exoplayer2.Player
+import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import kohii.v1.BuildConfig
 import kohii.v1.core.Bucket.Companion.BOTH_AXIS
 import kohii.v1.core.Bucket.Companion.HORIZONTAL
 import kohii.v1.core.Bucket.Companion.NONE_AXIS
 import kohii.v1.core.Bucket.Companion.VERTICAL
-import kohii.v1.core.Common.STATE_ENDED
-import kohii.v1.core.Common.STATE_IDLE
 import kohii.v1.core.Playback.Controller
 import kohii.v1.internal.PlayerParametersChangeListener
 import kohii.v1.logDebug
@@ -56,20 +54,21 @@ abstract class Playback(
   val manager: Manager,
   val bucket: Bucket,
   val container: ViewGroup,
-  val config: Config = Config()
-) : PlayableContainer, PlayerEventListener, ErrorListener {
-
+  val config: Config = Config(),
+) : PlayableContainer, Player.Listener, ErrorListener {
   companion object {
     @Suppress("unused")
     const val DELAY_INFINITE = -1L
 
-    internal val CENTER_X: Comparator<Token> = Comparator { o1, o2 ->
-      compareValues(o1.containerRect.centerX(), o2.containerRect.centerX())
-    }
+    internal val CENTER_X: Comparator<Token> =
+      Comparator { o1, o2 ->
+        compareValues(o1.containerRect.centerX(), o2.containerRect.centerX())
+      }
 
-    internal val CENTER_Y: Comparator<Token> = Comparator { o1, o2 ->
-      compareValues(o1.containerRect.centerY(), o2.containerRect.centerY())
-    }
+    internal val CENTER_Y: Comparator<Token> =
+      Comparator { o1, o2 ->
+        compareValues(o1.containerRect.centerY(), o2.containerRect.centerY())
+      }
 
     internal val VERTICAL_COMPARATOR =
       Comparator<Playback> { o1, o2 -> o1.compareWith(o2, VERTICAL) }
@@ -91,13 +90,14 @@ abstract class Playback(
 
   class Token(
     private val threshold: Float = 0.65F,
+    // -1 ~ < 0 : inactive or detached, 0 ~ 1: active
     @FloatRange(from = -1.0, to = 1.0)
-    val areaOffset: Float, // -1 ~ < 0 : inactive or detached, 0 ~ 1: active
-    val containerRect: Rect, // Relative Rect to its Bucket's root View.
+    val areaOffset: Float,
+    // Relative Rect to its Bucket's root View.
+    val containerRect: Rect,
     val containerWidth: Int,
-    val containerHeight: Int
+    val containerHeight: Int,
   ) {
-
     internal fun shouldPrepare(): Boolean {
       return areaOffset >= 0
     }
@@ -117,23 +117,120 @@ abstract class Playback(
     val threshold: Float = 0.65F,
     val preload: Boolean = false,
     val releaseOnInActive: Boolean = false,
-    val repeatMode: Int = Common.REPEAT_MODE_OFF,
+    val repeatMode: Int = Player.REPEAT_MODE_OFF,
     val callbacks: Set<Callback> = emptySet(),
     val controller: Controller? = null,
     val initialPlaybackInfo: PlaybackInfo? = null,
     val artworkHintListener: ArtworkHintListener? = null,
     val tokenUpdateListener: TokenUpdateListener? = null,
-    val networkTypeChangeListener: NetworkTypeChangeListener? = null
+    val networkTypeChangeListener: NetworkTypeChangeListener? = null,
   )
 
+  private val tmpRect = Rect()
+  private val callbacks = ArrayDeque<Callback>()
+  private val listeners = ArrayDeque<StateListener>()
+
+  // Callbacks those will be setup when the Playback is added, and cleared when it is removed.
+  private var controller: Controller? = null
+  private var artworkHintListener: ArtworkHintListener? = null
+  private var tokenUpdateListener: TokenUpdateListener? = null
+  private var networkTypeChangeListener: NetworkTypeChangeListener? = null
+
+  // Will be updated everytime 'onRefresh' is called.
+  private var playbackToken: Token =
+    Token(config.threshold, -1F, Rect(), 0, 0)
+
+  /**
+   * Return `true` if this [Playback] is locked, `false` otherwise.
+   */
+  var lock: Boolean = bucket.lock
+    get() = field || bucket.lock
+    internal set(value) {
+      field = value
+      manager.refresh()
+    }
+
+  internal val token: Token
+    get() = playbackToken
+
+  private var playbackState: Int
+
+  internal val isAttached: Boolean
+    get() = playbackState >= STATE_ATTACHED
+
+  internal val isActive: Boolean
+    get() = playbackState >= STATE_ACTIVE
+
+  internal var lifecycleState: State = State.INITIALIZED
+
+  // Smaller value = higher priority. Priority 0 is the selected Playback. The higher priority, the
+  // closer it is to the selected Playback.
+  // Consider to prepare the underline Playable for high enough priority, and release it otherwise.
+  // This value is updated by Group. Inactive Playback always has Int.MAX_VALUE priority.
+  internal var playbackPriority: Int = Int.MAX_VALUE
+    set(value) {
+      val oldPriority = field
+      field = value
+      val newPriority = field
+      logDebug { "Playback#playbackPriority $oldPriority --> $newPriority, $this" }
+      if (oldPriority == newPriority) return
+      playable?.onPlaybackPriorityChanged(this, oldPriority, newPriority)
+    }
+
+  internal var playbackVolumeInfo: VolumeInfo = bucket.effectiveVolumeInfo(bucket.volumeInfo)
+    set(value) {
+      val from = field
+      field = value
+      val to = field
+      logDebug { "Playback#volumeInfo $from --> $to, $this" }
+      playable?.onVolumeInfoChanged(this, from, to)
+    }
+
+  var playable: Playable? = null
+    internal set(value) {
+      field = value
+      if (value != null && config.initialPlaybackInfo != null) {
+        value.playbackInfo = config.initialPlaybackInfo
+      }
+    }
+
+  internal var playerParametersChangeListener: PlayerParametersChangeListener? = null
+
+  private val playerState: Int
+    get() = playable?.playerState ?: Player.STATE_IDLE
+
+  val tag = config.tag
+
+  val volumeInfo: VolumeInfo
+    get() = playbackVolumeInfo
+
+  private val playbackInfo: PlaybackInfo
+    get() = playable?.playbackInfo ?: PlaybackInfo()
+
+  val containerRect: Rect
+    get() = token.containerRect
+
+  var playerParameters: PlayerParameters = PlayerParameters.DEFAULT
+    set(value) {
+      val from = field
+      field = value
+      val to = field
+      if (from != to) playerParametersChangeListener?.onPlayerParametersChanged(to)
+    }
+
+  init {
+    playbackState = STATE_CREATED
+    playbackVolumeInfo = bucket.effectiveVolumeInfo(bucket.volumeInfo)
+  }
+
   override fun toString(): String {
-    return "${super.toString()}, [$playable], [${token}]"
+    return "${super.toString()}, [$playable], [$token]"
   }
 
   protected open fun updateToken(): Token {
-    "Playback#updateToken $this".logDebug()
+    logDebug { "Playback#updateToken $this" }
     tmpRect.setEmpty()
-    if (!lifecycleState.isAtLeast(STARTED)) {
+    if (!lifecycleState.isAtLeast(manager.activeLifecycleState)) {
       return Token(config.threshold, -1F, tmpRect, container.width, container.height)
     }
 
@@ -145,29 +242,21 @@ abstract class Playback(
       return Token(config.threshold, -1F, tmpRect, container.width, container.height)
     }
 
-    val drawArea = with(Rect()) {
-      container.getDrawingRect(this)
-      container.clipBounds?.let {
-        this.intersect(it)
+    val drawArea =
+      with(Rect()) {
+        container.getDrawingRect(this)
+        container.clipBounds?.let(::intersect)
+        width() * height()
       }
-      width() * height()
-    }
 
     val offset: Float =
-      if (drawArea > 0) (tmpRect.width() * tmpRect.height()) / drawArea.toFloat()
-      else 0F
+      if (drawArea > 0) {
+        (tmpRect.width() * tmpRect.height()) / drawArea.toFloat()
+      } else {
+        0F
+      }
     return Token(config.threshold, offset, tmpRect, container.width, container.height)
   }
-
-  private val tmpRect = Rect()
-  private val callbacks = ArrayDeque<Callback>()
-  private val listeners = ArrayDeque<StateListener>()
-
-  // Callbacks those will be setup when the Playback is added, and cleared when it is removed.
-  private var controller: Controller? = null
-  private var artworkHintListener: ArtworkHintListener? = null
-  private var tokenUpdateListener: TokenUpdateListener? = null
-  private var networkTypeChangeListener: NetworkTypeChangeListener? = null
 
   /**
    * Returns a usable renderer for the [playable], or `null` if no renderer is available or needed.
@@ -201,7 +290,7 @@ abstract class Playback(
    * Return `true` if this Playback successfully attaches the renderer, `false` otherwise.
    */
   internal fun attachRenderer(renderer: Any?): Boolean {
-    "Playback#attachRenderer $renderer $this".logDebug()
+    logDebug { "Playback#attachRenderer $renderer $this" }
     return onAttachRenderer(renderer)
   }
 
@@ -209,7 +298,7 @@ abstract class Playback(
    * Return `true` if this Playback successfully detaches the renderer, `false` otherwise.
    */
   internal fun detachRenderer(renderer: Any?): Boolean {
-    "Playback#detachRenderer $renderer $this".logDebug()
+    logDebug { "Playback#detachRenderer $renderer $this" }
     return onDetachRenderer(renderer)
   }
 
@@ -235,7 +324,7 @@ abstract class Playback(
   }
 
   internal fun onAdded() {
-    "Playback#onAdded $this".logDebug()
+    logDebug { "Playback#onAdded $this" }
     playbackState = STATE_ADDED
     callbacks.forEach { it.onAdded(this) }
     controller = config.controller
@@ -243,51 +332,49 @@ abstract class Playback(
     tokenUpdateListener = config.tokenUpdateListener
     networkTypeChangeListener = config.networkTypeChangeListener
     playerParameters = networkTypeChangeListener?.onNetworkTypeChanged(manager.master.networkType)
-        ?: playerParameters
-    bucket.addContainer(this.container)
+      ?: playerParameters
   }
 
   internal fun onRemoved() {
-    "Playback#onRemoved $this".logDebug()
+    logDebug { "Playback#onRemoved $this" }
     playbackState = STATE_REMOVED
-    bucket.removeContainer(this.container)
     controller = null
     tokenUpdateListener = null
     artworkHintListener = null
     networkTypeChangeListener = null
     callbacks.onEach { it.onRemoved(this) }
-        .clear()
+      .clear()
     listeners.clear()
   }
 
   internal fun onAttached() {
-    "Playback#onAttached $this".logDebug()
+    logDebug { "Playback#onAttached $this" }
     playbackState = STATE_ATTACHED
     callbacks.forEach { it.onAttached(this) }
   }
 
   internal fun onDetached() {
-    "Playback#onDetached $this".logDebug()
+    logDebug { "Playback#onDetached $this" }
     playbackState = STATE_DETACHED
     callbacks.forEach { it.onDetached(this) }
   }
 
   @CallSuper
   internal open fun onActive() {
-    "Playback#onActive $this".logDebug()
+    logDebug { "Playback#onActive $this" }
     playbackState = STATE_ACTIVE
     callbacks.forEach { it.onActive(this) }
     artworkHintListener?.onArtworkHint(
-        this,
-        playable?.isPlaying() == false,
-        playbackInfo.resumePosition,
-        playerState
+      this,
+      playable?.isPlaying() == false,
+      playbackInfo.resumePosition,
+      playerState,
     )
   }
 
   @CallSuper
   internal open fun onInActive() {
-    "Playback#onInActive $this".logDebug()
+    logDebug { "Playback#onInActive $this" }
     playbackState = STATE_INACTIVE
     artworkHintListener?.onArtworkHint(this, true, playbackInfo.resumePosition, playerState)
     playable?.teardownRenderer(this)
@@ -296,107 +383,56 @@ abstract class Playback(
 
   @CallSuper
   internal open fun onPlay() {
-    "Playback#onPlay $this".logDebug()
+    logDebug { "Playback#onPlay $this" }
     container.keepScreenOn = true
     artworkHintListener?.onArtworkHint(
-        this, playerState == STATE_ENDED, playbackInfo.resumePosition, playerState
+      this,
+      playerState == Player.STATE_ENDED,
+      playbackInfo.resumePosition,
+      playerState,
     )
   }
 
   @CallSuper
   internal open fun onPause() {
     container.keepScreenOn = false
-    "Playback#onPause $this".logDebug()
+    logDebug { "Playback#onPause $this" }
     artworkHintListener?.onArtworkHint(this, true, playbackInfo.resumePosition, playerState)
   }
 
-  // Will be updated everytime 'onRefresh' is called.
-  private var playbackToken: Token =
-    Token(config.threshold, -1F, Rect(), 0, 0)
-
-  internal var lock: Boolean = bucket.lock
-    get() = field || bucket.lock
-    set(value) {
-      field = value
-      manager.refresh()
-    }
-
-  internal val token: Token
-    get() = playbackToken
-
   internal fun onRefresh() {
-    "Playback#onRefresh $this".logDebug()
+    logDebug { "Playback#onRefresh $this" }
     playbackToken = updateToken()
     tokenUpdateListener?.onTokenUpdate(this, token)
-    "Playback#onRefresh token updated -> $this".logDebug()
+    logDebug { "Playback#onRefresh token updated -> $this" }
   }
-
-  private var playbackState: Int = STATE_CREATED
-
-  internal val isAttached: Boolean
-    get() = playbackState >= STATE_ATTACHED
-
-  internal val isActive: Boolean
-    get() = playbackState >= STATE_ACTIVE
-
-  internal var lifecycleState: State = State.INITIALIZED
-
-  // Smaller value = higher priority. Priority 0 is the selected Playback. The higher priority, the
-  // closer it is to the selected Playback.
-  // Consider to prepare the underline Playable for high enough priority, and release it otherwise.
-  // This value is updated by Group. Inactive Playback always has Int.MAX_VALUE priority.
-  internal var playbackPriority: Int = Int.MAX_VALUE
-    set(value) {
-      val oldPriority = field
-      field = value
-      val newPriority = field
-      "Playback#playbackPriority $oldPriority --> $newPriority, $this".logDebug()
-      if (oldPriority == newPriority) return
-      playable?.onPlaybackPriorityChanged(this, oldPriority, newPriority)
-    }
-
-  internal var playbackVolumeInfo: VolumeInfo = bucket.effectiveVolumeInfo(bucket.volumeInfo)
-    set(value) {
-      val from = field
-      field = value
-      val to = field
-      "Playback#volumeInfo $from --> $to, $this".logDebug()
-      playable?.onVolumeInfoChanged(this, from, to)
-    }
-
-  init {
-    playbackVolumeInfo = bucket.effectiveVolumeInfo(bucket.volumeInfo)
-  }
-
-  var playable: Playable? = null
-    internal set(value) {
-      field = value
-      if (value != null && config.initialPlaybackInfo != null) {
-        value.playbackInfo = config.initialPlaybackInfo
-      }
-    }
-
-  internal var playerParametersChangeListener: PlayerParametersChangeListener? = null
 
   internal fun compareWith(
     other: Playback,
-    orientation: Int
+    orientation: Int,
   ): Int {
-    "Playback#compareWith $this $other, $this".logDebug()
+    logDebug { "Playback#compareWith $this $other, $this" }
     val thisToken = this.token
     val thatToken = other.token
 
-    var result = when (orientation) {
-      VERTICAL -> CENTER_Y.compare(thisToken, thatToken)
-      HORIZONTAL -> CENTER_X.compare(thisToken, thatToken)
-      BOTH_AXIS -> max(
-          CENTER_Y.compare(thisToken, thatToken), CENTER_X.compare(thisToken, thatToken)
-      )
-      NONE_AXIS -> max(
-          CENTER_Y.compare(thisToken, thatToken), CENTER_X.compare(thisToken, thatToken)
-      )
-      else -> 0
-    }
+    var result =
+      when (orientation) {
+        VERTICAL -> CENTER_Y.compare(thisToken, thatToken)
+        HORIZONTAL -> CENTER_X.compare(thisToken, thatToken)
+        BOTH_AXIS ->
+          max(
+            CENTER_Y.compare(thisToken, thatToken),
+            CENTER_X.compare(thisToken, thatToken),
+          )
+
+        NONE_AXIS ->
+          max(
+            CENTER_Y.compare(thisToken, thatToken),
+            CENTER_X.compare(thisToken, thatToken),
+          )
+
+        else -> 0
+      }
 
     if (result == 0) result = compareValues(thisToken.areaOffset, thatToken.areaOffset)
     return result
@@ -404,55 +440,31 @@ abstract class Playback(
 
   internal fun onNetworkTypeChanged(networkType: NetworkType) {
     this.playerParameters = networkTypeChangeListener?.onNetworkTypeChanged(networkType)
-        ?: this.playerParameters
+      ?: this.playerParameters
   }
 
-  // Public APIs
-
-  val tag = config.tag
-
-  private val playerState: Int
-    get() = playable?.playerState ?: STATE_IDLE
-
-  val volumeInfo: VolumeInfo
-    get() = playbackVolumeInfo
-
-  private val playbackInfo: PlaybackInfo
-    get() = playable?.playbackInfo ?: PlaybackInfo()
-
-  val containerRect: Rect
-    get() = token.containerRect
-
-  var playerParameters: PlayerParameters = PlayerParameters.DEFAULT
-    set(value) {
-      val from = field
-      field = value
-      val to = field
-      if (from != to) playerParametersChangeListener?.onPlayerParametersChanged(to)
-    }
-
   internal fun addCallback(callback: Callback) {
-    "Playback#addCallback $callback, $this".logDebug()
+    logDebug { "Playback#addCallback $callback, $this" }
     this.callbacks.push(callback)
   }
 
   internal fun removeCallback(callback: Callback?) {
-    "Playback#removeCallback $callback, $this".logDebug()
+    logDebug { "Playback#removeCallback $callback, $this" }
     this.callbacks.remove(callback)
   }
 
   fun addStateListener(listener: StateListener) {
-    "Playback#addStateListener $listener, $this".logDebug()
+    logDebug { "Playback#addStateListener $listener, $this" }
     this.listeners.add(listener)
   }
 
   fun removeStateListener(listener: StateListener?) {
-    "Playback#removeStateListener $listener, $this".logDebug()
+    logDebug { "Playback#removeStateListener $listener, $this" }
     this.listeners.remove(listener)
   }
 
   fun unbind() {
-    "Playback#unbind, $this".logDebug()
+    logDebug { "Playback#unbind, $this" }
     manager.master.dispatcher.post {
       playable?.onUnbind(this) ?: manager.removePlayback(this)
     }
@@ -471,63 +483,85 @@ abstract class Playback(
 
   // PlayerEventListener
 
-  override fun onPlayerStateChanged(
+  // Last known values reported by the Player, used to dispatch the StateListener callbacks.
+  private var lastPlayWhenReady: Boolean = false
+  private var lastPlaybackState: Int = Player.STATE_IDLE
+
+  override fun onPlayWhenReadyChanged(
     playWhenReady: Boolean,
-    playbackState: Int
+    reason: Int,
   ) {
-    "Playback#onPlayerStateChanged $playWhenReady - $playbackState, $this".logDebug()
+    dispatchPlayerState(playWhenReady, lastPlaybackState)
+  }
+
+  override fun onPlaybackStateChanged(playbackState: Int) {
+    dispatchPlayerState(lastPlayWhenReady, playbackState)
+  }
+
+  private fun dispatchPlayerState(
+    playWhenReady: Boolean,
+    playbackState: Int,
+  ) {
+    if (playWhenReady == lastPlayWhenReady && playbackState == lastPlaybackState) return
+    lastPlayWhenReady = playWhenReady
+    lastPlaybackState = playbackState
+    logDebug { "Playback#onPlayerStateChanged $playWhenReady - $playbackState, $this" }
     when (playbackState) {
       Player.STATE_IDLE -> Unit
       Player.STATE_BUFFERING -> {
         listeners.forEach { it.onBuffering(this@Playback, playWhenReady) }
       }
+
       Player.STATE_READY -> {
         listeners.forEach {
           if (playWhenReady) it.onPlaying(this@Playback) else it.onPaused(this@Playback)
         }
       }
+
       Player.STATE_ENDED -> {
         listeners.forEach { it.onEnded(this@Playback) }
       }
     }
     val playable = this.playable
     artworkHintListener?.onArtworkHint(
-        playback = this,
-        shouldShow = if (playable != null) !playable.isPlaying() else true,
-        position = playbackInfo.resumePosition,
-        state = playerState
+      playback = this,
+      shouldShow = if (playable != null) !playable.isPlaying() else true,
+      position = playbackInfo.resumePosition,
+      state = playerState,
     )
   }
 
-  override fun onVideoSizeChanged(
-    width: Int,
-    height: Int,
-    unappliedRotationDegrees: Int,
-    pixelWidthHeightRatio: Float
-  ) {
-    "Playback#onVideoSizeChanged $width × $height, $this".logDebug()
+  override fun onVideoSizeChanged(videoSize: VideoSize) {
+    logDebug { "Playback#onVideoSizeChanged ${videoSize.width} × ${videoSize.height}, $this" }
     listeners.forEach {
-      it.onVideoSizeChanged(this, width, height, unappliedRotationDegrees, pixelWidthHeightRatio)
+      it.onVideoSizeChanged(
+        playback = this,
+        width = videoSize.width,
+        height = videoSize.height,
+        unAppliedRotationDegrees = videoSize.unappliedRotationDegrees,
+        pixelWidthHeightRatio = videoSize.pixelWidthHeightRatio,
+      )
     }
   }
 
   override fun onRenderedFirstFrame() {
-    "Playback#onRenderedFirstFrame, $this".logDebug()
+    logDebug { "Playback#onRenderedFirstFrame, $this" }
     listeners.forEach { it.onRendered(this) }
   }
 
   // ErrorListener
 
   override fun onError(error: Exception) {
-    "Playback#onError $error, $this".logDebug()
+    logDebug { "Playback#onError $error, $this" }
     listeners.forEach { it.onError(this, error) }
     if (BuildConfig.DEBUG) error.printStackTrace()
   }
 
+  /**
+   * Callbacks for events triggered by the underlying [Playable].
+   */
   interface StateListener {
-
     /** Called when a Video is rendered on the Surface for the first time */
-    @JvmDefault
     fun onRendered(playback: Playback) = Unit
 
     /**
@@ -535,58 +569,48 @@ abstract class Playback(
      *
      * @param playWhenReady true if the Video will start playing once buffered enough, false otherwise.
      */
-    @JvmDefault
     fun onBuffering(
       playback: Playback,
-      playWhenReady: Boolean
+      playWhenReady: Boolean,
     ) = Unit // ExoPlayer state: 2
 
     /** Called when the Video starts playing */
-    @JvmDefault
     fun onPlaying(playback: Playback) = Unit // ExoPlayer state: 3, play flag: true
 
     /** Called when the Video is paused */
-    @JvmDefault
     fun onPaused(playback: Playback) = Unit // ExoPlayer state: 3, play flag: false
 
     /** Called when the Video finishes its playback */
-    @JvmDefault
     fun onEnded(playback: Playback) = Unit // ExoPlayer state: 4
 
-    @JvmDefault
     fun onVideoSizeChanged(
       playback: Playback,
       width: Int,
       height: Int,
       unAppliedRotationDegrees: Int,
-      pixelWidthHeightRatio: Float
+      pixelWidthHeightRatio: Float,
     ) = Unit
 
-    @JvmDefault
     fun onError(
       playback: Playback,
-      exception: Exception
+      exception: Exception,
     ) = Unit
   }
 
+  /**
+   * Callbacks for lifecycle events of a [Playback].
+   */
   interface Callback {
-
-    @JvmDefault
     fun onActive(playback: Playback) = Unit
 
-    @JvmDefault
     fun onInActive(playback: Playback) = Unit
 
-    @JvmDefault
     fun onAdded(playback: Playback) = Unit
 
-    @JvmDefault
     fun onRemoved(playback: Playback) = Unit
 
-    @JvmDefault
     fun onAttached(playback: Playback) = Unit
 
-    @JvmDefault
     fun onDetached(playback: Playback) = Unit
   }
 
@@ -610,8 +634,9 @@ abstract class Playback(
      * user before (this is equal to doing nothing).
      *
      * Default result is `true`.
+     *
+     * Note: this value is ignored in 1.2.0 due to an in-completed behavior.
      */
-    @JvmDefault
     fun kohiiCanPause(): Boolean = true
 
     /**
@@ -624,7 +649,6 @@ abstract class Playback(
      *
      * Default result is `false`.
      */
-    @JvmDefault
     fun kohiiCanStart(): Boolean = false
 
     /**
@@ -634,8 +658,10 @@ abstract class Playback(
      *
      * @see [Playback.onRendererAttached]
      */
-    @JvmDefault
-    fun setupRenderer(playback: Playback, renderer: Any?) = Unit
+    fun setupRenderer(
+      playback: Playback,
+      renderer: Any?,
+    ) = Unit
 
     /**
      * This method is called once the renderer of the [Playback] becomes unavailable to it. Client
@@ -644,12 +670,13 @@ abstract class Playback(
      *
      * @see [Playback.onRendererDetached]
      */
-    @JvmDefault
-    fun teardownRenderer(playback: Playback, renderer: Any?) = Unit
+    fun teardownRenderer(
+      playback: Playback,
+      renderer: Any?,
+    ) = Unit
   }
 
   interface ArtworkHintListener {
-
     /**
      * @param position current position of the playback in milliseconds.
      */
@@ -657,22 +684,23 @@ abstract class Playback(
       playback: Playback,
       shouldShow: Boolean,
       position: Long,
-      state: Int
+      state: Int,
     )
   }
 
   interface TokenUpdateListener {
-
-    fun onTokenUpdate(playback: Playback, token: Token)
+    fun onTokenUpdate(
+      playback: Playback,
+      token: Token,
+    )
   }
 
   interface NetworkTypeChangeListener {
-
     fun onNetworkTypeChanged(networkType: NetworkType): PlayerParameters
   }
 }
 
-/** Extension functions for a Playback */
+//region Extension functions for a Playback
 
 /**
  * Quickly setup the [Controller] that only needs to setup the renderer.
@@ -684,9 +712,16 @@ abstract class Playback(
 inline fun controller(
   kohiiCanStart: Boolean = true,
   kohiiCanPause: Boolean = true,
-  crossinline setupRenderer: (playback: Playback, renderer: Any?) -> Unit
-): Controller = object : Controller {
-  override fun kohiiCanStart(): Boolean = kohiiCanStart
-  override fun kohiiCanPause(): Boolean = kohiiCanPause
-  override fun setupRenderer(playback: Playback, renderer: Any?) = setupRenderer(playback, renderer)
-}
+  crossinline setupRenderer: (playback: Playback, renderer: Any?) -> Unit,
+): Controller =
+  object : Controller {
+    override fun kohiiCanStart(): Boolean = kohiiCanStart
+
+    override fun kohiiCanPause(): Boolean = kohiiCanPause
+
+    override fun setupRenderer(
+      playback: Playback,
+      renderer: Any?,
+    ) = setupRenderer(playback, renderer)
+  }
+//endregion

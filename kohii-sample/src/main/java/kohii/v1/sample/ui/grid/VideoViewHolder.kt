@@ -20,17 +20,16 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.core.view.isVisible
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.recyclerview.selection.ItemDetailsLookup.ItemDetails
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import kohii.v1.core.Playback
 import kohii.v1.core.Rebinder
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class VideoViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.holder_player_container), Playback.ArtworkHintListener {
-
   private val root: AspectRatioFrameLayout = itemView.findViewById(R.id.playerContainer)
   internal val container: FrameLayout = itemView.findViewById(R.id.container)
   internal val thumbnail: ImageView = itemView.findViewById(R.id.thumbnail)
@@ -42,30 +41,39 @@ internal class VideoViewHolder(
   internal var videoUrl: String? = null
 
   internal val videoTag: String?
-    get() = videoUrl?.let { "HOLDER::〜$adapterPosition" }
+    get() = videoUrl?.let { "HOLDER::〜$absoluteAdapterPosition" }
 
   internal val rebinder: Rebinder?
     get() = videoTag?.let { Rebinder(it) }
 
-  internal val itemDetails: ItemDetails<Rebinder>
-    get() = object : ItemDetails<Rebinder>() {
-      override fun getSelectionKey() = rebinder
-      override fun getPosition() = adapterPosition
-    }
+  internal val itemDetails: ItemDetails<SelectionKey>
+    get() =
+      object : ItemDetails<SelectionKey>() {
+        override fun getSelectionKey(): SelectionKey? {
+          val rebinder = this@VideoViewHolder.rebinder
+          return if (rebinder != null) {
+            SelectionKey(absoluteAdapterPosition, rebinder)
+          } else {
+            null
+          }
+        }
+
+        override fun getPosition() = absoluteAdapterPosition
+      }
 
   override fun onArtworkHint(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     // Using animation to ease user's eyes when the thumbnail is shown/hidden
     thumbnail.animate()
-        .alpha(if (shouldShow) 1F else 0F)
-        .setDuration(200)
-        .withEndAction {
-          thumbnail.isVisible = shouldShow
-        }
-        .start()
+      .alpha(if (shouldShow) 1F else 0F)
+      .setDuration(200)
+      .withEndAction {
+        thumbnail.isVisible = shouldShow
+      }
+      .start()
   }
 }

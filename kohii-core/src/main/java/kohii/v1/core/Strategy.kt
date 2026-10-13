@@ -18,7 +18,6 @@ package kohii.v1.core
 
 @Suppress("ClassName")
 sealed class Strategy : Selector {
-
   object NO_PLAYER : Strategy() {
     override fun invoke(playbacks: Collection<Playback>): Collection<Playback> {
       return emptyList()

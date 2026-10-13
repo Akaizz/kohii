@@ -19,11 +19,10 @@ package kohii.v1.sample.ui.echo
 import kohii.v1.media.VolumeInfo
 
 interface VolumeStore {
-
   fun get(key: Int): VolumeInfo
 
   fun set(
     key: Int,
-    volumeInfo: VolumeInfo
+    volumeInfo: VolumeInfo,
   )
 }

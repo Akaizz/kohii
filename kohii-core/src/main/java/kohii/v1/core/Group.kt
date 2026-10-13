@@ -18,6 +18,7 @@ package kohii.v1.core
 
 import android.graphics.Rect
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
 import android.view.ViewGroup
 import androidx.collection.arraySetOf
@@ -36,11 +37,10 @@ import java.util.ArrayDeque
 
 class Group(
   internal val master: Master,
-  internal val activity: FragmentActivity
+  internal val activity: FragmentActivity,
 ) : DefaultLifecycleObserver, LifecycleEventObserver, Handler.Callback {
-
   companion object {
-    const val DELAY = 2 * 1000L / 60 /* about 2 frames */
+    const val DELAY = 2 * 1000L / 60 // about 2 frames
     const val MSG_REFRESH = 1
 
     private val managerComparator = Comparator<Manager> { o1, o2 -> o2.compareTo(o1) }
@@ -67,7 +67,7 @@ class Group(
       }
     }
 
-  internal var groupVolumeInfo: VolumeInfo = VolumeInfo()
+  internal var groupVolumeInfo: VolumeInfo = VolumeInfo.DEFAULT_ACTIVE
     set(value) {
       field = value
       managers.forEach { it.managerVolumeInfo = value }
@@ -83,7 +83,7 @@ class Group(
       managers.forEach { it.lock = value }
     }
 
-  private val handler = Handler(this)
+  private val handler = Handler(Looper.getMainLooper(), this)
   private val dispatcher = PlayableDispatcher(master)
 
   private val playbacks: Collection<Playback>
@@ -106,7 +106,10 @@ class Group(
     return true
   }
 
-  override fun onStateChanged(source: LifecycleOwner, event: Event) {
+  override fun onStateChanged(
+    source: LifecycleOwner,
+    event: Event,
+  ) {
     master.onGroupLifecycleStateChanged()
   }
 
@@ -131,89 +134,101 @@ class Group(
 
   internal fun findBucketForContainer(container: ViewGroup): Bucket? {
     return managers.asSequence()
-        .mapNotNull { it.findBucketForContainer(container) }
-        .firstOrNull()
+      .mapNotNull { it.findBucketForContainer(container) }
+      .firstOrNull()
   }
 
   internal fun onRefresh() {
     handler.removeMessages(MSG_REFRESH)
     handler.sendEmptyMessageDelayed(
-        MSG_REFRESH,
-        DELAY
+      MSG_REFRESH,
+      DELAY,
     )
   }
 
   private fun refresh() {
-    "Group#refresh, $this".logDebug()
+    logDebug { "Group#refresh, $this" }
     val playbacks = this.playbacks // save a cache to prevent re-mapping
-    playbacks.forEach { it.onRefresh() } // update token
+    playbacks.forEach(Playback::onRefresh) // update token
 
     val toPlay = linkedSetOf<Playback>() // Need the order.
     val toPause = arraySetOf<Playback>()
 
-    stickyManager?.let {
-      val (canPlay, canPause) = it.splitPlaybacks()
+    val stickyManager = this.stickyManager
+    if (stickyManager != null) {
+      val (canPlay, canPause) = stickyManager.splitPlaybacks()
       toPlay.addAll(canPlay)
       toPause.addAll(canPause)
-    } ?: managers.forEach {
-      val (canPlay, canPause) = it.splitPlaybacks()
-      toPlay.addAll(canPlay)
-      toPause.addAll(canPause)
+    } else {
+      managers.forEach {
+        val (canPlay, canPause) = it.splitPlaybacks()
+        toPlay.addAll(canPlay)
+        toPause.addAll(canPause)
+      }
     }
 
     val oldSelection = selection
-    selection = if (lock || activity.lifecycle.currentState < master.groupsMaxLifecycleState) {
-      emptySet()
-    } else {
-      toPlay.filterTo(mutableSetOf()) { !it.lock }
-    }
+    selection =
+      if (lock || activity.lifecycle.currentState < master.groupsMaxLifecycleState) {
+        emptySet()
+      } else {
+        toPlay.filterTo(mutableSetOf()) { !it.lock }
+      }
     val newSelection = selection
 
     // Next: as Playbacks are split into 2 collections, we then release unused resources and prepare
     // the ones that need to. We do so by updating Playback's priority.
     updatePlaybackPriorities(playbacks, newSelection)
 
-    (toPause + toPlay + oldSelection - newSelection).mapNotNull { it.playable }
-        .forEach { dispatcher.pause(it) }
+    (toPause + toPlay + oldSelection - newSelection)
+      .mapNotNull(Playback::playable)
+      .forEach(dispatcher::pause)
 
     if (newSelection.isNotEmpty()) {
-      newSelection.mapNotNull { it.playable }
-          .forEach { dispatcher.play(it) }
+      newSelection.mapNotNull(Playback::playable)
+        .forEach(dispatcher::play)
 
-      val grouped = newSelection.groupBy { it.manager }
+      val grouped = newSelection.groupBy(Playback::manager)
       this.managers.asSequence()
-          .filter { it.host is OnSelectionListener }
-          .forEach {
-            (it.host as OnSelectionListener).onSelection(grouped[it] ?: emptyList())
+        .mapNotNull<Manager, Pair<OnSelectionListener, List<Playback>>> {
+          if (it.host is OnSelectionListener) {
+            it.host to (grouped[it] ?: emptyList())
+          } else {
+            null
           }
+        }
+        .forEach { (onSelectionListener, playbacks) ->
+          onSelectionListener.onSelection(playbacks)
+        }
     }
   }
 
   private fun updatePlaybackPriorities(
     playbacks: Collection<Playback>,
-    selection: Collection<Playback>
+    selection: Set<Playback>,
   ) {
-    // The biggest Rect that covers all selected Playbacks
-    val cover = selection.fold(Rect()) { acc, playback ->
-      acc.union(playback.token.containerRect)
-      return@fold acc
-    }
+    // The smallest Rect that covers all selected Playbacks
+    val cover =
+      selection.fold(Rect()) { acc, playback ->
+        acc.union(playback.token.containerRect)
+        return@fold acc
+      }
 
     // Update playbackPriority
-    // Calculate a target coordinate: Pair<Pair<Int, Int>, Pair<Int, Int>> to save information.
-    val target = (cover.centerX() to cover.width() / 2) to (cover.centerY() to cover.height() / 2)
-    if (target.first.second > 0 && target.second.second > 0) {
+    val target = Pair(cover.exactCenterX(), cover.exactCenterY())
+    if (target.first > 0 && target.second > 0) {
       // Update priority of non-selected Playback first, so they can release unused/obsoleted
       // resource before the selected ones who consume a lot of resources.
-      (playbacks - selection).partitionToMutableSets(
+      (playbacks - selection)
+        .partitionToMutableSets(
           predicate = { it.isAttached },
-          transform = { it }
-      )
-          .also { (attached, detached) ->
-            detached.forEach { it.playbackPriority = Int.MAX_VALUE }
-            attached.sortedBy { it.token.containerRect distanceTo target }
-                .forEachIndexed { index, playback -> playback.playbackPriority = index + 1 }
-          }
+          transform = { it },
+        )
+        .also { (attached, detached) ->
+          detached.forEach { it.playbackPriority = Int.MAX_VALUE }
+          attached.sortedBy { it.token.containerRect distanceTo target }
+            .forEachIndexed { index, playback -> playback.playbackPriority = index + 1 }
+        }
       selection.forEach { it.playbackPriority = 0 }
     }
   }
@@ -237,13 +252,12 @@ class Group(
     if (manager.host is Prioritized) {
       if (!managers.contains(manager)) {
         updated = managers.add(manager)
-        val temp = managers.sortedWith(
-            managerComparator
-        )
+        val temp = managers.sortedWith(managerComparator)
         managers.clear()
         managers.addAll(temp)
-      } else
+      } else {
         updated = false
+      }
     } else {
       updated = !managers.contains(manager) && managers.add(manager)
     }
@@ -268,7 +282,11 @@ class Group(
     if (manager == null || stickyManager === manager) stickyManager = null
   }
 
-  internal fun notifyPlaybackChanged(playable: Playable, from: Playback?, to: Playback?) {
+  internal fun notifyPlaybackChanged(
+    playable: Playable,
+    from: Playback?,
+    to: Playback?,
+  ) {
     for (manager in managers) {
       manager.notifyPlaybackChanged(playable, from, to)
     }

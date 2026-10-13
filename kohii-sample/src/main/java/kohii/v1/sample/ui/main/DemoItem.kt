@@ -19,11 +19,11 @@ package kohii.v1.sample.ui.main
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class DemoItem(
   @StringRes val title: Int = 0,
   @StringRes val subTitle: Int = 0,
-  val fragmentClass: Class<out Fragment>
+  val fragmentClass: Class<out Fragment>,
 ) : Parcelable

@@ -22,13 +22,14 @@ import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
 open class BaseViewHolder(itemView: View) : ViewHolder(itemView) {
-
   constructor(
     parent: ViewGroup,
-    layoutId: Int
+    layoutId: Int,
   ) : this(parent.inflateView(layoutId))
 
-  fun getString(@StringRes res: Int): String = itemView.context.getString(res)
+  fun getString(
+    @StringRes res: Int,
+  ): String = itemView.context.getString(res)
 
   open fun bind(item: Any?) {}
 

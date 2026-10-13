@@ -21,9 +21,9 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.view.get
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.ui.PlayerView
-import kohii.v1.core.Common
+import androidx.media3.common.Player
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import kohii.v1.exoplayer.Kohii
 import kohii.v1.media.MediaItem
 import kohii.v1.sample.R
@@ -37,12 +37,11 @@ import kohii.v1.sample.data.Item
  */
 class VideoViewHolder(
   parent: ViewGroup,
-  val kohii: Kohii
+  val kohii: Kohii,
 ) : BaseViewHolder(
     parent,
-    R.layout.holder_mix_view
-) {
-
+    R.layout.holder_mix_view,
+  ) {
   private val mediaName = itemView.findViewById(R.id.videoTitle) as TextView
   private val playerContainer = itemView.findViewById(R.id.playerContainer) as FrameLayout
 
@@ -53,24 +52,27 @@ class VideoViewHolder(
     if (item is Item) {
       val drmItem = item.drmScheme?.let { DrmItem(item) }
       // Dynamically create the PlayerView instance.
-      val playerView = (drmItem?.let {
-        // Encrypted video must be played on SurfaceView.
-        playerContainer.inflateView(R.layout.playerview_surface)
-      } ?: playerContainer.inflateView(R.layout.playerview_texture)) as PlayerView
+      val playerView =
+        (
+          drmItem?.let {
+            // Encrypted video must be played on SurfaceView.
+            playerContainer.inflateView(R.layout.playerview_surface)
+          } ?: playerContainer.inflateView(R.layout.playerview_texture)
+        ) as PlayerView
       playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
       playerContainer.addView(playerView, 0)
 
       val mediaItem =
         MediaItem(Uri.parse(item.uri), item.extension, drmItem)
-      itemTag = "${javaClass.canonicalName}::${item.uri}::$adapterPosition"
+      itemTag = "${javaClass.canonicalName}::${item.uri}::$absoluteAdapterPosition"
       mediaName.text = item.name
 
       kohii.setUp(mediaItem) {
         tag = requireNotNull(itemTag)
         preload = false
-        repeatMode = Common.REPEAT_MODE_ONE
+        repeatMode = Player.REPEAT_MODE_ONE
       }
-          .bind(playerView)
+        .bind(playerView)
     }
   }
 

@@ -17,10 +17,10 @@
 package kohii.v1.sample.common
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class InitData(
   val tag: String,
-  val aspectRatio: Float
+  val aspectRatio: Float,
 ) : Parcelable

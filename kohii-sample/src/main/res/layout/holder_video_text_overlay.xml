@@ -15,8 +15,7 @@
   ~ limitations under the License.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/viewHolderRoot"
     android:layout_width="match_parent"
@@ -36,7 +35,7 @@
       app:layout_constraintTop_toTopOf="parent"
       >
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+    <androidx.media3.ui.AspectRatioFrameLayout
         android:id="@+id/playerViewContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

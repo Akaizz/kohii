@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.content.Context
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 
 /**
- * An interface that is used by the [DefaultExoPlayerProvider] to create a new
+ * An interface that is used by the [ExoPlayerPool] to create a new
  * [DefaultTrackSelector] when needed.
  */
 interface TrackSelectorFactory {
-
   /**
    * Creates a new [DefaultTrackSelector] instance, given the [Context] of the Application.
    */

@@ -22,16 +22,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.SharedElementCallback
 import androidx.core.view.ViewCompat
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.transition.TransitionInflater
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import kohii.v1.core.Prioritized
 import kohii.v1.core.Rebinder
 import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.common.InitData
-import kotlinx.android.synthetic.main.fragment_player.playerContainer
-import kotlinx.android.synthetic.main.fragment_player.playerView
+import kohii.v1.sample.databinding.FragmentPlayerBinding
 
 /**
  * To play a single Video.
@@ -39,21 +38,21 @@ import kotlinx.android.synthetic.main.fragment_player.playerView
  * @author eneim (2018/06/26).
  */
 open class PlayerFragment : BaseFragment(), Prioritized {
-
   companion object {
     private const val KEY_INIT_DATA = "kohii:fragment:player:init_data"
     private const val KEY_REBINDER = "kohii:fragment:player:rebinder"
 
     fun newInstance(
       rebinder: Rebinder,
-      initData: InitData
+      initData: InitData,
     ): PlayerFragment {
-      val bundle = Bundle().also {
-        it.putParcelable(KEY_REBINDER, rebinder)
-        it.putParcelable(KEY_INIT_DATA, initData)
-      }
+      val bundle =
+        Bundle().also {
+          it.putParcelable(KEY_REBINDER, rebinder)
+          it.putParcelable(KEY_INIT_DATA, initData)
+        }
       return PlayerFragment()
-          .also { it.arguments = bundle }
+        .also { it.arguments = bundle }
     }
   }
 
@@ -62,39 +61,43 @@ open class PlayerFragment : BaseFragment(), Prioritized {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     return inflater.inflate(R.layout.fragment_player, container, false)
   }
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
+    val binding: FragmentPlayerBinding = FragmentPlayerBinding.bind(view)
     // Avoid a postponeEnterTransition on orientation change, and postpone only of first creation.
     if (savedInstanceState == null) {
       postponeEnterTransition()
     }
     prepareSharedElementTransition()
 
-    val (initData, rebinder) = requireArguments().let {
-      requireNotNull(it.getParcelable<InitData>(KEY_INIT_DATA)) to
+    val (initData, rebinder) =
+      requireArguments().let {
+        requireNotNull(it.getParcelable<InitData>(KEY_INIT_DATA)) to
           requireNotNull(it.getParcelable<Rebinder>(KEY_REBINDER))
-    }
+      }
 
-    val container = playerView.findViewById(R.id.exo_content_frame) as AspectRatioFrameLayout
+    val container =
+      binding.playerView.findViewById(R.id.exo_content_frame) as AspectRatioFrameLayout
     container.setAspectRatio(initData.aspectRatio)
 
     ViewCompat.setTransitionName(container, initData.tag)
     transView = container
 
-    val kohii = Kohii[this].also {
-      it.register(this)
-          .addBucket(playerContainer)
-    }
+    val kohii =
+      Kohii[this].also {
+        it.register(this)
+          .addBucket(binding.playerContainer)
+      }
 
-    rebinder.bind(kohii, playerView) {
+    rebinder.bind(kohii, binding.playerView) {
       startPostponedEnterTransition()
     }
   }
@@ -108,22 +111,25 @@ open class PlayerFragment : BaseFragment(), Prioritized {
    * Prepares the shared element transition from and back to the grid fragment.
    */
   private fun prepareSharedElementTransition() {
-    val transition = TransitionInflater.from(requireContext())
+    val transition =
+      TransitionInflater.from(requireContext())
         .inflateTransition(R.transition.player_shared_element_transition)
     transition.duration = 275
     sharedElementEnterTransition = transition
 
     // A similar mapping is set at the GridFragment with a setExitSharedElementCallback.
-    setEnterSharedElementCallback(object : SharedElementCallback() {
-      override fun onMapSharedElements(
-        names: MutableList<String>?,
-        sharedElements: MutableMap<String, View>?
-      ) {
-        // Map the first shared element name to the child ImageView.
-        if (view !== null && transView != null) {
-          sharedElements?.put(names?.get(0)!!, transView!!)
+    setEnterSharedElementCallback(
+      object : SharedElementCallback() {
+        override fun onMapSharedElements(
+          names: MutableList<String>?,
+          sharedElements: MutableMap<String, View>?,
+        ) {
+          // Map the first shared element name to the child ImageView.
+          if (view !== null && transView != null) {
+            sharedElements?.put(names?.get(0)!!, transView!!)
+          }
         }
-      }
-    })
+      },
+    )
   }
 }

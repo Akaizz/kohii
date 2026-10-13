@@ -19,9 +19,9 @@ package kohii.v1.sample.tiktok.ui.home
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.media3.common.Player
 import androidx.recyclerview.widget.RecyclerView.Adapter
-import coil.api.load
-import kohii.v1.core.Common
+import coil.load
 import kohii.v1.core.Playback
 import kohii.v1.core.Playback.ArtworkHintListener
 import kohii.v1.core.controller
@@ -32,10 +32,12 @@ import kohii.v1.sample.tiktok.databinding.HolderVerticalVideoBinding
 
 class VideosAdapter(
   private val videos: List<Video>,
-  val kohii: Kohii
+  val kohii: Kohii,
 ) : Adapter<VideoViewHolder>() {
-
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
+  override fun onCreateViewHolder(
+    parent: ViewGroup,
+    viewType: Int,
+  ): VideoViewHolder {
     val binding: HolderVerticalVideoBinding =
       HolderVerticalVideoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     return VideoViewHolder(binding)
@@ -43,39 +45,49 @@ class VideosAdapter(
 
   override fun getItemCount(): Int = Int.MAX_VALUE / 2
 
-  override fun onBindViewHolder(holder: VideoViewHolder, pos: Int) {
+  override fun onBindViewHolder(
+    holder: VideoViewHolder,
+    pos: Int,
+  ) {
     holder.videoItem = videos[pos % videos.size]
     val videoFile = requireNotNull(holder.videoFile)
     kohii.setUp(videoFile) {
       tag = "video::$pos"
       threshold = 0.5F
       preload = true
-      repeatMode = Common.REPEAT_MODE_ONE
-      artworkHintListener = object : ArtworkHintListener {
-        override fun onArtworkHint(
-          playback: Playback,
-          shouldShow: Boolean,
-          position: Long,
-          state: Int
-        ) {
-          holder.binding.thumbnailContainer.isVisible = playback.playable?.isPlaying() == false
+      repeatMode = Player.REPEAT_MODE_ONE
+      artworkHintListener =
+        object : ArtworkHintListener {
+          override fun onArtworkHint(
+            playback: Playback,
+            shouldShow: Boolean,
+            position: Long,
+            state: Int,
+          ) {
+            holder.binding.thumbnailContainer.isVisible = playback.playable?.isPlaying() == false
+          }
         }
-      }
 
-      controller = controller(kohiiCanStart = true, kohiiCanPause = true) { playback, _ ->
-        val playable = playback.playable ?: return@controller
-        holder.binding.container.setOnClickListener {
-          if (playable.isPlaying()) playback.manager.pause(playable)
-          else playback.manager.play(playable)
+      controller =
+        controller(kohiiCanStart = true, kohiiCanPause = true) { playback, _ ->
+          val playable = playback.playable ?: return@controller
+          holder.binding.container.setOnClickListener {
+            if (playable.isPlaying()) {
+              playback.manager.pause(playable)
+            } else {
+              playback.manager.play(playable)
+            }
+          }
         }
-      }
-    }.bind(holder.binding.playerView)
+    }.bind(holder.binding.playerView) {
+      it.addStateListener(holder)
+    }
 
     val videoStaticThumb = holder.videoThumbnail ?: return
     holder.binding.thumbnail.load(videoStaticThumb) {
       crossfade(true)
-      placeholder(R.drawable.ic_launcher_foreground)
-      error(R.drawable.ic_launcher_foreground)
+      placeholder(R.drawable.exo_edit_mode_logo)
+      error(R.drawable.exo_edit_mode_logo)
     }
   }
 

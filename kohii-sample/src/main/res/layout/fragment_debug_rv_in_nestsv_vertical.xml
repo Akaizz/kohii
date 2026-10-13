@@ -38,7 +38,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         />
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+    <androidx.media3.ui.AspectRatioFrameLayout
         android:id="@+id/dummyPlayer1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
           />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+    <androidx.media3.ui.AspectRatioFrameLayout
         android:id="@+id/dummyPlayer2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

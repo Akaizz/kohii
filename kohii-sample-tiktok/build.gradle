@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import kohii.BuildConfig
-import kohii.Libs
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 
 android {
-  compileSdkVersion BuildConfig.compileSdkVersion
+  namespace 'kohii.v1.sample.tiktok'
+  compileSdk libs.versions.android.compile.sdk.get().toInteger()
 
   defaultConfig {
+    minSdk libs.versions.android.min.sdk.get().toInteger()
+    targetSdk libs.versions.android.target.sdk.get().toInteger()
+    versionCode libs.versions.release.code.get().toInteger()
+    versionName libs.versions.release.name.get()
     applicationId "kohii.v1.sample.tiktok"
-    minSdkVersion 21 /* BuildConfig.minSdkVersion */
-    targetSdkVersion BuildConfig.targetSdkVersion
-    versionCode BuildConfig.releaseVersionCode
-    versionName BuildConfig.releaseVersionName
 
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     testApplicationId 'kohii.v1.sample.tiktok.test'
@@ -42,10 +39,16 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
+  packaging {
+    resources {
+      excludes +=
+          ['META-INF/services/javax.annotation.processing.Processor', 'META-INF/DEPENDENCIES']
+    }
+  }
 
-  packagingOptions {
-    exclude 'META-INF/services/javax.annotation.processing.Processor'
-    exclude 'META-INF/DEPENDENCIES'
+  lint {
+    // Sample code freely uses Media3 APIs annotated with @UnstableApi.
+    disable 'UnsafeOptInUsageError'
   }
 
   buildFeatures {
@@ -58,10 +61,6 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
-
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
 }
 
 dependencies {
@@ -69,39 +68,40 @@ dependencies {
   implementation project(':kohii-core')
   implementation project(':kohii-exoplayer')
 
-  implementation Libs.ExoPlayer.all
-  implementation Libs.AndroidX.Media.widget
+  implementation(libs.androidx.media3.exoplayer)
+  implementation(libs.androidx.media3.ui)
 
-  implementation Libs.Kotlin.stdlibJdk8
+  implementation(libs.androidx.core)
+  implementation(libs.androidx.fragment)
+  implementation(libs.androidx.appcompat)
+  implementation(libs.androidx.recyclerview)
+  implementation(libs.androidx.recyclerview.selection)
+  implementation(libs.androidx.constraintlayout)
+  implementation(libs.androidx.material)
 
-  implementation Libs.AndroidX.coreKtx
-  implementation Libs.AndroidX.Fragment.fragmentKtx
-  implementation Libs.AndroidX.appcompat
-  implementation Libs.AndroidX.recyclerView
-  implementation Libs.AndroidX.recyclerViewSelection
-  implementation Libs.AndroidX.constraintLayout
-  implementation Libs.Google.material
+  implementation(libs.androidx.navigation.common)
+  implementation(libs.androidx.navigation.runtime)
+  implementation(libs.androidx.navigation.fragment)
+  implementation(libs.androidx.navigation.ui)
 
-  implementation(Libs.AndroidX.Navigation.uiKtx)
-  implementation(Libs.AndroidX.Navigation.commonKtx)
-  implementation(Libs.AndroidX.Navigation.runtimeKtx)
-  implementation(Libs.AndroidX.Navigation.fragmentKtx)
+  implementation(libs.androidx.lifecycle.runtime)
+  implementation(libs.androidx.lifecycle.viewmodel)
+  implementation(libs.androidx.lifecycle.livedata)
+  implementation(libs.androidx.lifecycle.java8)
+  implementation(libs.androidx.lifecycle.process)
 
-  implementation Libs.AndroidX.Lifecycle.extensions
-  implementation Libs.AndroidX.Lifecycle.runtime
-  implementation Libs.AndroidX.Lifecycle.viewModel
-  implementation Libs.AndroidX.Lifecycle.liveData
-  implementation Libs.AndroidX.Lifecycle.java8
+  implementation(libs.square.moshi)
+  kapt(libs.square.moshi.codegen)
+  implementation(libs.okio)
 
-  implementation Libs.Square.moshi
-  kapt Libs.Square.moshiCodegen
-  implementation Libs.Square.okio
+  implementation(libs.coil.common)
 
-  implementation(Libs.Coil.coilBase)
+  implementation(libs.androidx.vectordrawable)
 
-  implementation(Libs.AndroidX.vector)
+  testImplementation(libs.androidx.core.ktx)
+  testImplementation(libs.androidx.rules)
+  testImplementation(libs.androidx.runner)
 
-  testImplementation(Libs.Common.junit)
-  androidTestImplementation(Libs.Common.junitExt)
-  androidTestImplementation(Libs.AndroidX.Test.espressoCore)
+  androidTestImplementation(libs.androidx.junit.ktx)
+  androidTestImplementation(libs.androidx.espresso.core)
 }

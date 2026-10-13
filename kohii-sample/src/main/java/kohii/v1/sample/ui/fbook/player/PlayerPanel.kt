@@ -20,20 +20,18 @@ import kohii.v1.core.Playback
 import kohii.v1.core.Rebinder
 
 interface PlayerPanel {
-
   val rebinder: Rebinder
 
   interface Callback {
-
     fun onPlayerActive(
       player: PlayerPanel,
-      playback: Playback
+      playback: Playback,
     ) {
     }
 
     fun onPlayerInActive(
       player: PlayerPanel,
-      playback: Playback
+      playback: Playback,
     ) {
     }
 

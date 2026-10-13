@@ -27,16 +27,15 @@ class VideoItemsAdapter(
   private val videos: List<Video>,
   private val kohii: Kohii,
   private val volumeStore: VolumeStore,
-  internal val volumeInfoUpdater: (VideoItemHolder) -> VolumeInfo?
+  internal val volumeInfoUpdater: (VideoItemHolder) -> VolumeInfo?,
 ) : Adapter<BaseViewHolder>() {
-
   companion object {
     internal val PAYLOAD_VOLUME = Any()
   }
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     val holder = VideoItemHolder(parent, kohii)
 
@@ -54,7 +53,7 @@ class VideoItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     holder.bind(position) // this action is ignored in this demo
     if (holder is VideoItemHolder) {
@@ -66,7 +65,7 @@ class VideoItemsAdapter(
   override fun onBindViewHolder(
     holder: BaseViewHolder,
     position: Int,
-    payloads: MutableList<Any>
+    payloads: MutableList<Any>,
   ) {
     val payload = payloads.find { it === PAYLOAD_VOLUME }
     if (payload != null && holder is VideoItemHolder) {

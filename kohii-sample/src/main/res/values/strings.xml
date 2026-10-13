@@ -262,22 +262,6 @@
     It also supports floating Player (same concept as Picture-In-Picture, but not for Activity).
   </string>
 
-  <string name="demo_title_youtube_1">
-    Kohii + YouTube (1)
-  </string>
-
-  <string name="demo_desc_youtube_1">
-    Kohii with YouTube video using the YouTube Android Player API.
-  </string>
-
-  <string name="demo_title_youtube_2">
-    Kohii + YouTube (2)
-  </string>
-
-  <string name="demo_desc_youtube_2">
-    Kohii with YouTube videos using https://github.com/PierfrancescoSoffritti/android-youtube-player library.
-  </string>
-
   <string name="demo_title_debug">
     Kohii + Debug
   </string>
@@ -285,4 +269,13 @@
   <string name="demo_desc_debug">
     Debug Kohii
   </string>
+
+  <string name="demo_title_manual_1">
+    Kohii + Videos with manual controller
+  </string>
+
+  <string name="demo_desc_manual_1">
+    Videos with manual controller to play/pause or open the Video in fullscreen.
+  </string>
+
 </resources>

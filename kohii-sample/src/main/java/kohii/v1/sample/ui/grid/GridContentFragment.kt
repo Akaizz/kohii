@@ -21,12 +21,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
+import androidx.recyclerview.selection.SelectionTracker.Builder
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.GridLayoutManager
+import kohii.v1.core.Engine
 import kohii.v1.core.MemoryMode
-import kohii.v1.core.Rebinder
 import kohii.v1.exoplayer.Kohii
 import kohii.v1.sample.BuildConfig
 import kohii.v1.sample.R
@@ -34,19 +36,20 @@ import kohii.v1.sample.common.BaseFragment
 import kohii.v1.sample.databinding.FragmentRecyclerviewGridBinding
 
 class GridContentFragment : BaseFragment() {
-
-  private lateinit var kohii: Kohii
+  private lateinit var kohii: Engine<PlayerView>
 
   private var _binding: FragmentRecyclerviewGridBinding? = null
   private val binding: FragmentRecyclerviewGridBinding get() = requireNotNull(_binding)
 
-  private var _selectionTracker: SelectionTracker<Rebinder>? = null
-  private val selectionTracker: SelectionTracker<Rebinder> get() = requireNotNull(_selectionTracker)
+  private var _selectionTracker: SelectionTracker<SelectionKey>? = null
+  private val selectionTracker: SelectionTracker<SelectionKey>
+    get() = requireNotNull(_selectionTracker)
 
   private var videoGridCallback: VideoGridCallback? = null
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
+    // OR: kohii = createKohii(context, ExoPlayerConfig.DEFAULT)
     kohii = Kohii[this]
     videoGridCallback = parentFragment as? VideoGridCallback
   }
@@ -59,7 +62,7 @@ class GridContentFragment : BaseFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     _binding = FragmentRecyclerviewGridBinding.inflate(inflater, container, false)
     return binding.root
@@ -67,24 +70,26 @@ class GridContentFragment : BaseFragment() {
 
   override fun onViewCreated(
     view: View,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) {
     super.onViewCreated(view, savedInstanceState)
     kohii.register(this, MemoryMode.BALANCED)
-        .addBucket(binding.container)
+      .addBucket(binding.container)
 
     val spanCount = resources.getInteger(R.integer.grid_span)
-    val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-      override fun getSpanSize(position: Int): Int {
-        return if (position % 6 == 3 || position % 6 == spanCount) 2 else 1
+    val spanSizeLookup =
+      object : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+          return if (position % 6 == 3 || position % 6 == spanCount) 2 else 1
+        }
       }
-    }
 
-    val adapter = ItemsAdapter(
+    val adapter =
+      ItemsAdapter(
         kohii,
         shouldBindVideo = { !selectionTracker.isSelected(it) },
-        onVideoClick = { videoGridCallback?.onSelected(it) }
-    )
+        onVideoClick = { videoGridCallback?.onSelected(it) },
+      )
 
     (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup = spanSizeLookup
     binding.container.adapter = adapter
@@ -92,13 +97,14 @@ class GridContentFragment : BaseFragment() {
     val videoKeyProvider = VideoTagKeyProvider(binding.container)
     val videoItemDetailsLookup = VideoItemDetailsLookup(binding.container)
 
-    _selectionTracker = SelectionTracker.Builder(
+    _selectionTracker =
+      Builder(
         "${BuildConfig.APPLICATION_ID}::sample::grid",
         binding.container,
         videoKeyProvider,
         videoItemDetailsLookup,
-        StorageStrategy.createParcelableStorage(Rebinder::class.java)
-    )
+        StorageStrategy.createParcelableStorage(SelectionKey::class.java),
+      )
         .withSelectionPredicate(SelectionPredicates.createSelectSingleAnything())
         .build()
 
@@ -115,16 +121,16 @@ class GridContentFragment : BaseFragment() {
     selectionTracker.onSaveInstanceState(outState)
   }
 
-  internal fun select(rebinder: Rebinder) {
-    selectionTracker.select(rebinder)
+  internal fun select(selectionKey: SelectionKey) {
+    selectionTracker.select(selectionKey)
   }
 
-  internal fun deselect(rebinder: Rebinder) {
-    selectionTracker.deselect(rebinder)
+  internal fun deselect(selectionKey: SelectionKey) {
+    selectionTracker.deselect(selectionKey)
+    binding.container.adapter?.notifyItemChanged(selectionKey.position)
   }
 
   interface VideoGridCallback {
-
-    fun onSelected(rebinder: Rebinder)
+    fun onSelected(selectionKey: SelectionKey)
   }
 }

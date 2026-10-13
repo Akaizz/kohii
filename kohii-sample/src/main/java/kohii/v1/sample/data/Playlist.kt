@@ -17,7 +17,7 @@ package kohii.v1.sample.data
 
 import android.os.Parcelable
 import com.squareup.moshi.JsonClass
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Suppress("SpellCheckingInspection")
 @JsonClass(generateAdapter = true)
@@ -33,5 +33,5 @@ data class Playlist(
   val sources: List<Sources>,
   val tracks: List<Tracks>,
   val link: String,
-  val duration: Int
+  val duration: Int,
 ) : Parcelable

@@ -24,54 +24,56 @@ import androidx.core.util.Pools.SimplePool
 import kohii.v1.media.Media
 import kohii.v1.onEachAcquired
 
-abstract class RecycledRendererProvider @JvmOverloads constructor(
-  private val poolSize: Int = 2
-) : RendererProvider {
+abstract class RecycledRendererProvider
+  @JvmOverloads
+  constructor(
+    private val poolSize: Int = 2,
+  ) : RendererProvider {
+    private val pools = SparseArrayCompat<SimplePool<Any>>(2)
 
-  private val pools = SparseArrayCompat<SimplePool<Any>>(2)
-
-  @CallSuper
-  override fun acquireRenderer(
-    playback: Playback,
-    media: Media
-  ): Any {
-    val rendererType = getRendererType(playback.container, media)
-    val pool = pools.get(rendererType)
-    return pool?.acquire() ?: createRenderer(playback, rendererType)
-  }
-
-  // Test: releaseRenderer(any(), any(), null) must return true.
-  @CallSuper
-  override fun releaseRenderer(
-    playback: Playback,
-    media: Media,
-    renderer: Any?
-  ): Boolean {
-    if (renderer == null) return true
-    val rendererType = getRendererType(playback.container, media)
-    val pool = pools.get(rendererType) ?: SimplePool<Any>(poolSize).also {
-      pools.put(rendererType, it)
+    @CallSuper
+    override fun acquireRenderer(
+      playback: Playback,
+      media: Media,
+    ): Any {
+      val rendererType = getRendererType(playback.container, media)
+      val pool = pools.get(rendererType)
+      return pool?.acquire() ?: createRenderer(playback, rendererType)
     }
-    return pool.release(renderer)
-  }
 
-  @CallSuper
-  override fun clear() {
-    pools.forEach { _, value ->
-      value.onEachAcquired(::onClear)
+    // Test: releaseRenderer(any(), any(), null) must return true.
+    @CallSuper
+    override fun releaseRenderer(
+      playback: Playback,
+      media: Media,
+      renderer: Any?,
+    ): Boolean {
+      if (renderer == null) return true
+      val rendererType = getRendererType(playback.container, media)
+      val pool =
+        pools.get(rendererType) ?: SimplePool<Any>(poolSize).also {
+          pools.put(rendererType, it)
+        }
+      return pool.release(renderer)
     }
+
+    @CallSuper
+    override fun clear() {
+      pools.forEach { _, value ->
+        value.onEachAcquired(::onClear)
+      }
+    }
+
+    protected open fun getRendererType(
+      container: ViewGroup,
+      media: Media,
+    ): Int = 0
+
+    // Must always create new Renderer.
+    protected abstract fun createRenderer(
+      playback: Playback,
+      rendererType: Int,
+    ): Any
+
+    protected open fun onClear(renderer: Any) = Unit
   }
-
-  protected open fun getRendererType(
-    container: ViewGroup,
-    media: Media
-  ): Int = 0
-
-  // Must always create new Renderer.
-  protected abstract fun createRenderer(
-    playback: Playback,
-    rendererType: Int
-  ): Any
-
-  protected open fun onClear(renderer: Any) = Unit
-}

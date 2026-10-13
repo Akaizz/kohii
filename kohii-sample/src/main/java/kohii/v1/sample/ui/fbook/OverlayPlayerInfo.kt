@@ -20,7 +20,7 @@ import kohii.v1.core.Rebinder
 
 data class OverlayPlayerInfo(
   val mode: Int = -1,
-  val rebinder: Rebinder
+  val rebinder: Rebinder,
 ) {
   companion object {
     const val MODE_FULLSCREEN = 1

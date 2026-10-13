@@ -34,13 +34,12 @@ import kotlin.properties.Delegates
 internal class VideoItemHolder(
   inflater: LayoutInflater,
   parent: ViewGroup,
-  private val clickListener: OnClickListener
+  private val clickListener: OnClickListener,
 ) : BaseViewHolder(inflater, R.layout.holder_video_text_overlay, parent),
-    Playback.ArtworkHintListener,
-    OnClickListener {
-
+  Playback.ArtworkHintListener,
+  OnClickListener {
   override fun onClick(v: View?) {
-    clickListener.onItemClick(v!!, null, adapterPosition, itemId, rebinder)
+    clickListener.onItemClick(v!!, null, absoluteAdapterPosition, itemId, rebinder)
   }
 
   val videoTitle = itemView.findViewById(R.id.videoTitle) as TextView
@@ -50,34 +49,40 @@ internal class VideoItemHolder(
   internal val container = itemView.findViewById(R.id.playerContainer) as View
 
   internal var videoData by Delegates.observable<Video?>(
-      initialValue = null,
-      onChange = { _, _, value ->
-        if (value != null) {
-          val firstItem = value.playlist.first()
-          videoImage = firstItem.image
-          videoFile = firstItem.sources.first()
-              .file
-        } else {
-          videoImage = null
-          videoFile = null
-        }
+    initialValue = null,
+    onChange = { _, _, value ->
+      if (value != null) {
+        val firstPlaylist = value.playlist.first()
+        videoImage = firstPlaylist.image
+        videoFile = firstPlaylist.sources
+          .firstOrNull {
+            it.file.endsWith("m3u8")
+          }?.file ?: firstPlaylist.sources.first().file
+      } else {
+        videoImage = null
+        videoFile = null
       }
+    },
   )
 
   internal var videoFile: String? = null
   internal var videoImage: String? = null
   internal val videoTag: String?
-    get() = this.videoFile?.let { "$it::$adapterPosition" }
+    get() = this.videoFile?.let { "$it::$absoluteAdapterPosition" }
 
   // Trick
   internal val rebinder: Rebinder?
     get() = this.videoTag?.let { Rebinder(it) }
 
-  override fun onRecycled(success: Boolean) {
-    super.onRecycled(success)
+  override fun onRecycled() {
+    super.onRecycled()
     this.videoData = null
-    thumbnail.clearAnimation()
     thumbnail.isVisible = true
+  }
+
+  override fun clearTransientStates() {
+    super.clearTransientStates()
+    thumbnail.clearAnimation()
   }
 
   override fun onAttached() {
@@ -94,25 +99,25 @@ internal class VideoItemHolder(
     playback: Playback,
     shouldShow: Boolean,
     position: Long,
-    state: Int
+    state: Int,
   ) {
     if (!shouldShow) {
       thumbnail.animate()
-          .alpha(0F)
-          .setDuration(200)
-          .withEndAction {
-            thumbnail.isVisible = false
-          }
-          .start()
+        .alpha(0F)
+        .setDuration(200)
+        .withEndAction {
+          thumbnail.isVisible = false
+        }
+        .start()
     } else {
       thumbnail.alpha = 1F
       thumbnail.animate()
-          .alpha(1F)
-          .setDuration(0)
-          .withEndAction {
-            thumbnail.isVisible = true
-          }
-          .start()
+        .alpha(1F)
+        .setDuration(0)
+        .withEndAction {
+          thumbnail.isVisible = true
+        }
+        .start()
     }
   }
 
@@ -126,7 +131,7 @@ internal class VideoItemHolder(
     return object : ItemDetails<Rebinder>() {
       override fun getSelectionKey() = rebinder
 
-      override fun getPosition() = adapterPosition
+      override fun getPosition() = absoluteAdapterPosition
     }
   }
 }

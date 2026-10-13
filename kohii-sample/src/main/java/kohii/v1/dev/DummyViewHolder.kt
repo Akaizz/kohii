@@ -18,12 +18,12 @@ package kohii.v1.dev
 
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.media3.ui.PlayerView
 import kohii.v1.sample.R
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class DummyViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, R.layout.dev_video_holder) {
   internal val playerView: PlayerView = itemView.findViewById(R.id.playerView)
   internal val enterFullscreen: View = itemView.findViewById(R.id.exo_fullscreen_enter)

@@ -20,10 +20,9 @@ import kohii.v1.core.Playable.Config
 import kohii.v1.media.Media
 
 abstract class PlayableCreator<RENDERER : Any>(val rendererType: Class<RENDERER>) {
-
   abstract fun createPlayable(
     config: Config,
-    media: Media
+    media: Media,
   ): Playable
 
   abstract fun cleanUp()

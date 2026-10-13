@@ -17,19 +17,20 @@
 package kohii.v1.sample.ui.nested4
 
 import android.view.ViewGroup
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.recyclerview.selection.ItemDetailsLookup.ItemDetails
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import kohii.v1.core.Rebinder
 import kohii.v1.sample.R.id
 import kohii.v1.sample.R.layout
 import kohii.v1.sample.common.BaseViewHolder
 
 internal class VideoViewHolder(
-  parent: ViewGroup
+  parent: ViewGroup,
 ) : BaseViewHolder(parent, layout.holder_player_view) {
-  internal val container = itemView.findViewById(
-      id.playerContainer
-  ) as AspectRatioFrameLayout
+  internal val container =
+    itemView.findViewById(
+      id.playerContainer,
+    ) as AspectRatioFrameLayout
 
   init {
     container.setAspectRatio(16 / 9F)
@@ -37,14 +38,16 @@ internal class VideoViewHolder(
 
   internal var videoUrl: String? = null
   internal val videoTag: String?
-    get() = videoUrl?.let { "HOLDER::〜$adapterPosition" }
+    get() = videoUrl?.let { "HOLDER::〜$absoluteAdapterPosition" }
 
   internal val rebinder: Rebinder?
     get() = videoTag?.let { Rebinder(it) }
 
   internal val itemDetails: ItemDetails<Rebinder>
-    get() = object : ItemDetails<Rebinder>() {
-      override fun getSelectionKey() = rebinder
-      override fun getPosition() = adapterPosition
-    }
+    get() =
+      object : ItemDetails<Rebinder>() {
+        override fun getSelectionKey() = rebinder
+
+        override fun getPosition() = absoluteAdapterPosition
+      }
 }

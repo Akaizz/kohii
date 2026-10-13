@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
-import com.google.android.exoplayer2.LoadControl
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.LoadControl
 
 interface LoadControlFactory {
-
   /**
    * Returns a [LoadControl].
    */

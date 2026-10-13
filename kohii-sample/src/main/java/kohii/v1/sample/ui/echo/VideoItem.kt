@@ -20,5 +20,5 @@ data class VideoItem(
   val title: String,
   val description: String,
   val imageUrl: String,
-  val file: String
+  val file: String,
 )

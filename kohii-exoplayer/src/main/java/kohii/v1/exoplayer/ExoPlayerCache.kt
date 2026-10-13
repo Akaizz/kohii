@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
+@file:OptIn(UnstableApi::class)
+
 package kohii.v1.exoplayer
 
 import android.content.Context
-import com.google.android.exoplayer2.database.ExoDatabaseProvider
-import com.google.android.exoplayer2.upstream.cache.Cache
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
-import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor
-import com.google.android.exoplayer2.upstream.cache.SimpleCache
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.NoOpCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import kohii.v1.exoplayer.ExoPlayerCache.downloadCacheSingleton
 import kohii.v1.exoplayer.ExoPlayerCache.lruCacheSingleton
+import kohii.v1.logWarn
 import kohii.v1.utils.Capsule
 import java.io.File
 
@@ -34,35 +39,60 @@ import java.io.File
  * which is useful to store downloaded content.
  */
 object ExoPlayerCache {
-
   private const val CACHE_CONTENT_DIRECTORY = "kohii_content"
   private const val DOWNLOAD_CONTENT_DIRECTORY = "kohii_content_download"
-  private const val CACHE_SIZE = 24 * 1024 * 1024L // 24 Megabytes
+  private const val MIN_CACHE_SIZE = 32 * 1024 * 1024L // 32 Megabytes
+  private const val MAX_CACHE_SIZE = 256 * 1024 * 1024L // 256 Megabytes
+
+  // The cache size is 10% of the free space, between MIN_CACHE_SIZE and MAX_CACHE_SIZE, so a feed
+  // of many videos can keep the recently watched ones without filling up small devices.
+  private fun cacheSizeFor(directory: File): Long = (directory.usableSpace / 10).coerceIn(MIN_CACHE_SIZE, MAX_CACHE_SIZE)
 
   private val lruCacheCreator: (Context) -> Cache = { context ->
+    val databaseProvider = StandaloneDatabaseProvider(context)
+    deleteLegacyLruCache(context, databaseProvider)
+    // Stored in the cache directory, so the system can reclaim the space when the device is low on
+    // storage. SimpleCache handles the files removed by the system.
+    val directory = File(context.cacheDir, CACHE_CONTENT_DIRECTORY)
     SimpleCache(
-        File(
-            context.getExternalFilesDir(null) ?: context.filesDir,
-            CACHE_CONTENT_DIRECTORY
-        ),
-        LeastRecentlyUsedCacheEvictor(CACHE_SIZE),
-        ExoDatabaseProvider(context)
+      directory,
+      LeastRecentlyUsedCacheEvictor(cacheSizeFor(context.cacheDir)),
+      databaseProvider,
     )
+  }
+
+  // Older versions stored the LRU cache in the external files directory. Delete it in background, as
+  // it is not used anymore.
+  private fun deleteLegacyLruCache(
+    context: Context,
+    databaseProvider: StandaloneDatabaseProvider,
+  ) {
+    val legacyDirectory =
+      File(context.getExternalFilesDir(null) ?: context.filesDir, CACHE_CONTENT_DIRECTORY)
+    if (!legacyDirectory.exists()) return
+    Thread {
+      try {
+        SimpleCache.delete(legacyDirectory, databaseProvider)
+      } catch (error: Exception) {
+        logWarn { "Failed to delete the legacy cache at $legacyDirectory: $error" }
+      }
+    }.start()
   }
 
   private val downloadCacheCreator: (Context) -> Cache = { context ->
     SimpleCache(
-        File(
-            context.getExternalFilesDir(null) ?: context.filesDir,
-            DOWNLOAD_CONTENT_DIRECTORY
-        ),
-        NoOpCacheEvictor(),
-        ExoDatabaseProvider(context)
+      File(
+        context.getExternalFilesDir(null) ?: context.filesDir,
+        DOWNLOAD_CONTENT_DIRECTORY,
+      ),
+      NoOpCacheEvictor(),
+      StandaloneDatabaseProvider(context),
     )
   }
 
   /**
-   * A reusable [Cache] that uses the [LeastRecentlyUsedCacheEvictor] internally.
+   * A reusable [Cache] that uses the [LeastRecentlyUsedCacheEvictor] internally. It is stored in the
+   * app's cache directory and uses 10% of the free space, between 32 MB and 256 MB.
    *
    * Usage:
    *

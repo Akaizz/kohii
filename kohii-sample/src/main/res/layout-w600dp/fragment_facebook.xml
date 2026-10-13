@@ -43,7 +43,7 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         />
 
-    <com.google.android.exoplayer2.ui.PlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@+id/dummyPlayer"
         android:layout_width="64dp"
         android:layout_height="64dp"

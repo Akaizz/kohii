@@ -23,7 +23,7 @@ import android.graphics.Rect
 import android.util.Log
 import android.view.View
 import androidx.annotation.RestrictTo
-import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP
+import androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout.Behavior
 import androidx.core.util.Pools.Pool
@@ -37,8 +37,11 @@ inline fun <T> Pool<T>.onEachAcquired(action: (T) -> Unit) {
   var item: T?
   do {
     item = this.acquire()
-    if (item == null) break
-    else action(item)
+    if (item == null) {
+      break
+    } else {
+      action(item)
+    }
   } while (true)
 }
 
@@ -64,7 +67,7 @@ internal fun View.findCoordinatorLayoutDirectChildContainer(target: View?): View
 
 internal inline fun <T, R> Iterable<T>.partitionToMutableSets(
   predicate: (T) -> Boolean,
-  transform: (T) -> R
+  transform: (T) -> R,
 ): Pair<MutableSet<R>, MutableSet<R>> {
   val first = mutableSetOf<R>()
   val second = mutableSetOf<R>()
@@ -78,11 +81,14 @@ internal inline fun <T, R> Iterable<T>.partitionToMutableSets(
   return Pair(first, second)
 }
 
-internal infix fun Rect.distanceTo(target: Pair<Pair<Int, Int>, Pair<Int, Int>>): Int {
-  val (targetCenterX, targetHalfWidth) = target.first
-  val (targetCenterY, targetHalfHeight) = target.second
-  val distanceX = abs(this.centerX() - targetCenterX) / targetHalfWidth
-  val distanceY = abs(this.centerY() - targetCenterY) / targetHalfHeight
+/**
+ * Formula:
+ * > distance = distanceX + distanceY, where distanceX is the diff between the X coordinate of the
+ * Rect center and distanceY is the diff between the Y coordinate of the Rect center.
+ */
+internal infix fun Rect.distanceTo(target: Pair<Float, Float>): Float {
+  val distanceX = abs(this.centerX() - target.first)
+  val distanceY = abs(this.centerY() - target.second)
   return distanceX + distanceY // no need to be the fancy Euclid sqrt distance.
 }
 
@@ -102,33 +108,40 @@ fun View.viewBehavior(): Behavior<*>? {
   return if (behavior is BehaviorWrapper) behavior.delegate else behavior
 }
 
-// Because I want to compose the message first, then log it.
-@RestrictTo(LIBRARY_GROUP)
-fun String.logDebug(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.d(tag, this)
-  }
+@PublishedApi
+internal val LOG_TAG = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log"
+
+// The message is only composed when logging is enabled, so release builds pay nothing for it.
+@RestrictTo(LIBRARY_GROUP_PREFIX)
+inline fun logDebug(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.d(tag, message())
 }
 
-@RestrictTo(LIBRARY_GROUP)
-fun String.logInfo(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.i(tag, this)
-  }
+@RestrictTo(LIBRARY_GROUP_PREFIX)
+inline fun logInfo(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.i(tag, message())
 }
 
-@RestrictTo(LIBRARY_GROUP)
-fun String.logWarn(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.w(tag, this)
-  }
+@RestrictTo(LIBRARY_GROUP_PREFIX)
+inline fun logWarn(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.w(tag, message())
 }
 
-@RestrictTo(LIBRARY_GROUP)
-fun String.logError(tag: String = "${BuildConfig.LIBRARY_PACKAGE_NAME}.log") {
-  if (BuildConfig.DEBUG) {
-    Log.e(tag, this)
-  }
+@RestrictTo(LIBRARY_GROUP_PREFIX)
+inline fun logError(
+  tag: String = LOG_TAG,
+  message: () -> String,
+) {
+  if (BuildConfig.DEBUG) Log.e(tag, message())
 }
 
 internal inline fun debugOnly(action: () -> Unit) {

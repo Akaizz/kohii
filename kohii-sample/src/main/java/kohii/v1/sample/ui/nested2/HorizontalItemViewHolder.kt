@@ -17,13 +17,13 @@
 package kohii.v1.sample.ui.nested2
 
 import android.view.View
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import kohii.v1.sample.R.id
 
 internal class HorizontalItemViewHolder(itemView: View) : ViewHolder(itemView) {
-
-  internal val container = itemView.findViewById(
-      id.playerContainer
-  ) as AspectRatioFrameLayout
+  internal val container =
+    itemView.findViewById(
+      id.playerContainer,
+    ) as AspectRatioFrameLayout
 }

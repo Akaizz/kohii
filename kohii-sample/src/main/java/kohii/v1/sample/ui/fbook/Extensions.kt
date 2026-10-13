@@ -20,9 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
-inline fun <reified T : ViewHolder> RecyclerView.filterVisibleHolder(
-  predicate: (T) -> Boolean = { true }
-): List<T> {
+inline fun <reified T : ViewHolder> RecyclerView.filterVisibleHolder(predicate: (T) -> Boolean = { true }): List<T> {
   val layout: LayoutManager = layoutManager ?: return emptyList()
   val childCount = layout.childCount
   if (childCount == 0) return emptyList()

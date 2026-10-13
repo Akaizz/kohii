@@ -21,6 +21,5 @@ import androidx.lifecycle.ViewModel
 import kohii.v1.core.Rebinder
 
 class VideosViewModel : ViewModel() {
-
   val selectedRebinder = MutableLiveData<Rebinder>(null)
 }

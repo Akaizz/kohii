@@ -17,18 +17,18 @@
 package kohii.v1.sample.ui.grid
 
 import android.view.ViewGroup
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
-import kohii.v1.core.Rebinder
-import kohii.v1.exoplayer.Kohii
-import kohii.v1.sample.DemoApp.Companion.assetVideoUri
+import kohii.v1.core.Engine
+import kohii.v1.sample.DemoApp.Companion.VIDEO_URI_ASSET
 import kohii.v1.sample.common.BaseViewHolder
+import timber.log.Timber
 
 internal class ItemsAdapter(
-  private val kohii: Kohii,
-  val shouldBindVideo: (Rebinder?) -> Boolean,
-  val onVideoClick: (Rebinder) -> Unit
+  private val kohii: Engine<PlayerView>,
+  val shouldBindVideo: (SelectionKey?) -> Boolean,
+  val onVideoClick: (SelectionKey) -> Unit,
 ) : Adapter<BaseViewHolder>() {
-
   companion object {
     private const val TYPE_VIDEO = 1
     private const val TYPE_TEXT = 2
@@ -40,7 +40,7 @@ internal class ItemsAdapter(
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
-    viewType: Int
+    viewType: Int,
   ): BaseViewHolder {
     return if (viewType == TYPE_VIDEO) VideoViewHolder(parent) else TextViewHolder(parent)
   }
@@ -59,26 +59,33 @@ internal class ItemsAdapter(
 
   override fun onBindViewHolder(
     holder: BaseViewHolder,
-    position: Int
+    position: Int,
   ) {
     if (holder is VideoViewHolder) {
-      holder.videoUrl = assetVideoUri
-      val videoTag = holder.videoTag
-      if (shouldBindVideo(holder.rebinder)) {
-        kohii.setUp(assetVideoUri) {
+      holder.videoUrl = VIDEO_URI_ASSET
+      val videoTag = holder.videoTag // This will also set the Rebinder.
+      val rebinder = holder.rebinder
+      val selectionKey = if (rebinder != null) SelectionKey(position, rebinder) else null
+      if (shouldBindVideo(selectionKey)) {
+        Timber.w("Bind VH: rebinder=$rebinder")
+        kohii.setUp(VIDEO_URI_ASSET) {
           tag = requireNotNull(videoTag)
           artworkHintListener = holder
         }
-            .bind(holder.container)
+          .bind(holder.container)
       }
-    } else holder.bind(position)
+    } else {
+      holder.bind(position)
+    }
   }
 
   override fun onViewAttachedToWindow(holder: BaseViewHolder) {
     super.onViewAttachedToWindow(holder)
     if (holder is VideoViewHolder) {
       holder.itemView.setOnClickListener {
-        holder.rebinder?.let(onVideoClick)
+        holder.rebinder?.let { rebinder ->
+          onVideoClick(SelectionKey(holder.absoluteAdapterPosition, rebinder))
+        }
       }
     }
   }
