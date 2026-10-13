@@ -31,6 +31,9 @@ Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm s�
   Bỏ workflow publish snapshot lên Sonatype OSSRH (đã ngừng hoạt động).
 - Phát hành qua JitPack thay cho OSSRH (group `com.github.akaizz.kohii`); `kohii-exoplayer` khai báo
   `kohii-core` dạng `api` nên app chỉ cần khai báo `kohii-exoplayer`.
+- Xóa `buildSrc` (code chết, không file build nào dùng). Nó buộc Gradle biên dịch Kotlin DSL và tải
+  thêm `kotlin-stdlib`/`kotlin-gradle-plugin` trước mọi bản build, từng làm build trên JitPack lỗi khi
+  Maven Central trả về `429 Too Many Requests`.
 
 ## 1. Rủi ro và lỗi trong code
 
@@ -147,8 +150,7 @@ Nên dùng `LruCache`.
   (`2018005` = 2.18.5) không còn đúng với Media3.
 - **P2. Javadoc bị tắt** ở `kohii-core`, và lint tắt `RestrictedApi`, `VisibleForTests`,
   `UnusedResources`, `UnusedIds` ở mọi module.
-- **P2. Code chết**: `buildSrc/.../Dependencies.kt` không được dùng, còn tham chiếu ExoPlayer 2 và
-  Media2. `.github/FUNDING.yml` trỏ tới tài khoản tác giả gốc.
+- **P2. `.github/FUNDING.yml`** trỏ tới tài khoản tác giả gốc.
 - **P2. Sample target SDK 36**: từ Android 15 app bắt buộc edge-to-edge (Android 16 bỏ luôn cách tắt),
   giao diện sample có thể bị thanh hệ thống che.
 

@@ -33,8 +33,6 @@
 /kohii-sample/google-services.json
 /kohii/src/main/java/.scannerwork/
 /.scannerwork/.sonar_lock
-/buildSrc/build
-/buildSrc/.gradle
 /.idea/markdown-exported-files.xml
 /kohii-exoplayer/.gitignore
 /kohii-exoplayer/consumer-rules.pro
