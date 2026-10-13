@@ -35,15 +35,8 @@ buildscript {
     classpath(libs.ktlint.gradle)
     classpath(libs.dokka.gradle.plugin)
     classpath(libs.binary.compatibility.validator)
-    classpath(libs.publish.plugin)
   }
 }
-
-apply plugin: 'io.github.gradle-nexus.publish-plugin'
-
-// Setup for the Nexus Publish Plugin.
-group = libs.versions.release.groupid.get()
-version = libs.versions.release.name.get()
 
 def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok")]
 
@@ -58,23 +51,6 @@ apply plugin: "org.jetbrains.dokka"
 tasks.withType(DokkaMultiModuleTask).configureEach {
   outputDirectory.set(file("$rootDir/docs/api"))
   removeChildTasks(sampleProjects)
-}
-
-def getRepositoryUsername() {
-  return hasProperty('mavenCentralRepositoryUsername') ? mavenCentralRepositoryUsername : ""
-}
-
-def getRepositoryPassword() {
-  return hasProperty('mavenCentralRepositoryPassword') ? mavenCentralRepositoryPassword : ""
-}
-
-nexusPublishing {
-  repositories {
-    sonatype {
-      username = getRepositoryUsername()
-      password = getRepositoryPassword()
-    }
-  }
 }
 
 allprojects {

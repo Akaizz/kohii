@@ -58,7 +58,8 @@ android {
 }
 
 dependencies {
-  implementation project(':kohii-core')
+  // kohii-exoplayer's public API uses kohii-core types (Engine, Playable, ...).
+  api project(':kohii-core')
 
   api(libs.androidx.media3.common)
   api(libs.androidx.media3.exoplayer)

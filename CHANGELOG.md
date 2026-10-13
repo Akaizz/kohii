@@ -14,6 +14,10 @@
   `ExoPlayer`, so it only knows the methods of the Media3 version it was built with: with a newer
   Media3, calling a method added later (for example `PlayerControlView` calls
   `ExoPlayer.isScrubbingModeEnabled()` since Media3 1.8) crashes with `AbstractMethodError`.
+- Published through JitPack as `com.github.Akaizz.kohii:kohii-core` and
+  `com.github.Akaizz.kohii:kohii-exoplayer` (instead of `im.ene.kohii` on Maven Central).
+- (kohii-exoplayer): `kohii-core` is now an `api` dependency, so apps only need to declare
+  `kohii-exoplayer`.
 - (kohii-core): `NetworkTypeObserver` is registered with an explicit main thread `Executor`, as
   `register(Listener)` is deprecated in Media3 1.10.
 - (kohii-core): `media3-common` is now an `api` dependency, so `Player`, `C`, ... are available to

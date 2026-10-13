@@ -28,7 +28,9 @@ Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm s�
   buộc để có component `release` cho `gradle/release_maven.gradle`.
 - CI: thay hai workflow cũ (dùng `actions/cache@v2` đã bị GitHub ngừng hỗ trợ) bằng `ci.yml` chạy
   `./gradlew check assembleDebug` với `checkout@v4`, `setup-java@v4`, `gradle/actions/setup-gradle@v4`.
-  Bỏ workflow publish snapshot (xem mục 4).
+  Bỏ workflow publish snapshot lên Sonatype OSSRH (đã ngừng hoạt động).
+- Phát hành qua JitPack thay cho OSSRH (group `com.github.Akaizz.kohii`); `kohii-exoplayer` khai báo
+  `kohii-core` dạng `api` nên app chỉ cần khai báo `kohii-exoplayer`.
 
 ## 1. Rủi ro và lỗi trong code
 
@@ -124,8 +126,6 @@ Nên dùng `LruCache`.
   `PlayerViewPlayable` và một số màn sample; logic 1.1.x trong `Bucket.selectByOrientation`.
 - **P2. API deprecated còn public**: `PlayerEventListener`, các hằng số trong `Common`
   (`REPEAT_MODE_*`, `STATE_*`), các type alias `StyledPlayerView*`. Có thể xóa ở lần tăng version lớn.
-- **P2. `kohii-exoplayer` phụ thuộc `kohii-core` dạng `implementation`** dù API public dùng kiểu của
-  `kohii-core` (`Engine`, `Playable`...), nên client phải tự khai báo `kohii-core`. Nên đổi sang `api`.
 - **P2. Gần như không có test**: chỉ có `PlayerPoolTest`. Logic chọn video
   (`Manager.splitPlaybacks`, `Bucket.selectByOrientation`) và vòng đời `Playable` chưa có test.
 
@@ -134,14 +134,12 @@ Nên dùng `LruCache`.
 - **P0. Cập nhật file `.api`**: chạy `./gradlew apiDump` và commit. Các file `.api` đang được sửa
   tay (phần do Kotlin sinh cho `KohiiExoPlayer` không khớp), nên `apiCheck` trong CI sẽ thất bại cho
   tới khi dump lại.
-- **P1. Chưa có kênh phát hành**: `gradle/release_maven.gradle` vẫn publish lên `oss.sonatype.org`
-  (Sonatype OSSRH, đã ngừng hoạt động giữa 2025), và group `im.ene.kohii` thuộc tác giả gốc nên bản
-  fork không publish vào đó được. Workflow publish snapshot đã bị bỏ. App hiện vẫn dùng
-  `im.ene.kohii:kohii-core/kohii-exoplayer:1.4.0.2017001` (bản gốc, build với ExoPlayer 2.17.1) cùng
-  các dependency `com.google.android.exoplayer:*:2.17.1`. Để dùng bản fork, cần đổi group (ví dụ
-  `vn.gapowork.android`, đã dùng cho các thư viện nội bộ khác của app) và publish lên Maven nội bộ,
-  hoặc dùng JitPack (app đã dùng cho các fork `com.github.Akaizz:*`), hoặc include dạng module source.
-  Sau khi chuyển, bỏ các dependency ExoPlayer 2 khỏi app nếu không còn chỗ nào dùng.
+- **P1. Kiểm tra bản build JitPack đầu tiên**: thư viện được phát hành qua JitPack
+  (`com.github.Akaizz.kohii:kohii-core`/`kohii-exoplayer`, cấu hình trong `jitpack.yml`). Cần mở
+  `https://jitpack.io/#Akaizz/kohii`, build một tag hoặc `media3-SNAPSHOT` và xem log để chắc JitPack
+  build được với JDK 17, compileSdk 36. Sau đó đổi app từ `im.ene.kohii:*:1.4.0.2017001` (bản gốc,
+  ExoPlayer 2.17.1) sang bản này, sửa `FeedVideoPlayerInitializer` sang Media3, rồi bỏ các dependency
+  `com.google.android.exoplayer:*:2.17.1` nếu không còn chỗ nào dùng.
 - **P2. Jetifier vẫn bật** (`android.enableJetifier=true`) dù có thể không còn thư viện support cũ;
   làm build chậm. Kiểm tra bằng `./gradlew checkJetifier` rồi tắt.
 - **P2. Version không đồng bộ**: `gradle.properties` ghi `VERSION_NAME=1.4.0.2017001`,
@@ -157,7 +155,7 @@ Nên dùng `LruCache`.
 ## 5. Thứ tự đề xuất
 
 1. Build nhánh `media3`, sửa lỗi biên dịch nếu có, chạy `./gradlew apiDump` và commit.
-2. Quyết định kênh phát hành cho app.
+2. Build bản JitPack đầu tiên và chuyển app sang dùng nó.
 3. Bỏ Toast tự hiện trong `PlayerViewBridge`.
 4. Dọn pool khi thiếu bộ nhớ, sửa `MemoryMode.LOW` trên Android 14+.
 5. Viết test cho logic chọn video trước khi tối ưu đường refresh.

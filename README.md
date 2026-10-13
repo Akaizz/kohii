@@ -31,19 +31,20 @@ powerful features out of the box, including
 
 Add to your module's build.gradle dependencies
 
+This fork is distributed through [JitPack](https://jitpack.io/#Akaizz/kohii).
+
 ```groovy
-// Update top level build.gradle
-allprojects {
-  repositories {
-    mavenCentral()
-  }
+// settings.gradle (or top level build.gradle)
+repositories {
+  google()
+  mavenCentral()
+  maven { url "https://jitpack.io" }
 }
 ```
 
 ```groovy
-// Add these to app level build.gradle (or to module that will use Kohii)
-implementation "im.ene.kohii:kohii-core:1.4.0.2017001" // core library
-implementation "im.ene.kohii:kohii-exoplayer:1.4.0.2017001" // default support for ExoPlayer
+// <version> is a git tag, a commit hash, or <branch>-SNAPSHOT (for example media3-SNAPSHOT).
+implementation "com.github.Akaizz.kohii:kohii-exoplayer:<version>" // also brings kohii-core
 // Media3 ExoPlayer (androidx.media3:media3-exoplayer, media3-ui) is included transitively.
 // If your app also declares Media3 modules, use the same version as Kohii (1.10.1).
 ```

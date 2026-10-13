@@ -1,23 +1,9 @@
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
+// Published through JitPack (https://jitpack.io) as com.github.Akaizz.kohii:<module>:<version>.
+// JitPack sets JITPACK=true and VERSION (the requested tag, commit or branch-SNAPSHOT) when building.
 group = GROUP
-version = VERSION_NAME
-
-@SuppressWarnings('GrMethodMayBeStatic')
-def isReleaseBuild() {
-  return !VERSION_NAME.contains("SNAPSHOT")
-}
-
-def getReleaseRepositoryUrl() {
-  return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
-      : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-}
-
-def getSnapshotRepositoryUrl() {
-  return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
-      : "https://oss.sonatype.org/content/repositories/snapshots/"
-}
+version = System.getenv("JITPACK") == "true" ? System.getenv("VERSION") : VERSION_NAME
 
 def configurePom(pom) {
   pom.name = POM_NAME
@@ -95,35 +81,13 @@ afterEvaluate { project ->
     publications {
       release(MavenPublication) {
         from components.release
-        groupId = GROUP
-        version = VERSION_NAME
+        groupId = project.group
+        version = project.version
         artifactId = POM_ARTIFACT_ID
         artifact androidSourcesJar
         artifact androidJavadocsJar
         configurePom(pom)
       }
     }
-
-    repositories {
-      maven {
-        def releasesRepoUrl = getReleaseRepositoryUrl()
-        def snapshotsRepoUrl = getSnapshotRepositoryUrl()
-        url = isReleaseBuild() ? releasesRepoUrl : snapshotsRepoUrl
-
-        credentials(PasswordCredentials) {
-          username = getRepositoryUsername()
-          password = getRepositoryPassword()
-        }
-      }
-    }
   }
-
-//  signing {
-//    publishing.publications.all { publication ->
-//      sign publication
-//    }
-//  }
 }
-
-// Command:
-// ./gradlew publishReleasePublicationToMavenRepository closeAndReleaseSonatypeStagingRepository
