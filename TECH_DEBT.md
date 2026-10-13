@@ -29,7 +29,7 @@ Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm s�
 - CI: thay hai workflow cũ (dùng `actions/cache@v2` đã bị GitHub ngừng hỗ trợ) bằng `ci.yml` chạy
   `./gradlew check assembleDebug` với `checkout@v4`, `setup-java@v4`, `gradle/actions/setup-gradle@v4`.
   Bỏ workflow publish snapshot lên Sonatype OSSRH (đã ngừng hoạt động).
-- Phát hành qua JitPack thay cho OSSRH (group `com.github.Akaizz.kohii`); `kohii-exoplayer` khai báo
+- Phát hành qua JitPack thay cho OSSRH (group `com.github.akaizz.kohii`); `kohii-exoplayer` khai báo
   `kohii-core` dạng `api` nên app chỉ cần khai báo `kohii-exoplayer`.
 
 ## 1. Rủi ro và lỗi trong code
@@ -135,8 +135,8 @@ Nên dùng `LruCache`.
   tay (phần do Kotlin sinh cho `KohiiExoPlayer` không khớp), nên `apiCheck` trong CI sẽ thất bại cho
   tới khi dump lại.
 - **P1. Kiểm tra bản build JitPack đầu tiên**: thư viện được phát hành qua JitPack
-  (`com.github.Akaizz.kohii:kohii-core`/`kohii-exoplayer`, cấu hình trong `jitpack.yml`). Cần mở
-  `https://jitpack.io/#Akaizz/kohii`, build một tag hoặc `media3-SNAPSHOT` và xem log để chắc JitPack
+  (`com.github.akaizz.kohii:kohii-core`/`kohii-exoplayer`, cấu hình trong `jitpack.yml`). Cần mở
+  `https://jitpack.io/#akaizz/kohii`, build một tag hoặc `media3-SNAPSHOT` và xem log để chắc JitPack
   build được với JDK 17, compileSdk 36. Sau đó đổi app từ `im.ene.kohii:*:1.4.0.2017001` (bản gốc,
   ExoPlayer 2.17.1) sang bản này, sửa `FeedVideoPlayerInitializer` sang Media3, rồi bỏ các dependency
   `com.google.android.exoplayer:*:2.17.1` nếu không còn chỗ nào dùng.

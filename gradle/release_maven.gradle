@@ -1,6 +1,6 @@
 apply plugin: 'maven-publish'
 
-// Published through JitPack (https://jitpack.io) as com.github.Akaizz.kohii:<module>:<version>.
+// Published through JitPack (https://jitpack.io) as com.github.akaizz.kohii:<module>:<version>.
 // JitPack sets JITPACK=true and VERSION (the requested tag, commit or branch-SNAPSHOT) when building.
 group = GROUP
 version = System.getenv("JITPACK") == "true" ? System.getenv("VERSION") : VERSION_NAME
