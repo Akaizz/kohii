@@ -105,8 +105,26 @@ data class ExoPlayerConfig(
       .setTargetBufferBytes(targetBufferBytes)
       .build()
 
+  // Shared by every player created from this config, so the bandwidth estimate learnt by one player
+  // is reused by the next ones instead of starting over from the initial estimate.
+  private var bandwidthMeter: BandwidthMeter? = null
+
+  /**
+   * Returns the [BandwidthMeter] shared by all the players created from this config. If all the
+   * bandwidth settings are the defaults, this is the app-wide [DefaultBandwidthMeter] singleton.
+   */
   override fun createBandwidthMeter(context: Context): BandwidthMeter =
-    DefaultBandwidthMeter.Builder(context.applicationContext)
+    bandwidthMeter ?: buildBandwidthMeter(context.applicationContext).also { bandwidthMeter = it }
+
+  private fun buildBandwidthMeter(context: Context): BandwidthMeter {
+    val useDefaults =
+      clock === Clock.DEFAULT &&
+        overrideInitialBitrateEstimate <= 0 &&
+        resetOnNetworkTypeChange &&
+        slidingWindowMaxWeight == DefaultBandwidthMeter.DEFAULT_SLIDING_WINDOW_MAX_WEIGHT
+    if (useDefaults) return DefaultBandwidthMeter.getSingletonInstance(context)
+
+    return DefaultBandwidthMeter.Builder(context)
       .setClock(clock)
       .setResetOnNetworkTypeChange(resetOnNetworkTypeChange)
       .setSlidingWindowMaxWeight(slidingWindowMaxWeight)
@@ -116,6 +134,7 @@ data class ExoPlayerConfig(
         }
       }
       .build()
+  }
 
   override fun createDefaultTrackSelector(context: Context): DefaultTrackSelector =
     if (trackSelectorParameters == null) {

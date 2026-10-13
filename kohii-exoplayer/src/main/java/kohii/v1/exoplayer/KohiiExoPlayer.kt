@@ -62,7 +62,7 @@ open class KohiiExoPlayer(
     trackSelector: DefaultTrackSelector = DefaultTrackSelector(context.applicationContext),
     loadControl: LoadControl = DefaultLoadControl.Builder().build(),
     bandwidthMeter: BandwidthMeter =
-      DefaultBandwidthMeter.Builder(context.applicationContext).build(),
+      DefaultBandwidthMeter.getSingletonInstance(context.applicationContext),
     mediaSourceFactory: MediaSource.Factory,
     analyticsCollector: AnalyticsCollector = DefaultAnalyticsCollector(clock),
     looper: Looper = Util.getCurrentOrMainLooper(),

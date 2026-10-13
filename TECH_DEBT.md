@@ -60,7 +60,7 @@ Sửa: đổi các hàm log thành `inline` nhận lambda, ví dụ
 và xóa lệnh log trong `compareWith`. Đây là thay đổi lớn về số dòng nhưng an toàn, và lợi ích rõ
 nhất trong danh sách này.
 
-### P1. Mỗi player có một `DefaultBandwidthMeter` riêng
+### P1. Mỗi player có một `DefaultBandwidthMeter` riêng (đã sửa)
 
 `ExoPlayerConfig.createBandwidthMeter()` tạo bandwidth meter mới cho mỗi player trong pool. Mỗi
 player phải tự ước lượng băng thông lại từ đầu, nên video đầu tiên của mỗi player thường chọn sai
@@ -69,11 +69,14 @@ chất lượng (adaptive streaming). Với feed nhiều video, đây là lý do
 Sửa: dùng một bandwidth meter dùng chung cho cả pool, ví dụ
 `DefaultBandwidthMeter.getSingletonInstance(context)` khi client không cấu hình gì đặc biệt.
 
-### P1. Pool giữ quá nhiều ExoPlayer
+### P2. Pool có thể giữ quá nhiều ExoPlayer
 
 `PlayerPool.DEFAULT_POOL_SIZE = max(SDK_INT / 6, số nhân CPU)`. Trên Android 14 với CPU 8 nhân,
 pool có thể giữ tới 8 instance ExoPlayer đang rảnh. Mỗi instance có thread playback, renderer và
 buffer riêng. Công thức `SDK_INT / 6` không còn ý nghĩa (nó được viết cho API 16–18).
+
+Thực tế pool chỉ đầy khi nhiều player được tạo cùng lúc (bật `preload`, lưới nhiều video), và
+player rảnh đã `stop()` thì decoder đã được giải phóng. Lợi ích chủ yếu ở máy yếu.
 
 Sửa: đặt mặc định cố định nhỏ (2–3) và cho client cấu hình.
 
@@ -157,6 +160,6 @@ không mute.
 
 1. ~~Sửa lỗi `applyPlayerParameters`.~~ Đã xong.
 2. Sửa CI để có lại kiểm tra tự động, chạy `apiDump`.
-3. ~~Log dạng lambda.~~ Đã xong. Còn lại: bandwidth meter dùng chung, giảm kích thước pool.
+3. ~~Log dạng lambda, bandwidth meter dùng chung.~~ Đã xong. Còn lại: giảm kích thước pool.
 4. Nâng AGP/Kotlin, rồi nâng Media3 lên bản mới nhất.
 5. Dọn code chết, version catalog, quyết định số phận `kohii-ads`.

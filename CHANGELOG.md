@@ -30,6 +30,10 @@
 - (kohii-exoplayer): `PlayerParameters` (max video size and bitrates) are now applied when the
   Bridge acquires a new player from the pool. Before, they were silently ignored until the next
   change.
+- (kohii-exoplayer): All players created from the same `ExoPlayerConfig` now share one
+  `BandwidthMeter` (the app-wide `DefaultBandwidthMeter` singleton when the bandwidth settings are
+  the defaults), so HLS/DASH streams start at the right quality instead of re-estimating the
+  bandwidth for every player.
 - (kohii-core): Debug log messages are only built when logging is enabled. The internal log helpers
   now take a lambda (`logDebug { "..." }`) instead of being `String` extensions.
 
