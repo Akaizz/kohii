@@ -311,6 +311,7 @@ public final class kohii/v1/core/MemoryMode : java/lang/Enum {
 	public static final field INFINITE Lkohii/v1/core/MemoryMode;
 	public static final field LOW Lkohii/v1/core/MemoryMode;
 	public static final field NORMAL Lkohii/v1/core/MemoryMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lkohii/v1/core/MemoryMode;
 	public static fun values ()[Lkohii/v1/core/MemoryMode;
 }
@@ -571,7 +572,7 @@ public final class kohii/v1/core/Rebinder : android/os/Parcelable {
 	public final fun component1 ()Ljava/lang/Object;
 	public final fun copy (Ljava/lang/Object;)Lkohii/v1/core/Rebinder;
 	public static synthetic fun copy$default (Lkohii/v1/core/Rebinder;Ljava/lang/Object;ILjava/lang/Object;)Lkohii/v1/core/Rebinder;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOptions ()Lkohii/v1/core/Rebinder$Options;
 	public final fun getTag ()Ljava/lang/Object;
@@ -579,7 +580,7 @@ public final class kohii/v1/core/Rebinder : android/os/Parcelable {
 	public final fun setOptions (Lkohii/v1/core/Rebinder$Options;)V
 	public fun toString ()Ljava/lang/String;
 	public final fun with (Lkotlin/jvm/functions/Function1;)Lkohii/v1/core/Rebinder;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class kohii/v1/core/Rebinder$Creator : android/os/Parcelable$Creator {
@@ -634,6 +635,7 @@ public final class kohii/v1/core/Scope : java/lang/Enum {
 	public static final field GROUP Lkohii/v1/core/Scope;
 	public static final field MANAGER Lkohii/v1/core/Scope;
 	public static final field PLAYBACK Lkohii/v1/core/Scope;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lkohii/v1/core/Scope;
 	public static fun values ()[Lkohii/v1/core/Scope;
 }
@@ -738,7 +740,7 @@ public final class kohii/v1/media/PlaybackInfo : android/os/Parcelable {
 	public final fun component2 ()J
 	public final fun copy (IJ)Lkohii/v1/media/PlaybackInfo;
 	public static synthetic fun copy$default (Lkohii/v1/media/PlaybackInfo;IJILjava/lang/Object;)Lkohii/v1/media/PlaybackInfo;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getResumePosition ()J
 	public final fun getResumeWindow ()I
@@ -746,7 +748,7 @@ public final class kohii/v1/media/PlaybackInfo : android/os/Parcelable {
 	public final fun setResumePosition (J)V
 	public final fun setResumeWindow (I)V
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class kohii/v1/media/PlaybackInfo$Companion {
@@ -771,13 +773,13 @@ public final class kohii/v1/media/VolumeInfo : android/os/Parcelable {
 	public final fun component2 ()F
 	public final fun copy (ZF)Lkohii/v1/media/VolumeInfo;
 	public static synthetic fun copy$default (Lkohii/v1/media/VolumeInfo;ZFILjava/lang/Object;)Lkohii/v1/media/VolumeInfo;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getMute ()Z
 	public final fun getVolume ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class kohii/v1/media/VolumeInfo$Companion {

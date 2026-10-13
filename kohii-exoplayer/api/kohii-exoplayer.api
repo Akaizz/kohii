@@ -68,7 +68,7 @@ public final class kohii/v1/exoplayer/HybridMediaItem : androidx/media3/exoplaye
 	public fun getType ()Ljava/lang/String;
 	public fun getUri ()Landroid/net/Uri;
 	public fun maybeThrowSourceInfoRefreshError ()V
-	public fun prepareSource (Landroidx/media3/exoplayer/source/MediaSource$MediaSourceCaller;Landroidx/media3/exoplayer/upstream/TransferListener;Landroidx/media3/exoplayer/analytics/PlayerId;)V
+	public fun prepareSource (Landroidx/media3/exoplayer/source/MediaSource$MediaSourceCaller;Landroidx/media3/datasource/TransferListener;Landroidx/media3/exoplayer/analytics/PlayerId;)V
 	public fun releasePeriod (Landroidx/media3/exoplayer/source/MediaPeriod;)V
 	public fun releaseSource (Landroidx/media3/exoplayer/source/MediaSource$MediaSourceCaller;)V
 	public fun removeDrmEventListener (Landroidx/media3/exoplayer/drm/DrmSessionEventListener;)V
@@ -103,6 +103,7 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun <init> (Landroidx/media3/exoplayer/ExoPlayer$Builder;)V
 	public fun <init> (Landroidx/media3/exoplayer/ExoPlayer;)V
 	public fun addAnalyticsListener (Landroidx/media3/exoplayer/analytics/AnalyticsListener;)V
+	public fun addAudioCodecParametersChangeListener (Landroidx/media3/exoplayer/CodecParametersChangeListener;Ljava/util/List;)V
 	public fun addAudioOffloadListener (Landroidx/media3/exoplayer/ExoPlayer$AudioOffloadListener;)V
 	public fun addListener (Landroidx/media3/common/Player$Listener;)V
 	public fun addMediaItem (ILandroidx/media3/common/MediaItem;)V
@@ -113,26 +114,25 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun addMediaSource (Landroidx/media3/exoplayer/source/MediaSource;)V
 	public fun addMediaSources (ILjava/util/List;)V
 	public fun addMediaSources (Ljava/util/List;)V
+	public fun addVideoCodecParametersChangeListener (Landroidx/media3/exoplayer/CodecParametersChangeListener;Ljava/util/List;)V
 	public fun addVolumeChangedListener (Lkohii/v1/core/VolumeChangedListener;)V
 	public fun canAdvertiseSession ()Z
 	public fun clearAuxEffectInfo ()V
-	public fun clearCameraMotionListener (Landroidx/media3/common/video/spherical/CameraMotionListener;)V
+	public fun clearCameraMotionListener (Landroidx/media3/exoplayer/video/spherical/CameraMotionListener;)V
 	public fun clearMediaItems ()V
-	public fun clearVideoFrameMetadataListener (Landroidx/media3/common/video/VideoFrameMetadataListener;)V
+	public fun clearVideoFrameMetadataListener (Landroidx/media3/exoplayer/video/VideoFrameMetadataListener;)V
 	public fun clearVideoSurface ()V
 	public fun clearVideoSurface (Landroid/view/Surface;)V
 	public fun clearVideoSurfaceHolder (Landroid/view/SurfaceHolder;)V
 	public fun clearVideoSurfaceView (Landroid/view/SurfaceView;)V
 	public fun clearVideoTextureView (Landroid/view/TextureView;)V
-	public fun createMessage (Landroidx/media3/common/PlayerMessage$Target;)Landroidx/media3/common/PlayerMessage;
+	public fun createMessage (Landroidx/media3/exoplayer/PlayerMessage$Target;)Landroidx/media3/exoplayer/PlayerMessage;
 	public fun decreaseDeviceVolume ()V
-	public fun experimentalIsSleepingForOffload ()Z
-	public fun experimentalSetOffloadSchedulingEnabled (Z)V
+	public fun decreaseDeviceVolume (I)V
 	public fun getAnalyticsCollector ()Landroidx/media3/exoplayer/analytics/AnalyticsCollector;
 	public fun getApplicationLooper ()Landroid/os/Looper;
 	public fun getAudioAttributes ()Landroidx/media3/common/AudioAttributes;
-	public fun getAudioComponent ()Landroidx/media3/exoplayer/ExoPlayer$AudioComponent;
-	public fun getAudioDecoderCounters ()Landroidx/media3/common/decoder/DecoderCounters;
+	public fun getAudioDecoderCounters ()Landroidx/media3/exoplayer/DecoderCounters;
 	public fun getAudioFormat ()Landroidx/media3/common/Format;
 	public fun getAudioSessionId ()I
 	public fun getAvailableCommands ()Landroidx/media3/common/Player$Commands;
@@ -156,7 +156,6 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun getCurrentTrackSelections ()Landroidx/media3/exoplayer/trackselection/TrackSelectionArray;
 	public fun getCurrentTracks ()Landroidx/media3/common/Tracks;
 	public fun getCurrentWindowIndex ()I
-	public fun getDeviceComponent ()Landroidx/media3/exoplayer/ExoPlayer$DeviceComponent;
 	public fun getDeviceInfo ()Landroidx/media3/common/DeviceInfo;
 	public fun getDeviceVolume ()I
 	public fun getDuration ()J
@@ -172,40 +171,39 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun getPlaybackParameters ()Landroidx/media3/common/PlaybackParameters;
 	public fun getPlaybackState ()I
 	public fun getPlaybackSuppressionReason ()I
-	public fun getPlayerError ()Landroidx/media3/common/ExoPlaybackException;
 	public synthetic fun getPlayerError ()Landroidx/media3/common/PlaybackException;
+	public fun getPlayerError ()Landroidx/media3/exoplayer/ExoPlaybackException;
 	public fun getPlaylistMetadata ()Landroidx/media3/common/MediaMetadata;
+	public fun getPreloadConfiguration ()Landroidx/media3/exoplayer/ExoPlayer$PreloadConfiguration;
 	public fun getPreviousMediaItemIndex ()I
 	public fun getPreviousWindowIndex ()I
-	public fun getRenderer (I)Landroidx/media3/common/Renderer;
+	public fun getRenderer (I)Landroidx/media3/exoplayer/Renderer;
 	public fun getRendererCount ()I
 	public fun getRendererType (I)I
 	public fun getRepeatMode ()I
+	public fun getScrubbingModeParameters ()Landroidx/media3/exoplayer/ScrubbingModeParameters;
+	public fun getSecondaryRenderer (I)Landroidx/media3/exoplayer/Renderer;
 	public fun getSeekBackIncrement ()J
 	public fun getSeekForwardIncrement ()J
-	public fun getSeekParameters ()Landroidx/media3/common/SeekParameters;
+	public fun getSeekParameters ()Landroidx/media3/exoplayer/SeekParameters;
 	public fun getShuffleModeEnabled ()Z
+	public fun getShuffleOrder ()Landroidx/media3/exoplayer/source/ShuffleOrder;
 	public fun getSkipSilenceEnabled ()Z
 	public fun getSurfaceSize ()Landroidx/media3/common/util/Size;
-	public fun getTextComponent ()Landroidx/media3/exoplayer/ExoPlayer$TextComponent;
 	public fun getTotalBufferedDuration ()J
-	public fun getTrackSelectionParameters ()Landroidx/media3/exoplayer/trackselection/TrackSelectionParameters;
+	public fun getTrackSelectionParameters ()Landroidx/media3/common/TrackSelectionParameters;
 	public fun getTrackSelector ()Landroidx/media3/exoplayer/trackselection/TrackSelector;
 	public fun getVideoChangeFrameRateStrategy ()I
-	public fun getVideoComponent ()Landroidx/media3/exoplayer/ExoPlayer$VideoComponent;
-	public fun getVideoDecoderCounters ()Landroidx/media3/common/decoder/DecoderCounters;
+	public fun getVideoDecoderCounters ()Landroidx/media3/exoplayer/DecoderCounters;
 	public fun getVideoFormat ()Landroidx/media3/common/Format;
 	public fun getVideoScalingMode ()I
 	public fun getVideoSize ()Landroidx/media3/common/VideoSize;
 	public final fun getVolume ()F
 	public fun getVolumeInfo ()Lkohii/v1/media/VolumeInfo;
-	public fun hasNext ()Z
 	public fun hasNextMediaItem ()Z
-	public fun hasNextWindow ()Z
-	public fun hasPrevious ()Z
 	public fun hasPreviousMediaItem ()Z
-	public fun hasPreviousWindow ()Z
 	public fun increaseDeviceVolume ()V
+	public fun increaseDeviceVolume (I)V
 	public fun isCommandAvailable (I)Z
 	public fun isCurrentMediaItemDynamic ()Z
 	public fun isCurrentMediaItemLive ()Z
@@ -217,24 +215,29 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun isLoading ()Z
 	public fun isPlaying ()Z
 	public fun isPlayingAd ()Z
+	public fun isReleased ()Z
+	public fun isScrubbingModeEnabled ()Z
+	public fun isSleepingForOffload ()Z
 	public fun isTunnelingEnabled ()Z
 	public fun moveMediaItem (II)V
 	public fun moveMediaItems (III)V
-	public fun next ()V
+	public fun mute ()V
 	public fun pause ()V
 	public fun play ()V
 	public fun prepare ()V
 	public fun prepare (Landroidx/media3/exoplayer/source/MediaSource;)V
 	public fun prepare (Landroidx/media3/exoplayer/source/MediaSource;ZZ)V
-	public fun previous ()V
 	public fun release ()V
 	public fun removeAnalyticsListener (Landroidx/media3/exoplayer/analytics/AnalyticsListener;)V
+	public fun removeAudioCodecParametersChangeListener (Landroidx/media3/exoplayer/CodecParametersChangeListener;)V
 	public fun removeAudioOffloadListener (Landroidx/media3/exoplayer/ExoPlayer$AudioOffloadListener;)V
 	public fun removeListener (Landroidx/media3/common/Player$Listener;)V
 	public fun removeMediaItem (I)V
 	public fun removeMediaItems (II)V
+	public fun removeVideoCodecParametersChangeListener (Landroidx/media3/exoplayer/CodecParametersChangeListener;)V
 	public fun removeVolumeChangedListener (Lkohii/v1/core/VolumeChangedListener;)V
-	public fun retry ()V
+	public fun replaceMediaItem (ILandroidx/media3/common/MediaItem;)V
+	public fun replaceMediaItems (IILjava/util/List;)V
 	public fun seekBack ()V
 	public fun seekForward ()V
 	public fun seekTo (IJ)V
@@ -243,19 +246,21 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun seekToDefaultPosition (I)V
 	public fun seekToNext ()V
 	public fun seekToNextMediaItem ()V
-	public fun seekToNextWindow ()V
 	public fun seekToPrevious ()V
 	public fun seekToPreviousMediaItem ()V
-	public fun seekToPreviousWindow ()V
 	public fun setAudioAttributes (Landroidx/media3/common/AudioAttributes;Z)V
+	public fun setAudioCodecParameters (Landroidx/media3/exoplayer/CodecParameters;)V
 	public fun setAudioSessionId (I)V
-	public fun setAuxEffectInfo (Landroidx/media3/common/audio/AuxEffectInfo;)V
-	public fun setCameraMotionListener (Landroidx/media3/common/video/spherical/CameraMotionListener;)V
+	public fun setAuxEffectInfo (Landroidx/media3/common/AuxEffectInfo;)V
+	public fun setCameraMotionListener (Landroidx/media3/exoplayer/video/spherical/CameraMotionListener;)V
 	public fun setDeviceMuted (Z)V
+	public fun setDeviceMuted (ZI)V
 	public fun setDeviceVolume (I)V
+	public fun setDeviceVolume (II)V
 	public fun setForegroundMode (Z)V
 	public fun setHandleAudioBecomingNoisy (Z)V
-	public fun setHandleWakeLock (Z)V
+	public fun setImageOutput (Landroidx/media3/exoplayer/image/ImageOutput;)V
+	public fun setMaxSeekToPreviousPositionMs (J)V
 	public fun setMediaItem (Landroidx/media3/common/MediaItem;)V
 	public fun setMediaItem (Landroidx/media3/common/MediaItem;J)V
 	public fun setMediaItem (Landroidx/media3/common/MediaItem;Z)V
@@ -274,25 +279,34 @@ public class kohii/v1/exoplayer/KohiiExoPlayer : androidx/media3/exoplayer/ExoPl
 	public fun setPlaybackSpeed (F)V
 	public fun setPlaylistMetadata (Landroidx/media3/common/MediaMetadata;)V
 	public fun setPreferredAudioDevice (Landroid/media/AudioDeviceInfo;)V
-	public fun setPriorityTaskManager (Landroidx/media3/common/util/PriorityTaskManager;)V
+	public fun setPreloadConfiguration (Landroidx/media3/exoplayer/ExoPlayer$PreloadConfiguration;)V
+	public fun setPriority (I)V
+	public fun setPriorityTaskManager (Landroidx/media3/common/PriorityTaskManager;)V
 	public fun setRepeatMode (I)V
-	public fun setSeekParameters (Landroidx/media3/common/SeekParameters;)V
+	public fun setScrubbingModeEnabled (Z)V
+	public fun setScrubbingModeParameters (Landroidx/media3/exoplayer/ScrubbingModeParameters;)V
+	public fun setSeekBackIncrementMs (J)V
+	public fun setSeekForwardIncrementMs (J)V
+	public fun setSeekParameters (Landroidx/media3/exoplayer/SeekParameters;)V
 	public fun setShuffleModeEnabled (Z)V
 	public fun setShuffleOrder (Landroidx/media3/exoplayer/source/ShuffleOrder;)V
 	public fun setSkipSilenceEnabled (Z)V
-	public fun setTrackSelectionParameters (Landroidx/media3/exoplayer/trackselection/TrackSelectionParameters;)V
+	public fun setTrackSelectionParameters (Landroidx/media3/common/TrackSelectionParameters;)V
 	public fun setVideoChangeFrameRateStrategy (I)V
-	public fun setVideoFrameMetadataListener (Landroidx/media3/common/video/VideoFrameMetadataListener;)V
+	public fun setVideoCodecParameters (Landroidx/media3/exoplayer/CodecParameters;)V
+	public fun setVideoEffects (Ljava/util/List;)V
+	public fun setVideoFrameMetadataListener (Landroidx/media3/exoplayer/video/VideoFrameMetadataListener;)V
 	public fun setVideoScalingMode (I)V
 	public fun setVideoSurface (Landroid/view/Surface;)V
 	public fun setVideoSurfaceHolder (Landroid/view/SurfaceHolder;)V
 	public fun setVideoSurfaceView (Landroid/view/SurfaceView;)V
 	public fun setVideoTextureView (Landroid/view/TextureView;)V
+	public fun setVirtualDeviceId (I)V
 	public final fun setVolume (F)V
 	public fun setVolumeInfo (Lkohii/v1/media/VolumeInfo;)Z
 	public fun setWakeMode (I)V
 	public fun stop ()V
-	public fun stop (Z)V
+	public fun unmute ()V
 }
 
 public final class kohii/v1/exoplayer/KohiiKt {
