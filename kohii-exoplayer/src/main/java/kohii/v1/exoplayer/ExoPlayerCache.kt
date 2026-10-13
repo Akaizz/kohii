@@ -46,8 +46,7 @@ object ExoPlayerCache {
 
   // The cache size is 10% of the free space, between MIN_CACHE_SIZE and MAX_CACHE_SIZE, so a feed
   // of many videos can keep the recently watched ones without filling up small devices.
-  private fun cacheSizeFor(directory: File): Long =
-    (directory.usableSpace / 10).coerceIn(MIN_CACHE_SIZE, MAX_CACHE_SIZE)
+  private fun cacheSizeFor(directory: File): Long = (directory.usableSpace / 10).coerceIn(MIN_CACHE_SIZE, MAX_CACHE_SIZE)
 
   private val lruCacheCreator: (Context) -> Cache = { context ->
     val databaseProvider = StandaloneDatabaseProvider(context)

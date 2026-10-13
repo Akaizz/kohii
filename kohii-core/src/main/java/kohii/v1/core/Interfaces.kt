@@ -16,6 +16,7 @@
 
 package kohii.v1.core
 
+import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Metadata
@@ -27,6 +28,7 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
+import androidx.media3.common.util.UnstableApi
 import kohii.v1.media.VolumeInfo
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -58,8 +60,7 @@ class PlayerEventListeners : CopyOnWriteArraySet<Player.Listener>(), Player.List
 
   override fun onPlayerError(error: PlaybackException): Unit = forEach { it.onPlayerError(error) }
 
-  override fun onPlayerErrorChanged(error: PlaybackException?): Unit =
-    forEach { it.onPlayerErrorChanged(error) }
+  override fun onPlayerErrorChanged(error: PlaybackException?): Unit = forEach { it.onPlayerErrorChanged(error) }
 
   override fun onIsLoadingChanged(isLoading: Boolean): Unit = forEach { it.onIsLoadingChanged(isLoading) }
 
@@ -102,12 +103,14 @@ class PlayerEventListeners : CopyOnWriteArraySet<Player.Listener>(), Player.List
 
   override fun onCues(cueGroup: CueGroup): Unit = forEach { it.onCues(cueGroup) }
 
+  @OptIn(UnstableApi::class)
   override fun onMetadata(metadata: Metadata): Unit = forEach { it.onMetadata(metadata) }
 
   override fun onAudioAttributesChanged(audioAttributes: AudioAttributes): Unit = forEach { it.onAudioAttributesChanged(audioAttributes) }
 
   override fun onVolumeChanged(volume: Float): Unit = forEach { it.onVolumeChanged(volume) }
 
+  @OptIn(UnstableApi::class)
   override fun onAudioSessionIdChanged(audioSessionId: Int): Unit = forEach { it.onAudioSessionIdChanged(audioSessionId) }
 }
 
