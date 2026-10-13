@@ -1,6 +1,6 @@
 # Build configuration for https://jitpack.io
-# Artifacts: com.github.akaizz.kohii:kohii-core:<version> and
-#            com.github.akaizz.kohii:kohii-exoplayer:<version>
+# Artifacts: com.github.Akaizz.kohii:kohii-core:<version> and
+#            com.github.Akaizz.kohii:kohii-exoplayer:<version>
 # <version> is a git tag, a commit hash, or <branch>-SNAPSHOT (for example media3-SNAPSHOT).
 jdk:
   - openjdk17
