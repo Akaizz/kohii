@@ -1,188 +1,159 @@
 # Review: tech debt và hiệu năng
 
-Phạm vi: `kohii-core`, `kohii-exoplayer`, cấu hình build và CI, trên nhánh `media3` (sau khi
-chuyển sang Media3 1.4.1, bỏ `kohii-androidx`, `kohii-ads` và `kohii-experiments`).
+Phạm vi: `kohii-core`, `kohii-exoplayer`, hai app sample, cấu hình build và CI, trên nhánh `media3`
+(Media3 1.10.1; đã bỏ `kohii-androidx`, `kohii-ads`, `kohii-experiments`).
 
 Mức ưu tiên: **P0** là lỗi hoặc thứ đang hỏng, **P1** nên làm sớm, **P2** dọn dẹp khi có thời gian.
 
-## 1. Lỗi thật trong code
+> Lưu ý: nhánh này chưa được build lần nào sau khi đổi sang Media3 1.10.1 và bộ công cụ mới (môi
+> trường viết review không có Android SDK). Lần build đầu tiên có thể còn lỗi biên dịch cần sửa.
 
-### P0. `PlayerParameters` không được áp vào player mới (đã sửa)
+## 0. Đã xử lý trên nhánh `media3`
 
-`kohii-exoplayer/.../PlayerViewBridge.kt`, hàm `ensurePlayer()`:
+- Chuyển từ ExoPlayer 2 sang Media3 1.10.1, rà các API dùng trong thư viện theo mã nguồn 1.10.1
+  (chỉ có `NetworkTypeObserver.register(Listener)` bị deprecated, đã đổi sang bản có `Executor`).
+- `PlayerViewBridge.ensurePlayer()` gọi `applyPlayerParameters()` trước khi gán player, nên giới hạn
+  độ phân giải/bitrate bị bỏ qua với mọi player lấy từ pool. Đã sửa.
+- Log debug ghép chuỗi (và gọi `toString()`) cả ở bản release, kể cả trên đường refresh khi scroll.
+  Đã đổi sang hàm `inline` nhận lambda.
+- Mỗi player trong pool có một `DefaultBandwidthMeter` riêng (HLS/DASH phải ước lượng lại băng
+  thông). Đã dùng chung một meter cho mỗi `ExoPlayerConfig`.
+- Buffer mặc định 50 giây → 12 giây; cache LRU 24 MB → 10% dung lượng trống (32–256 MB), chuyển
+  sang `cacheDir`.
+- Build: AGP 8.12.3, Gradle 8.13, Kotlin 2.0.21, compileSdk 36, minSdk 24, targetSdk (sample) 35;
+  bỏ repo chết (`maven.fabric.io`, `jitpack.io`, snapshot của OSSRH); bỏ các mục không dùng trong
+  version catalog; đổi DSL deprecated (`compileSdkVersion`, `lintOptions`, `packagingOptions`,
+  `kotlinOptions`, `archivesBaseName`); thêm `publishing { singleVariant('release') }` mà AGP 8 bắt
+  buộc để có component `release` cho `gradle/release_maven.gradle`.
+- CI: thay hai workflow cũ (dùng `actions/cache@v2` đã bị GitHub ngừng hỗ trợ) bằng `ci.yml` chạy
+  `./gradlew check assembleDebug` với `checkout@v4`, `setup-java@v4`, `gradle/actions/setup-gradle@v4`.
+  Bỏ workflow publish snapshot (xem mục 4).
 
-```kotlin
-val player = playerPool.getPlayer(this.media)
-applyPlayerParameters(playerParameters) // this.player vẫn đang null -> return ngay
-this.player = player
-```
+## 1. Rủi ro và lỗi trong code
 
-`applyPlayerParameters` đọc `this.player`, nhưng lúc đó field chưa được gán nên hàm thoát luôn.
-Kết quả: giới hạn độ phân giải và bitrate (`maxVideoWidth/Height`, `maxVideoBitrate`,
-`maxAudioBitrate`) mà client đặt qua `Playback.playerParameters` hoặc `NetworkTypeChangeListener`
-bị bỏ qua mỗi khi bridge lấy player mới từ pool, cho tới lần đổi tham số kế tiếp.
+### P1. Phiên bản Media3 của app phải trùng với bản Kohii được build
 
-Sửa: gán `this.player = player` trước rồi mới gọi `applyPlayerParameters`.
+`KohiiExoPlayer` cài đặt `ExoPlayer` bằng delegation của Kotlin (`ExoPlayer by player`). Kotlin chỉ
+sinh hàm chuyển tiếp cho các hàm có trong `ExoPlayer` **tại thời điểm build Kohii**. Nếu app dùng
+Media3 mới hơn (Gradle luôn chọn bản cao nhất trong cả app), gọi một hàm mới thêm vào `ExoPlayer`
+trên `KohiiExoPlayer` sẽ crash với `AbstractMethodError`.
 
-### P1. Crash khi app dùng Media3 mới hơn bản Kohii được build
+Bằng chứng (đối chiếu mã nguồn `androidx/media`):
 
-`KohiiExoPlayer` cài đặt `ExoPlayer` bằng delegation của Kotlin (`ExoPlayer by player`), và
-`HybridMediaItem` làm tương tự với `MediaSource`. Kotlin chỉ sinh các hàm chuyển tiếp cho những
-hàm có trong interface **tại thời điểm build Kohii** (Media3 1.4.1).
+- Từ 1.4.1 lên 1.8.0, interface `Player` không thêm hàm nào (chỉ xóa 8 hàm deprecated), nhưng
+  `ExoPlayer` thêm 5 hàm abstract: `setScrubbingModeEnabled`, `isScrubbingModeEnabled`,
+  `setScrubbingModeParameters`, `getScrubbingModeParameters`, `getShuffleOrder`.
+- `PlayerControlView` bản 1.8.0, trong `updateProgress()`, gọi `isScrubbingModeEnabled()` qua
+  reflection lên mọi player là `ExoPlayer`: màn nào hiện thanh điều khiển sẽ crash nếu
+  `KohiiExoPlayer` được build với Media3 cũ hơn.
 
-Media3 thường thêm hàm mới vào `Player`/`ExoPlayer` ở các bản sau. Vì `media3-exoplayer` là
-dependency `api`, app rất dễ nâng Media3 lên bản mới hơn. Khi đó, nếu code của Media3 (ví dụ
-`PlayerView`) hoặc của app gọi một hàm mới trên `KohiiExoPlayer`, app sẽ crash với
-`AbstractMethodError`. Mọi player trong `ExoPlayerPool` đều là `KohiiExoPlayer`, nên rủi ro này
-áp dụng cho toàn bộ feed.
+**Không bỏ được `KohiiExoPlayer`, cũng không nên đổi nó sang `ForwardingPlayer`**: client tạo
+trực tiếp `KohiiExoPlayer(...)` trong `PlayerPool` riêng và kiểm tra `player is ExoPlayer` (để trả
+`AudioAttributes` về mặc định khi reset). Đổi sang `ForwardingPlayer` sẽ làm kiểm tra đó âm thầm sai.
 
-Sửa: không cài đặt lại interface của Media3. Ví dụ dùng thẳng instance `ExoPlayer` do
-`ExoPlayer.Builder` tạo ra và đặt logic âm lượng (`VolumeInfoController`) ở một lớp bọc riêng
-không implement `ExoPlayer`; hoặc kế thừa `ForwardingPlayer` (được build cùng Media3 nên luôn
-khớp). `HybridMediaItem` không được dùng ở đâu trong repo, có thể deprecate rồi xóa. Trong lúc
-chưa sửa, cần ghi rõ cho client: phải dùng đúng bản Media3 mà Kohii được build.
+Cách xử lý: quy định nâng Media3 ở Kohii và app cùng lúc (hiện cùng là 1.10.1). App nên khai báo
+mọi module Media3 (kể cả `media3-datasource-okhttp`, `media3-exoplayer-hls`) bằng cùng một biến
+version.
 
-### P2. `PlaybackInfo` là data class có thể thay đổi (mutable) nhưng được chia sẻ
+### P2. `HybridMediaItem` không còn tác dụng
 
-`PlaybackInfo` có `var resumeWindow` và `var resumePosition`. Getter `playbackInfo` của bridge có
-thể trả về chính object nội bộ (khi player đang idle), và `seekTo()` sửa trực tiếp object nhận
-được. Khi restore, object lấy từ `Master.playbackInfoStore` được gán thẳng làm trạng thái của
-bridge. Hiện chưa thấy lỗi cụ thể, nhưng ai giữ tham chiếu cũng có thể vô tình sửa trạng thái của
-bên khác.
+Nó được thiết kế để app đưa vào một `MediaSource` dựng sẵn: `DefaultMediaSourceFactoryProvider`
+kiểm tra `media is HybridMediaItem` và dùng thẳng `media.mediaSource`. Commit `fdbb72d` (nâng
+ExoPlayer 2.14) đã xóa provider đó, nên từ đó `MediaSource` truyền vào bị bỏ qua. Class này còn cài
+đặt lại interface `MediaSource`, nên có cùng rủi ro lệch phiên bản như trên. Nên deprecate rồi xóa.
 
-Sửa: đổi thành `val` và dùng `copy(...)`. Việc này đổi API nên nên làm cùng đợt tăng version lớn.
+### P2. `PlaybackInfo` là data class có thể thay đổi nhưng được chia sẻ
+
+`PlaybackInfo` có `var resumeWindow`, `var resumePosition`. Getter `playbackInfo` của bridge có thể
+trả về chính object nội bộ, `seekTo()` sửa trực tiếp object nhận được, và khi restore object lấy từ
+`Master.playbackInfoStore` được gán thẳng làm trạng thái bridge. Chưa thấy lỗi cụ thể. Đổi sang
+`val` + `copy()` là thay đổi API, nên gộp vào lần tăng version lớn.
 
 ### P2. `Playback.Token` giữ tham chiếu tới `Rect` dùng lại
 
-`Playback.updateToken()` truyền `tmpRect` (field dùng lại của mỗi Playback) vào `Token`. Token cũ
-vì thế bị thay đổi theo mỗi lần refresh. Bên trong Kohii chỉ đọc token mới nhất nên chưa gây lỗi,
-nhưng `Token` được đưa ra ngoài qua `TokenUpdateListener`: client nào giữ token cũ sẽ thấy giá trị
-bị đổi.
+`Playback.updateToken()` truyền `tmpRect` (field dùng lại) vào `Token`, nên token cũ bị thay đổi ở
+lần refresh sau. Bên trong Kohii chỉ đọc token mới nhất, nhưng `Token` được đưa ra ngoài qua
+`TokenUpdateListener`.
 
 ## 2. Hiệu năng
 
-### P1. Log debug vẫn tốn chi phí ở bản release (đã sửa)
+### P2. Pool ExoPlayer không được dọn khi thiếu bộ nhớ
 
-Mọi lệnh log có dạng `"Playback#onRefresh $this".logDebug()`. Chuỗi được ghép **trước** khi vào
-hàm, rồi mới kiểm tra `BuildConfig.DEBUG`. Vì vậy ngay cả bản release vẫn gọi `toString()` và
-ghép chuỗi.
+`Master` nhận `onTrimMemory` nhưng chỉ dùng để đổi `MemoryMode`; player rảnh trong pool chỉ được hủy
+khi không còn Playable nào. Nên giải phóng player rảnh khi `onLowMemory`. Không nên dọn ở
+`TRIM_MEMORY_UI_HIDDEN` (mỗi lần chuyển app), vì khi quay lại phải tạo lại player.
 
-Chi phí đáng kể nhất nằm ở các đường chạy mỗi lần refresh (tức là liên tục khi scroll):
+Kích thước pool (`max(SDK_INT / 6, số nhân CPU)`) **không phải vấn đề**: pool chỉ giữ tối đa số
+player từng chạy cùng lúc, player rảnh đã `stop()` nên decoder đã được giải phóng. Giảm pool quá nhỏ
+còn làm player bị tạo lại liên tục khi scroll. Có thể cho cấu hình `poolSize` qua `ExoPlayerConfig`
+(hiện `createKohii(context, config)` luôn dùng mặc định).
 
-- `Playback.onRefresh()` và `updateToken()`: 3 chuỗi cho mỗi Playback. `Playback.toString()` lại
-  gọi `Playable.toString()` và `Token.toString()`, tức là in cả `Rect`.
-- `Playback.compareWith()` được gọi **bên trong comparator** khi sort ứng viên, nên tốn
-  O(n log n) lần ghép chuỗi cho mỗi lần refresh.
-- `PlayableDispatcher.play/pause` (`logWarn`), các callback của `AbstractPlayable`.
+### P2. `MemoryMode.LOW` không còn được kích hoạt trên Android 14+
 
-Đã sửa: các hàm log giờ là `inline` nhận lambda (`logDebug { "..." }`), nên ở bản release chuỗi
-không được tạo. Lệnh log trong `compareWith` vẫn được giữ (dạng lambda); ở bản debug nó vẫn tốn
-chi phí khi sort.
+`Master.preferredMemoryMode()` chuyển sang `LOW` khi `trimMemoryLevel >= TRIM_MEMORY_RUNNING_LOW`.
+Hằng số này bị deprecated từ API 34 và hệ thống không còn gửi các mức `TRIM_MEMORY_RUNNING_*` cho
+app. Cần dựa vào tín hiệu khác (ví dụ `onLowMemory`, `ActivityManager.isLowRamDevice()`).
 
-### P1. Mỗi player có một `DefaultBandwidthMeter` riêng (đã sửa)
+### P2. Refresh bị hoãn trong lúc scroll
 
-`ExoPlayerConfig.createBandwidthMeter()` tạo bandwidth meter mới cho mỗi player trong pool. Mỗi
-player phải ước lượng băng thông lại từ giá trị đoán ban đầu, nên với stream đa chất lượng
-(HLS/DASH) vài giây đầu của player mới dễ bị chọn chất lượng thấp hơn mức mạng cho phép. Không ảnh
-hưởng tới MP4 (chỉ có một chất lượng).
+`Group.onRefresh()` xóa message cũ rồi hẹn lại sau khoảng 33 ms mỗi lần có sự kiện scroll, nên khi
+fling liên tục refresh chỉ chạy khi scroll chậm lại. Đây là đánh đổi có chủ ý (không khởi động video
+khi lướt nhanh). Chỉ nên đổi sang throttle nếu đo thấy video bắt đầu chậm.
 
-Đã sửa: mọi player tạo từ cùng một `ExoPlayerConfig` dùng chung một meter (là
-`DefaultBandwidthMeter.getSingletonInstance(context)` khi các tham số băng thông là mặc định).
+### P2. Cấp phát bộ nhớ trên đường refresh
 
-### P2. Kích thước pool ExoPlayer và bộ nhớ thấp
-
-`PlayerPool.DEFAULT_POOL_SIZE = max(SDK_INT / 6, số nhân CPU)`. Trên Android 14 với CPU 8 nhân,
-giới hạn là 8 player rảnh. Công thức `SDK_INT / 6` không còn ý nghĩa (nó được viết cho API 16–18).
-
-Trên thực tế đây **không phải vấn đề hiệu năng đáng lo**:
-
-- Pool chỉ giữ tối đa số player từng chạy cùng lúc; feed thông thường chỉ khoảng 2–4.
-- Player rảnh đã `stop()` nên decoder đã được giải phóng, chỉ còn một thread đang ngủ.
-- Ngược lại, đặt pool quá nhỏ (1–2) sẽ làm player bị hủy và tạo lại liên tục trên main thread khi
-  scroll, gây giật. **Không nên giảm pool để "tối ưu".**
-
-Hai việc nên làm:
-
-- Cho phép cấu hình kích thước pool qua `ExoPlayerConfig` (hiện `createKohii(context, config)`
-  luôn dùng giá trị mặc định).
-- Giải phóng player rảnh trong pool khi hệ thống báo thiếu bộ nhớ. Hiện `Master` có nhận
-  `onTrimMemory`, nhưng chỉ dùng để đổi `MemoryMode`; pool chỉ được dọn khi không còn Playable nào.
-
-### P2. Refresh bị hoãn liên tục trong lúc scroll
-
-`Group.onRefresh()` xóa message cũ rồi hẹn lại sau khoảng 33 ms mỗi lần có sự kiện scroll. Khi
-fling liên tục, refresh chỉ chạy khi scroll dừng hoặc chậm lại. Đây là đánh đổi có chủ ý: không
-khởi động video trong lúc lướt nhanh (đỡ tốn tài nguyên), đổi lại video bắt đầu phát trễ hơn một
-chút sau khi dừng. Chỉ nên đổi sang throttle (chạy tối đa một lần mỗi N ms) nếu thấy video bắt
-đầu chậm thật sự khi đo.
-
-### P2. Cấp phát bộ nhớ không cần thiết trên đường refresh
-
-- `Group.refresh()`: `managers.flatMap`, `linkedSetOf`, `arraySetOf`,
-  `toPause + toPlay + oldSelection - newSelection` (tạo 3 set tạm), `groupBy`.
-- `Manager.refreshPlaybackStates()`: duyệt `playbacks` 3 lần qua `filterValues` và `filter`.
-- `Manager.splitPlaybacks()`: `groupBy` và sort lại mỗi lần.
-- `Playback.updateToken()`: tạo `Rect()` mới mỗi lần.
-
-Mỗi chỗ nhỏ, nhưng tất cả chạy liên tục khi scroll. Nên gom thành một vòng lặp và dùng lại
-collection.
+`Group.refresh()` (`flatMap`, các set tạm, `groupBy`), `Manager.refreshPlaybackStates()` (duyệt
+`playbacks` 3 lần), `Manager.splitPlaybacks()` (`groupBy`, sort), `Playback.updateToken()` (`Rect()`
+mới mỗi lần). Mỗi chỗ nhỏ nhưng chạy liên tục khi scroll. Chỉ nên tối ưu khi đo thấy cần.
 
 ### P2. `Master.playbackInfoStore` không giới hạn kích thước
 
-Với Playable có tag, `PlaybackInfo` được lưu theo tag và chỉ bị xóa khi restore. Trong feed rất
-dài, map này lớn dần suốt vòng đời app. Nên dùng `LruCache`.
+Với Playable có tag, `PlaybackInfo` chỉ bị xóa khi được restore. Feed rất dài sẽ làm map này lớn dần.
+Nên dùng `LruCache`.
 
 ## 3. Tech debt trong code
 
-- **Thư viện hiển thị Toast** (P1): `PlayerViewBridge.onTracksChanged()` luôn hiện `Toast` khi
-  video hoặc audio có track không hỗ trợ, app không tắt được. (Toast khi lỗi decoder chỉ hiện nếu
-  không có `ErrorListener` nào, mà `Playback` luôn được đăng ký làm listener, nên thực tế hiếm
-  khi hiện.) Thư viện không nên tự hiện UI; nên chỉ báo qua listener và để app quyết định.
-- **`playbackParams` không bao giờ thay đổi**: `PlayerViewBridge.playbackParams` luôn là
-  `PlaybackParameters.DEFAULT`, nên không có cách đặt tốc độ phát qua Kohii.
-- **Code comment còn sót**: `ControlDispatcher` (đã bị xóa khỏi ExoPlayer từ 2.16) còn nằm trong
-  `PlayerViewPlayable`, `DevScrollViewFragment`; logic 1.1.x trong `Bucket.selectByOrientation`;
-  nhiều `TODO`.
-- **API deprecated còn public**: `PlayerEventListener`, các hằng số trong `Common`
-  (`REPEAT_MODE_*`, `STATE_*`). Có thể xóa ở lần tăng version lớn.
-- **`AtomicReference` không cần thiết**: `Master.manuallyStartedPlayable` chỉ được dùng trên main
-  thread.
-- **Gần như không có test**: `kohii-core` chỉ có `PlayerPoolTest`. Các logic quan trọng
-  (`Manager.splitPlaybacks`, `Bucket.selectByOrientation`, lifecycle của `Playable`) chưa có test.
+- **P1. Thư viện tự hiện Toast**: `PlayerViewBridge.onTracksChanged()` luôn hiện `Toast` khi video
+  hoặc audio có track không hỗ trợ, app không tắt được. (Toast khi lỗi decoder chỉ hiện nếu không có
+  `ErrorListener`; `Playback` luôn được đăng ký nên thực tế hiếm khi hiện.) Nên báo qua listener để
+  app quyết định; đây là thay đổi hành vi, cần ghi CHANGELOG.
+- **P2. `playbackParams` không bao giờ thay đổi**: `PlayerViewBridge.playbackParams` luôn là
+  `PlaybackParameters.DEFAULT`, không có cách đặt tốc độ phát qua Kohii.
+- **P2. Code comment còn sót**: `ControlDispatcher` (đã bị xóa khỏi ExoPlayer từ 2.16) trong
+  `PlayerViewPlayable` và một số màn sample; logic 1.1.x trong `Bucket.selectByOrientation`.
+- **P2. API deprecated còn public**: `PlayerEventListener`, các hằng số trong `Common`
+  (`REPEAT_MODE_*`, `STATE_*`), các type alias `StyledPlayerView*`. Có thể xóa ở lần tăng version lớn.
+- **P2. `kohii-exoplayer` phụ thuộc `kohii-core` dạng `implementation`** dù API public dùng kiểu của
+  `kohii-core` (`Engine`, `Playable`...), nên client phải tự khai báo `kohii-core`. Nên đổi sang `api`.
+- **P2. Gần như không có test**: chỉ có `PlayerPoolTest`. Logic chọn video
+  (`Manager.splitPlaybacks`, `Bucket.selectByOrientation`) và vòng đời `Playable` chưa có test.
 
 ## 4. Build, CI và phát hành
 
-- **P0. CI đang hỏng**: workflow dùng `actions/cache@v2`, đã bị GitHub ngừng hỗ trợ (job thất bại
-  ngay). `actions/checkout@v1/v2`, `actions/setup-java@v1`, `gradle/wrapper-validation-action@v1`
-  đều đã cũ. Nâng lên `checkout@v4`, `setup-java@v4`, `gradle/actions/setup-gradle@v4`.
-- **P0. Kênh phát hành đã ngừng**: `deploy_snapshot.yml` publish qua Sonatype OSSRH
-  (`oss.sonatype.org` trong `gradle/release_maven.gradle`, cùng `gradle-nexus` publish plugin). OSSRH đã ngừng hoạt động (giữa 2025), cần chuyển sang
-  Central Portal (ví dụ plugin `com.vanniktech.maven.publish` bản mới).
-- **P1. Repository chết hoặc không cần**: `build.gradle` còn `maven.fabric.io` (Fabric đã đóng
-  cửa) và `jitpack.io` (không còn dependency nào cần). Gradle vẫn thử các repo này khi resolve
-  dependency nên làm build chậm, và JitPack là rủi ro về chuỗi cung ứng.
-- **P1. Công cụ cũ**: AGP 8.4.1, Kotlin 1.8.10, Gradle 8.7, ktlint-gradle 12.1.1. Nâng lên giúp
-  build nhanh hơn và cho phép dùng Media3 bản mới hơn 1.4.1 (1.5+ yêu cầu compileSdk 35).
-- **P1. Jetifier**: `android.enableJetifier=true` làm build chậm, có thể không còn cần (không còn
-  thư viện support cũ). Cần kiểm tra bằng `./gradlew checkJetifier` rồi tắt.
-- **P2. Dọn version catalog**: `libs.versions.toml` còn nhiều mục không dùng: `agp = 7.4.2` (AGP
-  thật lấy từ `gradle = 8.4.1`), các mục Compose, Epoxy, KSP, coroutines, và một số module Media3
-  (`rtsp`, `workmanager`, `decoder`, `extractor`). `buildSrc/.../Dependencies.kt` là code chết còn
-  tham chiếu ExoPlayer 2 và Media2.
-- **P2. Version không đồng bộ**: `gradle.properties` ghi `VERSION_NAME=1.4.0.2017001`, còn
-  `libs.versions.toml` ghi `1.5.0.2018005-SNAPSHOT`. Cách đặt tên version theo số ExoPlayer
-  (`2018005` = ExoPlayer 2.18.5) không còn đúng với Media3.
-- **P2. Javadoc bị tắt** (`tasks.withType(Javadoc).all { enabled = false }`), và lint đang tắt
-  `RestrictedApi`, `VisibleForTests`, `UnusedResources`, `UnusedIds` ở mọi module.
-- **P2. File `.api`**: cần chạy `./gradlew apiDump` sau khi đổi sang Media3 (các file đã được sửa
-  tay, phần do Kotlin tự sinh khi delegate interface có thể chưa khớp).
+- **P0. Cập nhật file `.api`**: chạy `./gradlew apiDump` và commit. Các file `.api` đang được sửa
+  tay (phần do Kotlin sinh cho `KohiiExoPlayer` không khớp), nên `apiCheck` trong CI sẽ thất bại cho
+  tới khi dump lại.
+- **P1. Chưa có kênh phát hành**: `gradle/release_maven.gradle` vẫn publish lên `oss.sonatype.org`
+  (Sonatype OSSRH, đã ngừng hoạt động giữa 2025), và group `im.ene.kohii` thuộc tác giả gốc nên bản
+  fork không publish vào đó được. Workflow publish snapshot đã bị bỏ. Cần chọn cách phân phối cho app
+  (Maven nội bộ, GitHub Packages, hoặc include Kohii dạng module source).
+- **P2. Jetifier vẫn bật** (`android.enableJetifier=true`) dù có thể không còn thư viện support cũ;
+  làm build chậm. Kiểm tra bằng `./gradlew checkJetifier` rồi tắt.
+- **P2. Version không đồng bộ**: `gradle.properties` ghi `VERSION_NAME=1.4.0.2017001`,
+  `libs.versions.toml` ghi `1.5.0.2018005-SNAPSHOT`. Cách đặt version theo số ExoPlayer
+  (`2018005` = 2.18.5) không còn đúng với Media3.
+- **P2. Javadoc bị tắt** ở `kohii-core`, và lint tắt `RestrictedApi`, `VisibleForTests`,
+  `UnusedResources`, `UnusedIds` ở mọi module.
+- **P2. Code chết**: `buildSrc/.../Dependencies.kt` không được dùng, còn tham chiếu ExoPlayer 2 và
+  Media2. `.github/FUNDING.yml` trỏ tới tài khoản tác giả gốc.
+- **P2. Sample target SDK 35**: Android 15 bắt buộc edge-to-edge, giao diện sample có thể bị thanh hệ
+  thống che.
 
 ## 5. Thứ tự đề xuất
 
-1. ~~Sửa lỗi `applyPlayerParameters`.~~ Đã xong.
-2. Sửa CI để có lại kiểm tra tự động, chạy `apiDump`.
-3. ~~Log dạng lambda, bandwidth meter dùng chung.~~ Đã xong. (Cũng đã làm thêm: buffer mặc định
-   12 giây và cache LRU lớn hơn, xem `CHANGELOG.md`.)
-4. Bỏ delegation trong `KohiiExoPlayer`/`HybridMediaItem`, **trước khi** nâng Media3.
-5. Nâng AGP/Kotlin, rồi nâng Media3 lên bản mới nhất.
-6. Dọn code chết và version catalog.
+1. Build nhánh `media3`, sửa lỗi biên dịch nếu có, chạy `./gradlew apiDump` và commit.
+2. Quyết định kênh phát hành cho app.
+3. Bỏ Toast tự hiện trong `PlayerViewBridge`.
+4. Dọn pool khi thiếu bộ nhớ, sửa `MemoryMode.LOW` trên Android 14+.
+5. Viết test cho logic chọn video trước khi tối ưu đường refresh.
+6. Dọn code chết, API deprecated, version name.
