@@ -96,20 +96,35 @@ private class FeedViewHolder(val playerView: PlayerView) : RecyclerView.ViewHold
  * its first rendered frame, as an async trace section that macrobenchmarks can read.
  */
 private class FirstFrameTracer : Playback.StateListener {
-  private val pending = mutableSetOf<Any>()
+  // Cookie of the pending section of each Playback, by tag. Each attempt has its own cookie, so that
+  // an attempt paused before its first frame does not end in a later attempt of the same Playback.
+  private val pending = mutableMapOf<Any, Int>()
+  private var nextCookie = 0
 
   override fun onBuffering(
     playback: Playback,
     playWhenReady: Boolean,
   ) {
-    if (playWhenReady && pending.add(playback.tag) && Build.VERSION.SDK_INT >= 29) {
-      Trace.beginAsyncSection(FeedBenchmarkActivity.FIRST_FRAME_SECTION, playback.tag.hashCode())
+    if (Build.VERSION.SDK_INT < 29) return
+    if (playWhenReady) {
+      if (playback.tag in pending) return
+      val cookie = nextCookie++
+      pending[playback.tag] = cookie
+      Trace.beginAsyncSection(FeedBenchmarkActivity.FIRST_FRAME_SECTION, cookie)
+    } else {
+      // Paused before the first frame: leave the section unfinished, it is not counted.
+      pending.remove(playback.tag)
     }
   }
 
+  override fun onPaused(playback: Playback) {
+    pending.remove(playback.tag)
+  }
+
   override fun onRendered(playback: Playback) {
-    if (pending.remove(playback.tag) && Build.VERSION.SDK_INT >= 29) {
-      Trace.endAsyncSection(FeedBenchmarkActivity.FIRST_FRAME_SECTION, playback.tag.hashCode())
+    val cookie = pending.remove(playback.tag) ?: return
+    if (Build.VERSION.SDK_INT >= 29) {
+      Trace.endAsyncSection(FeedBenchmarkActivity.FIRST_FRAME_SECTION, cookie)
     }
   }
 }

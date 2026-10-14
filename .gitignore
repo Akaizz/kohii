@@ -61,6 +61,7 @@
 .project
 /.idea/dictionaries/
 /kohii-core/build/
+/kohii-benchmark/build/
 /.idea/markdown-navigator-enh.xml
 /.idea/jarRepositories.xml
 /.idea/render.experimental.xml

@@ -157,6 +157,9 @@ dependencies {
 
   implementation(libs.timber)
 
+  // Lets the macrobenchmarks install profiles on recent Android versions (1.3.x rejects SDK 34+).
+  implementation(libs.androidx.profileinstaller)
+
   implementation(libs.square.leakcanary.plumber)
   debugImplementation(libs.square.leakcanary)
 
