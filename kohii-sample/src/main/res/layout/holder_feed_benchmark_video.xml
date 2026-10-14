@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same setup as the PlayerView layouts provided by kohii-exoplayer. -->
+<androidx.media3.ui.PlayerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="240dp"
+    android:layout_marginBottom="8dp"
+    app:keep_content_on_player_reset="true"
+    app:resize_mode="fixed_width"
+    app:show_buffering="when_playing"
+    app:shutter_background_color="@android:color/black"
+    app:surface_type="texture_view"
+    app:use_controller="false"
+    />

@@ -30,6 +30,11 @@
       android:supportsRtl="true"
       tools:ignore="GoogleAppIndexingWarning"
       tools:targetApi="n">
+    <!-- Lets the macrobenchmarks in :kohii-benchmark trace the non-debuggable benchmark build. -->
+    <profileable
+        android:shell="true"
+        tools:targetApi="29" />
+
     <activity
         android:name=".MainActivity"
         android:supportsPictureInPicture="true"
@@ -49,6 +54,18 @@
     <activity
         android:name="kohii.v1.dev.PlayerActivity"
         android:theme="@style/AppTheme.Dark" />
+
+    <!-- Started by the macrobenchmarks in :kohii-benchmark. -->
+    <activity
+        android:name=".benchmark.FeedBenchmarkActivity"
+        android:exported="true"
+        android:theme="@style/AppTheme.Dark">
+      <intent-filter>
+        <action android:name="kohii.v1.sample.action.FEED_BENCHMARK" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
 
     <activity-alias
         android:name="Home"

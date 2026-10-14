@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- (kohii-benchmark): Macrobenchmark that scrolls a video feed of kohii-sample
+  (`FeedBenchmarkActivity`) and measures frame timing and the time to the first rendered frame of
+  each video. Real feed URLs can be passed with the `feedUrls` instrumentation argument.
+
 ### Changed
 
 - Migrated from ExoPlayer 2 (`com.google.android.exoplayer2`) to AndroidX Media3 1.10.1
