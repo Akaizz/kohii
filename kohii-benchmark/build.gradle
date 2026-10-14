@@ -1,0 +1,43 @@
+apply plugin: 'com.android.test'
+apply plugin: 'kotlin-android'
+
+// Macrobenchmarks for the kohii-sample app. See README.md in this module.
+android {
+  namespace 'kohii.v1.benchmark'
+  compileSdk libs.versions.android.compile.sdk.get().toInteger()
+
+  defaultConfig {
+    minSdk libs.versions.android.min.sdk.get().toInteger()
+    targetSdk libs.versions.android.target.sdk.get().toInteger()
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  buildTypes {
+    // Matches the "benchmark" build type of kohii-sample.
+    benchmark {
+      debuggable = true
+      signingConfig = debug.signingConfig
+      matchingFallbacks = ['release']
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  targetProjectPath = ':kohii-sample'
+  experimentalProperties['android.experimental.self-instrumenting'] = true
+}
+
+androidComponents {
+  beforeVariants(selector().all()) {
+    enable = buildType == 'benchmark'
+  }
+}
+
+dependencies {
+  implementation(libs.androidx.junit.ktx)
+  implementation(libs.androidx.uiautomator)
+  implementation(libs.androidx.benchmark.macro.junit4)
+}

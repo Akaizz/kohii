@@ -376,8 +376,7 @@ public abstract class kohii/v1/core/Playback : androidx/media3/common/Player$Lis
 	protected abstract fun onAttachRenderer (Ljava/lang/Object;)Z
 	protected abstract fun onDetachRenderer (Ljava/lang/Object;)Z
 	public fun onError (Ljava/lang/Exception;)V
-	public fun onPlayWhenReadyChanged (ZI)V
-	public fun onPlaybackStateChanged (I)V
+	public fun onEvents (Landroidx/media3/common/Player;Landroidx/media3/common/Player$Events;)V
 	public fun onRenderedFirstFrame ()V
 	public fun onVideoSizeChanged (Landroidx/media3/common/VideoSize;)V
 	public final fun removeStateListener (Lkohii/v1/core/Playback$StateListener;)V

@@ -483,19 +483,19 @@ abstract class Playback(
 
   // PlayerEventListener
 
-  // Last known values reported by the Player, used to dispatch the StateListener callbacks.
+  // Last values dispatched to the StateListener callbacks.
   private var lastPlayWhenReady: Boolean = false
   private var lastPlaybackState: Int = Player.STATE_IDLE
 
-  override fun onPlayWhenReadyChanged(
-    playWhenReady: Boolean,
-    reason: Int,
+  // Reads both values from the Player, like ExoPlayer 2's onPlayerStateChanged did: a pooled Player
+  // can be reused with playWhenReady already true, in which case onPlayWhenReadyChanged is not called.
+  override fun onEvents(
+    player: Player,
+    events: Player.Events,
   ) {
-    dispatchPlayerState(playWhenReady, lastPlaybackState)
-  }
-
-  override fun onPlaybackStateChanged(playbackState: Int) {
-    dispatchPlayerState(lastPlayWhenReady, playbackState)
+    if (events.containsAny(Player.EVENT_PLAY_WHEN_READY_CHANGED, Player.EVENT_PLAYBACK_STATE_CHANGED)) {
+      dispatchPlayerState(player.playWhenReady, player.playbackState)
+    }
   }
 
   private fun dispatchPlayerState(

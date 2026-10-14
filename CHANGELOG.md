@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- (kohii-benchmark): Macrobenchmark that scrolls a video feed of kohii-sample
+  (`FeedBenchmarkActivity`) and measures frame timing and the time to the first rendered frame of
+  each video. Real feed URLs can be passed with the `feedUrls` instrumentation argument.
+
 ### Changed
 
 - Migrated from ExoPlayer 2 (`com.google.android.exoplayer2`) to AndroidX Media3 1.10.1
@@ -47,6 +53,10 @@
 
 ### Fixed
 
+- (kohii-core): `Playback.StateListener` reported `onPaused` instead of `onPlaying` for a video
+  played with a player reused from the pool, as the pooled player could keep `playWhenReady` true
+  and no `onPlayWhenReadyChanged` was received. `Playback` now reads both `playWhenReady` and the
+  playback state from the player in `onEvents`, as ExoPlayer 2's `onPlayerStateChanged` did.
 - (kohii-exoplayer): `PlayerParameters` (max video size and bitrates) are now applied when the
   Bridge acquires a new player from the pool. Before, they were silently ignored until the next
   change.
