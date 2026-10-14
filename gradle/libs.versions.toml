@@ -51,6 +51,11 @@ airbnb-epoxy = "5.1.1"
 coil = "2.2.2"
 
 android-target-sdk = "33"
+# Only for kohii-sample and kohii-benchmark: the macrobenchmark libraries require compile SDK 34.
+android-compile-sdk = "34"
+androidx-benchmark = "1.3.3"
+androidx-uiautomator = "2.3.0"
+androidx-profileinstaller = "1.4.1"
 android-min-sdk = "21"
 timber = "5.0.1"
 vectordrawable = "1.1.0"
@@ -73,6 +78,9 @@ android-exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", v
 android-exoplayer-ima = { module = "com.google.android.exoplayer:extension-ima", version.ref = "exoplayer" }
 
 androidsvg-aar = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvg-aar" }
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-uiautomator" }
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "androidx-profileinstaller" }
 androidx-core-ktx = { module = "androidx.test:core-ktx", version.ref = "core-ktx" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "junit-ktx" }

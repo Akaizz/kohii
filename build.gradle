@@ -47,7 +47,7 @@ apply plugin: 'io.github.gradle-nexus.publish-plugin'
 group = libs.versions.release.groupid.get()
 version = libs.versions.release.name.get()
 
-def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok")]
+def sampleProjects = [project("kohii-sample"), project("kohii-sample-tiktok"), project("kohii-benchmark")]
 
 apply plugin: 'binary-compatibility-validator'
 apiValidation {

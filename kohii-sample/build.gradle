@@ -29,7 +29,7 @@ if (file("google-services.json").exists()) {
 
 android {
   namespace 'kohii.v1.sample'
-  compileSdkVersion libs.versions.android.target.sdk.get().toInteger()
+  compileSdkVersion libs.versions.android.compile.sdk.get().toInteger()
 
   signingConfigs {
     release {
@@ -73,6 +73,18 @@ android {
       applicationIdSuffix ".dev"
       signingConfig signingConfigs.debug
       // multiDexEnabled true
+      minifyEnabled false
+      shrinkResources false
+    }
+
+    // Used by :kohii-benchmark: release code (not debuggable), signed with the debug key so it can be
+    // installed without the release keystore. R8 is off to keep the comparison with other branches
+    // simple; both sides of a comparison must use the same setting.
+    benchmark {
+      initWith release
+      signingConfig signingConfigs.debug
+      matchingFallbacks = ['release']
+      debuggable false
       minifyEnabled false
       shrinkResources false
     }
@@ -147,6 +159,9 @@ dependencies {
   implementation(libs.firebase.analytics)
 
   implementation(libs.timber)
+
+  // Lets the macrobenchmarks install profiles on recent Android versions (1.3.x rejects SDK 34+).
+  implementation(libs.androidx.profileinstaller)
 
   implementation(libs.square.leakcanary.plumber)
   debugImplementation(libs.square.leakcanary)

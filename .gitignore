@@ -75,6 +75,7 @@
 /.idea/dictionaries/
 /kohii-ads/build/
 /kohii-core/build/
+/kohii-benchmark/build/
 /kohii-experiments/build/
 /.idea/markdown-navigator-enh.xml
 /.idea/jarRepositories.xml
