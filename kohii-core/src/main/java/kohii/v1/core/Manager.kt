@@ -107,13 +107,10 @@ class Manager internal constructor(
       field = value
       val to = field
       if (from === to) return
-      // Promote 'to' from buckets.
-      if (to != null) { // -> set new sticky Bucket
-        buckets.push(to) // Push it to head.
-      } else { // 'to' is null then 'from' must be nonnull. Consider to remove it from head.
-        // Demote 'from'
-        if (buckets.peek() === from) buckets.pop()
-      }
+      // Demote 'from' first, so only one copy of a sticky Bucket stays at the head.
+      if (from != null && buckets.peek() === from) buckets.pop()
+      // Promote 'to' by pushing it to the head.
+      if (to != null) buckets.push(to)
     }
 
   internal val playbacks = mutableMapOf<Any, Playback>() // Container -> Playback
@@ -263,8 +260,11 @@ class Manager internal constructor(
   }
 
   private fun onRemoveBucket(view: View) {
-    buckets.firstOrNull { it.root === view && buckets.remove(it) }
-      ?.onRemoved()
+    val bucket = buckets.firstOrNull { it.root === view } ?: return
+    if (stickyBucket === bucket) stickyBucket = null
+    // A sticky Bucket is also kept at its original position, remove every copy.
+    buckets.removeAll { it === bucket }
+    bucket.onRemoved()
   }
 
   internal fun refresh(): Unit = group.onRefresh()

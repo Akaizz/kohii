@@ -72,6 +72,10 @@
 - (kohii-core): `Engine.cancel(container)` now unbinds the container when it belongs to a Manager
   other than the first one of its Activity (for example, a Fragment's Manager when the Activity is
   also registered). Before, only a pending (not yet attached) binding was cancelled.
+- (kohii-core): Sticking a Bucket while another one is sticky now demotes the previous one. Before,
+  the previous sticky Bucket stayed at the head of the queue after both were unstuck, so it kept
+  being selected first. Removing a sticky Bucket now also removes every copy of it, so adding a
+  Bucket for the same view again creates a new Bucket instead of reusing the removed one.
 - (kohii-exoplayer): `KohiiExoPlayer.getAudioSessionId()` now returns the session id of the wrapped
   player. Media3 1.10 moved it to a Java default method of `Player`, which Kotlin's interface
   delegation does not forward, so it always returned `C.AUDIO_SESSION_ID_UNSET`.
